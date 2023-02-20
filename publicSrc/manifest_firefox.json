@@ -19,7 +19,6 @@
     "scripts": ["sw.js"]
   },
   "permissions": [
-    "tabs",
     "storage"
   ],
   "host_permissions": [
