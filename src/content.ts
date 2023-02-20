@@ -185,6 +185,9 @@ function handleEvent(event: any) {
       const [rating] = event.data.split(' ')
       site.events.rating?.(parseInt(rating))
     }
+
+    // Send update immediately, for snappier UI
+    sendUpdate()
   } catch (e) {
     ws.send(`Error:Error sending event to ${site.info.player()}`)
     ws.send(`ErrorD:${e}`)
