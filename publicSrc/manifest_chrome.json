@@ -19,7 +19,6 @@
     "service_worker": "sw.js"
   },
   "permissions": [
-    "tabs",
     "storage"
   ],
   "host_permissions": [
