@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebNowPlaying Redux</title>
+    <script src="action.js"></script>
+    <style>
+      html {
+        height: 478px;
+        min-width: 550px;
+      }
+      body {
+        padding: 0;
+        margin: 0;
+        font-family: 'Segoe UI';
+        background: linear-gradient(to top left, rgb(12, 182, 196), rgb(29, 53, 143));
+        background-attachment: fixed;
+        overflow-x: hidden;
+      }
+      #mainContent {
+        padding-left: 7.5%;
+        padding-right: 7.5%;
+        color: rgba(255, 255, 255, 0.75);
+        font-weight: 400;
+      }
+      label {
+        display: block;
+      }
+      .suboptions {
+        padding-left: 25px;
+      }
+      .disabled {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      footer {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 1rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.75);
+        background-color: rgba(0, 0, 0, .25);
+        padding-left: 7.5%;
+        padding-right: 7.5%;
+      }
+      footer a:link {
+        /* Applies to all unvisited links */
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.75);
+      }
+      footer a:visited {
+        /* Applies to all visited links */
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.75);
+      }
+      footer a:hover {
+        /* Applies to links under the pointer */
+        text-decoration: underline;
+        color: rgba(255, 255, 255, 1);
+      }
+      footer a:active {
+        /* Applies to activated links */
+        text-decoration: underline;
+        color: rgba(255, 255, 255, 1);
+      }
+      footer div.left {
+        float: left;
+      }
+      footer div.right {
+        float: right;
+      }
+      h1 {
+        margin-left: -5%;
+        color: rgba(255, 255, 255, 1);
+        line-height: 1.5rem;
+        font-weight: 400;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: rgba(255, 255, 255, 1);
+        line-height: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: 300;
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      select {
+        border: none;
+        color: rgba(255, 255, 255, 1);
+        background-color: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.15);
+      }
+      select option {
+        color: rgba(255, 255, 255, 1);
+        background: rgba(81, 106, 171, 1);
+      }
+      textarea {
+        border: none;
+        color: rgba(255, 255, 255, 1);
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+      }
+      .input {
+        border: none;
+        color: rgba(255, 255, 255, 1);
+        background-color: rgba(255, 255, 255, 0.15);
+        width: 50px;
+        border-radius: 3px;
+        margin-left: 5px;
+      }
+      @media screen and (max-height: 450px) {
+        footer {
+          position: unset;
+          width: 100%;
+          display: block;
+          padding-right: 0;
+        }
+      footer div.left,
+      footer div.right {
+          float: none;
+          clear: both;
+          width: fit-content;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mainContent">
+      <h1>WebNowPlaying Redux Options</h1>
+      <p>Generic script settings</p>
+      <div id="genericOptions" class="suboptions">
+        <label>
+          <input type="checkbox" id="useGeneric" /> Attempt to support unknown websites using the generic script
+        </label>
+        <div class="suboptions">
+          <label>
+          <input type="checkbox" id="useGenericList" />
+            <select id="isListBlacklist">
+              <option value="whitelist">whitelist</option>
+              <option value="blacklist">blacklist</option>
+            </select>
+            &nbsp;these sites.
+          </label>
+          <textarea rows="4" cols="52" id="genericList">streamable.com/*</textarea>
+        </div>
+      </div>
+  
+      <p style="float:left;">Websocket settings</p>
+      <p style="font-size: 1rem;font-weight: 300;">&#160;</p>
+      <div id="websocketOptions" class="disabled suboptions">
+        <label>
+          Port:
+          <input id="swPort" class="input" />
+        </label>
+        <label>
+          Update frequency (in ms):
+          <input id="updateFrequencyMs" class="input" />
+        </label>
+      </div>
+  
+      <h3 style="margin-top: 50px;">Note: Please reload affected pages in order for changes to take affect</h3>
+    </div>
+    <footer>
+      <div class="left">Redux by keifufu</div>
+      <div class="right">
+        <a href="https://github.com/tjhrulz/WebNowPlaying-BrowserExtension">Original extension by tjhrulz</a>
+      </div>
+    </footer>
+  </body>
+</html>
