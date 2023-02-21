@@ -1,4 +1,5 @@
 import Applemusic from './sites/AppleMusic'
+import Bandcamp from './sites/Bandcamp'
 import Generic from './sites/Generic'
 import Plex from './sites/Plex'
 import Soundcloud from './sites/Soundcloud'
@@ -12,9 +13,6 @@ import { defaultSettings, getSettings, Settings } from './utils'
 
 let settings: Settings = defaultSettings
 
-// Yes, this does allow, for example, www.youtube.scummy.net to be matched
-// but who cares (or would even visit sites like that)
-// It's not like this extension is handling sensitive data
 function getCurrentSite() {
   const host = window.location.hostname
 
@@ -24,7 +22,9 @@ function getCurrentSite() {
 
   if (host === 'music.apple.com')
     return Applemusic
-  if (host === 'app.plex.tv')
+  else if (host.endsWith('bandcamp.com'))
+    return Bandcamp
+  else if (host === 'app.plex.tv')
     return Plex
   else if (host === 'soundcloud.com')
     return Soundcloud
