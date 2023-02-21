@@ -1,5 +1,6 @@
 import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
+import Deezer from './sites/Deezer'
 import Generic from './sites/Generic'
 import Plex from './sites/Plex'
 import Soundcloud from './sites/Soundcloud'
@@ -24,6 +25,8 @@ function getCurrentSite() {
     return Applemusic
   else if (host.endsWith('bandcamp.com'))
     return Bandcamp
+  else if (host === 'www.deezer.com')
+    return Deezer
   else if (host === 'app.plex.tv')
     return Plex
   else if (host === 'soundcloud.com')
@@ -173,11 +176,11 @@ function handleEvent(event: any) {
     } else if (event.data.toLowerCase() === 'previous') {
       site.events.previous?.()
     } else if (event.data.toLowerCase().includes('setposition ') || event.data.toLowerCase().includes('setprogress ')) {
-      // Example string: SetPosition 123:SetProgress 0.5
+      // Example string: SetPosition 34:SetProgress 0,100890207715134:
       const [positionInSeconds] = event.data.toLowerCase().split('setposition ')[1].split(':')
-      const [, positionPercentage] = event.data.split(':')[1].split('setprogress ')
+      const [, positionPercentage] = event.data.toLowerCase().split(':')[1].split('setprogress ')
       site.events.setPositionSeconds?.(parseInt(positionInSeconds))
-      site.events.setPositionPercentage?.(parseFloat(positionPercentage))
+      site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
     } else if (event.data.toLowerCase().includes('setvolume ')) {
       const [, volume] = event.data.split(' ')
       site.events.setVolume?.(parseInt(volume) / 100)
