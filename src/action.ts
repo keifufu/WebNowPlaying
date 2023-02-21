@@ -10,7 +10,7 @@ const saveOptionsFromForm = () => {
   const isListBlacklist = document.querySelector<HTMLSelectElement>('#isListBlacklist')
   const genericList = document.querySelector<HTMLTextAreaElement>('#genericList')
 
-  const newSettings = {
+  const newSettings: Settings = {
     swPort: parseInt(swPort?.value || defaultSettings.swPort.toString()),
     updateFrequencyMs: parseInt(updateFrequencyMs?.value || defaultSettings.updateFrequencyMs.toString()),
     useGeneric: useGeneric?.checked || defaultSettings.useGeneric,
@@ -20,8 +20,28 @@ const saveOptionsFromForm = () => {
   }
 
   // Only save if settings have changed
-  if (settings && JSON.stringify(settings) !== JSON.stringify(newSettings))
-    setSettings(newSettings)
+  let changed = false
+  if (settings) {
+    for (const key in settings) {
+      const currValue = settings[key as keyof Settings]
+      const newValue = newSettings[key as keyof Settings]
+
+      if (Array.isArray(currValue) && Array.isArray(newValue)) {
+        if (currValue.length !== newValue.length) {
+          changed = true
+          break
+        }
+      } else if (currValue !== newValue) {
+        changed = true
+        break
+      }
+    }
+
+    if (changed) {
+      setSettings(newSettings)
+      settings = newSettings
+    }
+  }
 }
 
 async function loadOptionsIntoForm() {
