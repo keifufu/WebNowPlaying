@@ -6,6 +6,7 @@ Intended to work together with the [original](https://github.com/tjhrulz/WebNowP
 - Apple Music
 - Bandcamp
 - Deezer
+- Pandora
 - Plex
 - SoundCloud
 - Spotify

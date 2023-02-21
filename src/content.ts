@@ -2,6 +2,7 @@ import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
 import Deezer from './sites/Deezer'
 import Generic from './sites/Generic'
+import Pandora from './sites/Pandora'
 import Plex from './sites/Plex'
 import Soundcloud from './sites/Soundcloud'
 import Spotify from './sites/Spotify'
@@ -27,6 +28,8 @@ function getCurrentSite() {
     return Bandcamp
   else if (host === 'www.deezer.com')
     return Deezer
+  else if (host === 'www.pandora.com')
+    return Pandora
   else if (host === 'app.plex.tv')
     return Plex
   else if (host === 'soundcloud.com')
