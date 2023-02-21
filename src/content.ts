@@ -112,8 +112,19 @@ const ws = {
       _ws.onmessage = ws.onMessage
       _ws.onerror = ws.onError
     } catch {
-      sendEvent('wsDisconnected')
+      ws.retry()
     }
+  },
+  retry() {
+    if (wsConnected) return
+    sendEvent('wsDisconnected')
+    clearTimeout(outdatedTimeout)
+    clearInterval(updateInterval)
+    // exponential backoff reconnect with a max of 60 seconds
+    setTimeout(() => {
+      ws.init()
+      reconnectCount += 1
+    }, Math.min(1000 * (2 ** reconnectCount), 60000))
   },
   send(data: string) {
     if (_ws.readyState !== WebSocket.OPEN) return
@@ -131,16 +142,7 @@ const ws = {
   },
   onClose() {
     wsConnected = false
-    sendEvent('wsDisconnected')
-
-    clearTimeout(outdatedTimeout)
-    clearInterval(updateInterval)
-
-    // exponential backoff reconnect with a max of 60 seconds
-    setTimeout(() => {
-      ws.init()
-      reconnectCount += 1
-    }, Math.min(1000 * (2 ** reconnectCount), 60000))
+    ws.retry()
   },
   onMessage(event: any) {
     const versionNumber = event.data.toLowerCase().split(':')
