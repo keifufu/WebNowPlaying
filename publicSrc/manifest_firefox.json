@@ -26,7 +26,8 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "webnowplayingredux@keifufu.dev"
+      "id": "webnowplayingredux@keifufu.dev",
+      "strict_min_version": "109.0"
     }
   }
 }
