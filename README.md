@@ -4,11 +4,13 @@ Intended to work together with the [original](https://github.com/tjhrulz/WebNowP
 
 ### Supported websites
 - Apple Music
+- Plex
 - SoundCloud
 - Spotify
 - Tidal
 - Twitch
 - YouTube
+- Youtube Embeds
 - YouTube Music
 - Any website with a video or music element might work, you can enable them in the options (Click the extension icon)
 

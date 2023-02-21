@@ -41,7 +41,7 @@ const site: Site = {
     volume: () => {
       const video = document.querySelector<HTMLVideoElement>('.html5-main-video')
       if (!video || video.muted) return 0
-      return video.volume
+      return (video.volume * 100)
     },
     rating: () => 0,
     repeat: () => 0, // 0 = no repeat, 1 = repeat song, 2 = repeat playlist

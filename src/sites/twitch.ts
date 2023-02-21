@@ -36,7 +36,7 @@ const site: Site = {
         return timeInSecondsToString(document.querySelector('video')?.currentTime || 0)
       }
     },
-    volume: () => document.querySelector('video')?.volume || 0,
+    volume: () => (document.querySelector('video')?.volume || 0) * 100,
     // Rating could be following, but ffz and/or bttv fuck it up so I can't get it consistently
     rating: () => 0,
     repeat: () => 0,

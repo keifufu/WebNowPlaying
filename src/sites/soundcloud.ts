@@ -12,7 +12,7 @@ const site: Site = {
     cover: () => getMediaSessionCover(),
     duration: () => document.querySelectorAll<HTMLElement>('.playbackTimeline__duration > span')[1]?.innerText || '',
     position: () => document.querySelectorAll<HTMLElement>('.playbackTimeline__timePassed > span')[1]?.innerText || '',
-    volume: () => parseInt(document.querySelector<HTMLElement>('.volume__sliderProgress')?.style.height || '1') / (document.querySelector('.volume__sliderBackground')?.getBoundingClientRect().height || 1),
+    volume: () => (parseInt(document.querySelector<HTMLElement>('.volume__sliderProgress')?.style.height || '1') / (document.querySelector('.volume__sliderBackground')?.getBoundingClientRect().height || 1)) * 100,
     rating: () => (document.querySelector('.playbackSoundBadge__like')?.className.includes('selected') ? 5 : 0),
     repeat: () => {
       if (document.querySelectorAll('.m-one').length > 0)

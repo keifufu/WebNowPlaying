@@ -22,7 +22,7 @@ const site: Site = {
       if (!durationInfo) return '0:00'
       return durationInfo.split(' / ')[0]
     },
-    volume: () => document.querySelector('video')?.volume || 0,
+    volume: () => (document.querySelector('video')?.volume || 0) * 100,
     rating: () => {
       // eslint-disable-next-line prefer-destructuring
       const likeButton = document.querySelectorAll('.middle-controls-buttons button')[1]

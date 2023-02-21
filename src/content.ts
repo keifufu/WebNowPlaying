@@ -1,5 +1,6 @@
 import Applemusic from './sites/AppleMusic'
 import Generic from './sites/Generic'
+import Plex from './sites/Plex'
 import Soundcloud from './sites/Soundcloud'
 import Spotify from './sites/Spotify'
 import Tidal from './sites/Tidal'
@@ -23,6 +24,8 @@ function getCurrentSite() {
 
   if (host === 'music.apple.com')
     return Applemusic
+  if (host === 'app.plex.tv')
+    return Plex
   else if (host === 'soundcloud.com')
     return Soundcloud
   else if (host === 'open.spotify.com')
@@ -212,6 +215,7 @@ function sendUpdate() {
     return
   }
 
+  // TODO: for numbers, maybe trim to 2 decimal places?
   const values: (keyof SiteInfo)[] = ['state', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
   values.forEach((key) => {
     try {
