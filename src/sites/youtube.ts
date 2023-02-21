@@ -12,11 +12,9 @@ const site: Site = {
       // I copied this from the original, documentation says 3 isn't used, but apparently it is?
       if (document.querySelector('.ytp-play-button')?.getAttribute('aria-label') === null)
         state = 3
-
       // It is possible for the video to be "playing" but not started
       if (state === 1 && (document.querySelector<HTMLVideoElement>('.html5-main-video')?.played.length || 0) <= 0)
         state = 2
-
       return state
     },
     title: () => document.querySelector<HTMLElement>('.ytd-video-primary-info-renderer.title')?.innerText || '',
@@ -28,7 +26,7 @@ const site: Site = {
       return ''
     },
     cover: () => {
-      const [videoId] = window.location.href.split('v=')[1].split('&')
+      const videoId = new URLSearchParams(window.location.search).get('v')
       return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
     },
     duration: () => document.querySelector<HTMLElement>('.ytp-time-duration')?.innerText || '0:00',
@@ -71,12 +69,11 @@ const site: Site = {
     setPositionPercentage: null,
     setVolume: (volume: number) => {
       const video = document.querySelector<HTMLVideoElement>('.html5-main-video')
-      if (!video) return
-      if (video.muted && volume > 0)
-        video.muted = false
-      if (volume === 0)
-        video.muted = true
-      video.volume = volume
+      if (video) {
+        video.volume = volume
+        if (volume === 0) video.muted = true
+        else video.muted = false
+      }
     },
     repeat: () => {
       // If no playlist repeat button exists, set the video to loop, otherwise click the playlist loop button

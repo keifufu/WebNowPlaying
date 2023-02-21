@@ -1,11 +1,12 @@
-import applemusic from './sites/applemusic'
-import generic from './sites/generic'
-import soundcloud from './sites/soundcloud'
-import spotify from './sites/spotify'
-import tidal from './sites/tidal'
-import twitch from './sites/twitch'
-import youtube from './sites/youtube'
-import youtubemusic from './sites/youtubemusic'
+import Applemusic from './sites/AppleMusic'
+import Generic from './sites/Generic'
+import Soundcloud from './sites/Soundcloud'
+import Spotify from './sites/Spotify'
+import Tidal from './sites/Tidal'
+import Twitch from './sites/Twitch'
+import Youtube from './sites/Youtube'
+import YoutubeEmbed from './sites/YoutubeEmbed'
+import YoutubeMusic from './sites/YoutubeMusic'
 import { defaultSettings, getSettings, Settings } from './utils'
 
 let settings: Settings = defaultSettings
@@ -16,28 +17,32 @@ let settings: Settings = defaultSettings
 function getCurrentSite() {
   const host = window.location.hostname
 
+  // prioritize matching youtube.com/embed before youtube.com
+  if (host === 'www.youtube.com' && window.location.pathname.startsWith('/embed'))
+    return YoutubeEmbed
+
   if (host === 'music.apple.com')
-    return applemusic
+    return Applemusic
   else if (host === 'soundcloud.com')
-    return soundcloud
+    return Soundcloud
   else if (host === 'open.spotify.com')
-    return spotify
+    return Spotify
   else if (host === 'listen.tidal.com')
-    return tidal
+    return Tidal
   else if (host === 'www.twitch.tv')
-    return twitch
+    return Twitch
   else if (host === 'www.youtube.com')
-    return youtube
+    return Youtube
   else if (host === 'music.youtube.com')
-    return youtubemusic
+    return YoutubeMusic
 
   if (settings.useGeneric) {
     if (settings.useGenericList) {
       if (settings.isListBlacklist && settings.genericList.includes(host)) return null
       if (!settings.isListBlacklist && !settings.genericList.includes(host)) return null
     }
-    generic.init?.()
-    return generic
+    Generic.init?.()
+    return Generic
   }
 
   return null

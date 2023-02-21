@@ -15,14 +15,8 @@ export const getMediaSessionCover = () => {
 // Converts every word in a string to start with a capital letter
 export const capitalize = (str: string) => str.toLowerCase().replace(/(?:^|\s)\S/g, (a) => a.toUpperCase())
 
-function pad(number: number, length: number) {
-  let str = String(number)
-  while (str.length < length)
-    str = '0' + str
-  return str
-}
-
 // Convert seconds to a time string acceptable to Rainmeter
+const pad = (num: number, size: number) => num.toString().padStart(size, '0')
 export const timeInSecondsToString = (timeInSeconds: number) => {
   const timeInMinutes = Math.floor(timeInSeconds / 60)
   if (timeInMinutes < 60)
