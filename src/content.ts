@@ -79,7 +79,7 @@ export type Site = {
   }
 }
 
-const sendEvent = (event: string) => chrome.runtime?.id && chrome.runtime.sendMessage({ event })
+const sendEvent = (event: 'outdated' | 'wsConnected' | 'wsDisconnected') => chrome.runtime?.id && chrome.runtime.sendMessage({ event })
 
 let reconnectCount = 0
 let wsConnected = false
@@ -228,7 +228,9 @@ window.addEventListener('beforeunload', () => {
   if (wsConnected && _ws.readyState === WebSocket.OPEN) {
     _ws.onclose = null
     _ws.close()
+    sendEvent('wsDisconnected')
   }
 })
 
-ws.init()
+// Only initialize the websocket we match the host
+if (getCurrentSite() !== null) ws.init()
