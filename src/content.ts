@@ -171,7 +171,7 @@ function handleEvent(event: any) {
       site.events.setPositionSeconds?.(parseInt(positionInSeconds))
       site.events.setPositionPercentage?.(parseFloat(positionPercentage))
     } else if (event.data.toLowerCase().includes('setvolume ')) {
-      const [volume] = event.data.split(' ')
+      const [, volume] = event.data.split(' ')
       site.events.setVolume?.(parseInt(volume) / 100)
     } else if (event.data.toLowerCase() === 'repeat') {
       site.events.repeat?.()
@@ -182,11 +182,11 @@ function handleEvent(event: any) {
     } else if (event.data.toLowerCase() === 'togglethumbsdown') {
       site.events.toggleThumbsDown?.()
     } else if (event.data.toLowerCase().includes('rating ')) {
-      const [rating] = event.data.split(' ')
+      const [, rating] = event.data.split(' ')
       site.events.rating?.(parseInt(rating))
     }
 
-    // Send update immediately, for snappier UI
+    // Send update immediately, for a snappier Widget UI
     sendUpdate()
   } catch (e) {
     ws.send(`Error:Error sending event to ${site.info.player()}`)
