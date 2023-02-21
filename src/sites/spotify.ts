@@ -17,8 +17,8 @@ const site: Site = {
     rating: () => (document.querySelectorAll('.Root__now-playing-bar button')[1].getAttribute('aria-checked') === 'true' ? 5 : 0),
     repeat: () => {
       const state = document.querySelectorAll('.player-controls__buttons button')[4].getAttribute('aria-checked')
-      if (state === 'true') return 1
-      if (state === 'mixed') return 2
+      if (state === 'true') return 2
+      if (state === 'mixed') return 1
       return 0
     },
     shuffle: () => (document.querySelector('.player-controls__buttons button')?.getAttribute('aria-checked') === 'true' ? 1 : 0)

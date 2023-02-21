@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "lib": [
+      "DOM",
+      "ES2021.String"
+    ],
     "outDir": "./dist/",
     "noImplicitAny": true,
     "module": "es6",
