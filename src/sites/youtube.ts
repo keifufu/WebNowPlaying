@@ -31,7 +31,11 @@ const site: Site = {
     },
     duration: () => document.querySelector<HTMLElement>('.ytp-time-duration')?.innerText || '0:00',
     position: () => timeInSecondsToString(document.querySelector<HTMLVideoElement>('.html5-main-video')?.currentTime || 0),
-    volume: () => document.querySelector<HTMLVideoElement>('.html5-main-video')?.volume || 0,
+    volume: () => {
+      const video = document.querySelector<HTMLVideoElement>('.html5-main-video')
+      if (!video || video.muted) return 0
+      return (video.volume * 100)
+    },
     rating: () => {
       const likeButtonPressed = document.querySelector('#segmented-like-button button')?.getAttribute('aria-pressed')
       const dislikeButtonPressed = document.querySelector('#segmented-dislike-button button')?.getAttribute('aria-pressed')

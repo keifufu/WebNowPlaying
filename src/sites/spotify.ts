@@ -13,7 +13,7 @@ const site: Site = {
     cover: () => getMediaSessionCover(),
     duration: () => document.querySelectorAll<HTMLElement>('.playback-bar > div')[2]?.innerText || '',
     position: () => document.querySelector<HTMLElement>('.playback-bar > div')?.innerText || '',
-    volume: () => parseFloat(document.querySelector<HTMLElement>('.volume-bar__slider-container > div > div')?.style.getPropertyValue('--progress-bar-transform').replace('%', '') || '1') / 100,
+    volume: () => parseFloat(document.querySelector<HTMLElement>('.volume-bar__slider-container > div > div')?.style.getPropertyValue('--progress-bar-transform').replace('%', '') || '1'),
     rating: () => (document.querySelectorAll('.Root__now-playing-bar button')[1].getAttribute('aria-checked') === 'true' ? 5 : 0),
     repeat: () => {
       const state = document.querySelectorAll('.player-controls__buttons button')[4].getAttribute('aria-checked')

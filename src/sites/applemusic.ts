@@ -13,7 +13,7 @@ const site: Site = {
     cover: () => getMediaSessionCover(),
     duration: () => timeInSecondsToString(document.querySelector('audio')?.duration || 0),
     position: () => timeInSecondsToString(document.querySelector('audio')?.currentTime || 0),
-    volume: () => document.querySelector('audio')?.volume || 0,
+    volume: () => (document.querySelector('audio')?.volume || 0) * 100,
     rating: null,
     repeat: () => {
       const repeatButton = document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-repeat')?.shadowRoot?.querySelector('.button--repeat')

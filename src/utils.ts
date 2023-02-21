@@ -9,7 +9,8 @@ export const getMediaSessionCover = () => {
     return bSize - aSize
   })
 
-  return biggestImage.src.split('?')[0]
+  // Never remove the search from the url again
+  return biggestImage.src
 }
 
 // Converts every word in a string to start with a capital letter
