@@ -18,7 +18,9 @@ unless they have a fully functioning demo.
 For example, Amazon Music's demo has half it's UI elements hidden, you can't skip through songs, etc.
 
 ## Installing
-Soon, waiting for approval.
+Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux/)  
+Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/ejimjbbegnadfnpgnnfngljgmgpddnmp)  
+Edge, Opera, etc. also use the Chrome Web Store
 
 ## Building from source
 - Install [Node.js](https://nodejs.org)
