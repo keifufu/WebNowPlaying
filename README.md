@@ -27,6 +27,13 @@ Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/we
 Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/ejimjbbegnadfnpgnnfngljgmgpddnmp)  
 Edge, Opera, etc. also use the Chrome Web Store
 
+## TODO
+- Improved Youtube support, better playlist looping and section skipping would be nice
+- Netflix support
+- Deezer volume support
+- Pandora volume support
+- Tidal volume support
+
 ## Building from source
 - Install [Node.js](https://nodejs.org)
 - Install pnpm globally with `npm i -g pnpm`
