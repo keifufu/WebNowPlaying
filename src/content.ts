@@ -215,12 +215,15 @@ function sendUpdate() {
     return
   }
 
-  // TODO: for numbers, maybe trim to 2 decimal places?
   const values: (keyof SiteInfo)[] = ['state', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
   values.forEach((key) => {
     try {
-      const value = site.info[key]?.()
-      if (value && value !== cache[key]) {
+      let value = site.info[key]?.()
+      // Check for null, and not just falsy, because 0 and '' are falsy
+      if (value !== null && value !== cache[key]) {
+        // For numbers, trim to 2 decimal places
+        if (typeof value === 'number')
+          value = parseFloat(value.toFixed(2))
         ws.send(`${key.toUpperCase()}:${value}`)
         cache[key] = value
       }
