@@ -4,6 +4,7 @@ Intended to work together with the [original](https://github.com/tjhrulz/WebNowP
 
 ### Supported websites
 - Apple Music
+- Bandcamp
 - Plex
 - SoundCloud
 - Spotify
