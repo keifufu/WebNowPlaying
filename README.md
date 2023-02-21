@@ -22,6 +22,7 @@ Soon, waiting for approval.
 
 ## Building from source
 - Install [Node.js](https://nodejs.org)
-- Run `npm i`
-- Run `npm run build`
+- Install pnpm globally with `npm i -g pnpm`
+- Run `pnpm i`
+- Run `pnpm run build`
 - The output will be in /dist
