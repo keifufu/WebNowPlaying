@@ -6,10 +6,10 @@ const site: Site = {
   info: {
     player: () => 'Bandcamp',
     state: () => (document.querySelector('audio')?.paused ? 2 : 1),
-    title: () => document.querySelector<HTMLElement>('.trackTitle')?.innerText || '',
-    artist: () => capitalize(document.location.host.split('.')[0]),
+    title: () => document.querySelector<HTMLElement>('.trackTitle')?.innerText || document.querySelector<HTMLElement>('.title')?.innerText || '',
+    artist: () => document.querySelector<HTMLElement>('.artist span')?.innerText || capitalize(document.location.host.split('.')[0]),
     album: () => document.querySelector<HTMLElement>('.fromAlbum')?.innerText || '',
-    cover: () => document.querySelector<HTMLImageElement>('.popupImage img')?.src || '',
+    cover: () => document.querySelector<HTMLImageElement>('.carousel-player-inner img')?.src || document.querySelector<HTMLImageElement>('.popupImage img')?.src || '',
     duration: () => timeInSecondsToString(document.querySelector('audio')?.duration || 0),
     position: () => timeInSecondsToString(document.querySelector('audio')?.currentTime || 0),
     volume: () => (document.querySelector('audio')?.volume || 0) * 100,
@@ -18,9 +18,18 @@ const site: Site = {
     shuffle: () => 0
   },
   events: {
-    playpause: () => document.querySelector<HTMLButtonElement>('.playbutton')?.click(),
-    next: null,
-    previous: null,
+    playpause: () => {
+      const button = document.querySelector<HTMLButtonElement>('.playpause') || document.querySelector<HTMLButtonElement>('.playbutton')
+      button?.click()
+    },
+    next: () => {
+      const button = document.querySelector<HTMLButtonElement>('.nextbutton') || document.querySelector<HTMLButtonElement>('.next')
+      button?.click()
+    },
+    previous: () => {
+      const button = document.querySelector<HTMLButtonElement>('.prevbutton') || document.querySelector<HTMLButtonElement>('.prev')
+      button?.click()
+    },
     setPositionSeconds: (positionInSeconds: number) => {
       const audio = document.querySelector('audio')
       if (audio) audio.currentTime = positionInSeconds
