@@ -168,7 +168,7 @@ window.addEventListener('beforeunload', () => {
 // If no element has been used in the past then it returns the first video element in that page
 // If there is no video element then it returns the first audio element in that page
 // If these is no elements at all then it returns null
-// At that point in time the accumlated elements are purged from the list
+// At that point in time the accumulated elements are purged from the list
 let elements: any[] = []
 function updateCurrentElement() {
   // If any elements have been updated since last check
@@ -176,8 +176,8 @@ function updateCurrentElement() {
     // If last used element does not exist in array select a new one
     if (elements.indexOf(element) < 0) {
       // Update element to the element that came in most recently
-      // @TODO make this ignore elements that are muted or have no sound
-      // @TODO prioritize elements in the list that had a state or src change more recently to break ties
+      // @TO_DO make this ignore elements that are muted or have no sound
+      // @TO_DO prioritize elements in the list that had a state or src change more recently to break ties
       element = elements[elements.length - 1]
     }
   // No elements have been updated, only try to change element if it is null
@@ -191,7 +191,7 @@ function updateCurrentElement() {
     }
     // If no suitable audio element was found try to check for video elements
     if (!element) {
-      // @TODO check if there is a way to see if a video has audio
+      // @TO_DO check if there is a way to see if a video has audio
       for (let i = 0; i < document.getElementsByTagName('video').length; i++) {
         if (document.getElementsByTagName('video')[i].duration > 0) {
           element = document.getElementsByTagName('video')[i]
@@ -214,7 +214,7 @@ function setupElementEvents() {
     }
   }
   for (let i = 0; i < document.getElementsByTagName('audio').length; i++) {
-    // @TODO may have to not check if null in case someone else has a time update event already (Although in those cases I may break their site)
+    // @TO_DO may have to not check if null in case someone else has a time update event already (Although in those cases I may break their site)
     if (document.getElementsByTagName('audio')[i].ontimeupdate === null) {
       document.getElementsByTagName('audio')[i].ontimeupdate = () => function() {
         elements.push(this)
