@@ -40,3 +40,5 @@ Edge, Opera, etc. also use the Chrome Web Store
 - Run `pnpm i`
 - Run `pnpm run build`
 - The output will be in /dist
+
+// TODO: default volume return to 100
