@@ -1,11 +1,11 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { capitalize, timeInSecondsToString } from '../utils'
 
 const site: Site = {
   ready: () => document.querySelector('audio') !== null,
   info: {
     player: () => 'Bandcamp',
-    state: () => (document.querySelector('audio')?.paused ? 2 : 1),
+    state: () => (document.querySelector('audio')?.paused ? StateMode.PAUSED : StateMode.PLAYING),
     title: () => document.querySelector<HTMLElement>('.trackTitle')?.innerText || document.querySelector<HTMLElement>('.title')?.innerText || '',
     artist: () => document.querySelector<HTMLElement>('.artist span')?.innerText || capitalize(document.location.host.split('.')[0]),
     album: () => document.querySelector<HTMLElement>('.fromAlbum')?.innerText || '',
@@ -14,11 +14,11 @@ const site: Site = {
     position: () => timeInSecondsToString(document.querySelector('audio')?.currentTime || 0),
     volume: () => (document.querySelector('audio')?.volume || 1) * 100,
     rating: () => 0,
-    repeat: () => 0,
-    shuffle: () => 0
+    repeat: () => RepeatMode.NONE,
+    shuffle: () => false
   },
   events: {
-    playpause: () => {
+    togglePlaying: () => {
       const button = document.querySelector<HTMLButtonElement>('.playpause') || document.querySelector<HTMLButtonElement>('.playbutton')
       button?.click()
     },
@@ -38,16 +38,16 @@ const site: Site = {
     setVolume: (volume: number) => {
       const audio = document.querySelector('audio')
       if (audio) {
-        audio.volume = volume
+        audio.volume = volume / 100
         if (volume === 0) audio.muted = true
         else audio.muted = false
       }
     },
-    repeat: null,
-    shuffle: null,
+    toggleRepeat: null,
+    toggleShuffle: null,
     toggleThumbsUp: null,
     toggleThumbsDown: null,
-    rating: null
+    setRating: null
   }
 }
 

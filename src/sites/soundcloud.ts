@@ -1,11 +1,11 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { getMediaSessionCover } from '../utils'
 
 const site: Site = {
   ready: () => navigator.mediaSession.metadata !== null,
   info: {
     player: () => 'Soundcloud',
-    state: () => (navigator.mediaSession.playbackState === 'playing' ? 1 : 2),
+    state: () => (navigator.mediaSession.playbackState === 'playing' ? StateMode.PLAYING : StateMode.PAUSED),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
@@ -16,15 +16,15 @@ const site: Site = {
     rating: () => (document.querySelector('.playbackSoundBadge__like')?.className.includes('selected') ? 5 : 0),
     repeat: () => {
       if (document.querySelectorAll('.m-one').length > 0)
-        return 2
+        return RepeatMode.ONE
       if (document.querySelectorAll('.m-all').length > 0)
-        return 1
-      return 0
+        return RepeatMode.ALL
+      return RepeatMode.NONE
     },
-    shuffle: () => (document.querySelectorAll('.m-shuffling').length > 0 ? 1 : 0)
+    shuffle: () => (document.querySelectorAll('.m-shuffling').length > 0)
   },
   events: {
-    playpause: () => document.querySelector<HTMLButtonElement>('.playControl')?.click(),
+    togglePlaying: () => document.querySelector<HTMLButtonElement>('.playControl')?.click(),
     next: () => document.querySelector<HTMLButtonElement>('.skipControl__next')?.click(),
     previous: () => document.querySelector<HTMLButtonElement>('.skipControl__previous')?.click(),
     setPositionSeconds: null,
@@ -68,7 +68,7 @@ const site: Site = {
       }))
 
       let counter = 0
-      let vol = volume
+      let vol = volume / 100
       const volumeReadyTest = setInterval(() => {
         if (document.querySelector('.volume.expanded.hover')) {
           clearInterval(volumeReadyTest)
@@ -108,11 +108,11 @@ const site: Site = {
         }
       }, 25)
     },
-    repeat: () => document.querySelector<HTMLButtonElement>('.repeatControl')?.click(),
-    shuffle: () => document.querySelector<HTMLButtonElement>('.shuffleControl')?.click(),
+    toggleRepeat: () => document.querySelector<HTMLButtonElement>('.repeatControl')?.click(),
+    toggleShuffle: () => document.querySelector<HTMLButtonElement>('.shuffleControl')?.click(),
     toggleThumbsUp: () => document.querySelector<HTMLButtonElement>('.playbackSoundBadge__like')?.click(),
     toggleThumbsDown: null,
-    rating: (rating: number) => {
+    setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
         site.events.toggleThumbsUp?.()
       else if (rating < 3 && site.info.rating?.() === 5)

@@ -1,4 +1,4 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { capitalize } from '../utils'
 
 const site: Site = {
@@ -7,8 +7,8 @@ const site: Site = {
     player: () => 'Pandora',
     state: () => {
       // If pandora asked if you are still listening it is paused
-      if (document.querySelector('.StillListeningBody') !== null) return 2
-      return document.querySelector('.PlayButton__Icon path')?.getAttribute('d')?.includes('22.5v-21l16.5') ? 2 : 1
+      if (document.querySelector('.StillListeningBody') !== null) return StateMode.STOPPED
+      return document.querySelector('.PlayButton__Icon path')?.getAttribute('d')?.includes('22.5v-21l16.5') ? StateMode.PAUSED : StateMode.PLAYING
     },
     title: () => document.querySelector<HTMLElement>('.Tuner__Audio__TrackDetail__title')?.innerText || '',
     artist: () => document.querySelector<HTMLElement>('.Tuner__Audio__TrackDetail__artist')?.innerText || '',
@@ -41,14 +41,14 @@ const site: Site = {
     },
     repeat: () => {
       const state = document.querySelector('.RepeatButton')?.getAttribute('aria-checked')
-      if (state === 'true') return 2
-      if (state === 'mixed') return 1
-      return 0
+      if (state === 'true') return RepeatMode.ALL
+      if (state === 'mixed') return RepeatMode.ONE
+      return RepeatMode.NONE
     },
-    shuffle: () => (document.querySelector('.ShuffleButton')?.getAttribute('aria-checked') === 'true' ? 1 : 0)
+    shuffle: () => (document.querySelector('.ShuffleButton')?.getAttribute('aria-checked') === 'true')
   },
   events: {
-    playpause: () => document.querySelector<HTMLButtonElement>('.PlayButton')?.click(),
+    togglePlaying: () => document.querySelector<HTMLButtonElement>('.PlayButton')?.click(),
     next: () => {
       const normalSkipButton = document.querySelector<HTMLButtonElement>('.Tuner__Control__SkipForward__Button')
       if (normalSkipButton) return normalSkipButton.click()
@@ -82,11 +82,11 @@ const site: Site = {
       }))
     },
     setVolume: null, // TODO: setVolume
-    repeat: () => document.querySelector<HTMLButtonElement>('.RepeatButton')?.click(),
-    shuffle: () => document.querySelector<HTMLButtonElement>('.ShuffleButton')?.click(),
+    toggleRepeat: () => document.querySelector<HTMLButtonElement>('.RepeatButton')?.click(),
+    toggleShuffle: () => document.querySelector<HTMLButtonElement>('.ShuffleButton')?.click(),
     toggleThumbsUp: () => document.querySelector<HTMLButtonElement>('.ThumbUpButton')?.click(),
     toggleThumbsDown: () => document.querySelector<HTMLButtonElement>('.ThumbDownButton')?.click(),
-    rating: (rating: number) => {
+    setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
         site.events.toggleThumbsUp?.()
       else if (rating < 3 && site.info.rating?.() !== 1)

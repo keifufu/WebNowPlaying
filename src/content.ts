@@ -47,8 +47,8 @@ function getCurrentSite() {
 
   if (settings.useGeneric) {
     if (settings.useGenericList) {
-      if (settings.isListBlacklist && settings.genericList.includes(host)) return null
-      if (!settings.isListBlacklist && !settings.genericList.includes(host)) return null
+      if (settings.isListBlocked && settings.genericList.includes(host)) return null
+      if (!settings.isListBlocked && !settings.genericList.includes(host)) return null
     }
     Generic.init?.()
     return Generic
@@ -57,21 +57,22 @@ function getCurrentSite() {
   return null
 }
 
-// Refer to https://github.com/tjhrulz/WebNowPlaying/blob/master/README.md
-// for what these are supposed to return
+export enum StateMode { STOPPED = 'STOPPED', PLAYING = 'PLAYING', PAUSED = 'PAUSED' }
+export enum RepeatMode { NONE = 'NONE', ONE = 'ONE', ALL = 'ALL' }
+
 type SiteInfo = {
-  player: () => string
-  state: () => number
-  title: () => string
-  artist: () => string
-  album: () => string
-  cover: () => string
-  duration: () => string
-  position: () => string
-  volume: (() => number) | null
-  rating: (() => number) | null
-  repeat: () => number
-  shuffle: () => number
+  player: () => string // Default '' (empty string)
+  state: () => StateMode // Default StateEnum.STOPPED
+  title: () => string // Default '' (empty string)
+  artist: () => string // Default '' (empty string)
+  album: () => string // Default '' (empty string)
+  cover: () => string // Default '' (empty string)
+  duration: () => string // Default '0:00'
+  position: () => string // Default '0:00'
+  volume: (() => number) | null // Default 100
+  rating: (() => number) | null // Default 0
+  repeat: () => RepeatMode // Default RepeatEnum.NONE
+  shuffle: () => boolean // Default false
 }
 
 export type Site = {
@@ -79,17 +80,17 @@ export type Site = {
   ready: () => boolean,
   info: SiteInfo
   events: {
-    playpause: (() => void) | null
+    togglePlaying: (() => void) | null
     next: (() => void) | null
     previous: (() => void) | null
     setPositionSeconds: ((positionInSeconds: number) => void) | null
     setPositionPercentage: ((progressPercentage: number) => void) | null
     setVolume: ((volume: number) => void) | null
-    repeat: (() => void) | null
-    shuffle: (() => void) | null
+    toggleRepeat: (() => void) | null
+    toggleShuffle: (() => void) | null
     toggleThumbsUp: (() => void) | null
     toggleThumbsDown: (() => void) | null
-    rating: ((rating: number) => void) | null
+    setRating: ((rating: number) => void) | null
   }
 }
 
@@ -147,15 +148,21 @@ const ws = {
     ws.retry()
   },
   onMessage(event: any) {
-    const versionNumber = event.data.toLowerCase().split(':')
-    if (versionNumber[0].includes('version')) {
-      // Check that version number is the same major version
-      if (versionNumber[1].split('.')[1] < 5) {
+    // TODO: websocket should still connect and all even if plugin is outdated (maybe hardcode an exception for anything below 1.0.0 since communication changed there)
+    const [type, data] = event.data.split(' ')
+    if (type === 'VERSION') {
+      // The version is major.minor.patch, compare version against what the extension knows is the latest version
+      // C# actually gives us a version with 4 numbers, but this just ignores the last one
+      const latestVersion = '0.5.0'
+      const [major, minor, patch] = latestVersion.split('.').map((v) => parseInt(v))
+      const [major2, minor2, patch2] = (data as string).split('.').map((v) => parseInt(v))
+      if (major2 < major || (major2 === major && minor2 < minor) || (major2 === major && minor2 === minor && patch2 < patch)) {
         sendEvent('outdated')
       } else {
         clearTimeout(outdatedTimeout)
         sendEvent('wsConnected')
       }
+      return
     }
 
     try {
@@ -167,48 +174,55 @@ const ws = {
   },
   onError(event: any) {
     if (typeof event.data !== 'undefined')
-      console.log('Websocket Error:' + event.data)
+      console.error('WNPRedux Websocket Error:' + event.data)
   }
 }
 
+enum Events {
+  TOGGLE_PLAYING,
+  NEXT,
+  PREVIOUS,
+  SET_POSITION,
+  SET_VOLUME,
+  TOGGLE_REPEAT,
+  TOGGLE_SHUFFLE,
+  TOGGLE_THUMBS_UP,
+  TOGGLE_THUMBS_DOWN,
+  SET_RATING
+}
+// TODO: improve error logging on both sides
+// TODO: fix "tabs connected"
+
 function handleEvent(event: any) {
   const site = getCurrentSite()
-  if (!site || !site.ready()) return ws.send('Error: Error sending event: No site found or site not ready.')
+  if (!site || !site.ready()) return ws.send('ERROR:Error sending event: No site found or site not ready.')
+  const [type, data] = event.data.split(' ')
 
   try {
-    if (event.data.toLowerCase() === 'playpause') {
-      site.events.playpause?.()
-    } else if (event.data.toLowerCase() === 'next') {
-      site.events.next?.()
-    } else if (event.data.toLowerCase() === 'previous') {
-      site.events.previous?.()
-    } else if (event.data.toLowerCase().includes('setposition ') || event.data.toLowerCase().includes('setprogress ')) {
-      // Example string: SetPosition 34:SetProgress 0,100890207715134:
-      const [positionInSeconds] = event.data.toLowerCase().split('setposition ')[1].split(':')
-      const [, positionPercentage] = event.data.toLowerCase().split(':')[1].split('setprogress ')
-      site.events.setPositionSeconds?.(parseInt(positionInSeconds))
-      site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
-    } else if (event.data.toLowerCase().includes('setvolume ')) {
-      const [, volume] = event.data.split(' ')
-      site.events.setVolume?.(parseInt(volume) / 100)
-    } else if (event.data.toLowerCase() === 'repeat') {
-      site.events.repeat?.()
-    } else if (event.data.toLowerCase() === 'shuffle') {
-      site.events.shuffle?.()
-    } else if (event.data.toLowerCase() === 'togglethumbsup') {
-      site.events.toggleThumbsUp?.()
-    } else if (event.data.toLowerCase() === 'togglethumbsdown') {
-      site.events.toggleThumbsDown?.()
-    } else if (event.data.toLowerCase().includes('rating ')) {
-      const [, rating] = event.data.split(' ')
-      site.events.rating?.(parseInt(rating))
+    switch (Events[type as keyof typeof Events]) {
+      case Events.TOGGLE_PLAYING: site.events.togglePlaying?.(); break
+      case Events.NEXT: site.events.next?.(); break
+      case Events.PREVIOUS: site.events.previous?.(); break
+      case Events.SET_POSITION: {
+        const [positionInSeconds, positionPercentage] = data.split(':')
+        site.events.setPositionSeconds?.(parseInt(positionInSeconds))
+        site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
+        break
+      }
+      case Events.SET_VOLUME: site.events.setVolume?.(parseInt(data)); break
+      case Events.TOGGLE_REPEAT: site.events.toggleRepeat?.(); break
+      case Events.TOGGLE_SHUFFLE: site.events.toggleShuffle?.(); break
+      case Events.TOGGLE_THUMBS_UP: site.events.toggleThumbsUp?.(); break
+      case Events.TOGGLE_THUMBS_DOWN: site.events.toggleThumbsDown?.(); break
+      case Events.SET_RATING: site.events.setRating?.(parseInt(data)); break
+      default: break
     }
 
     // Send update immediately, for a snappier Widget UI
     sendUpdate()
   } catch (e) {
-    ws.send(`Error:Error sending event to ${site.info.player()}`)
-    ws.send(`ErrorD:${e}`)
+    ws.send(`ERROR:Error sending event to ${site.info.player()}`)
+    ws.send(`ERRORDEBUG:${e}`)
   }
 }
 
@@ -217,9 +231,9 @@ function sendUpdate() {
 
   const site = getCurrentSite()
   if (!site || !site.ready()) {
-    if (cache.state !== 0) {
-      ws.send('STATE:0')
-      cache.state = 0
+    if (cache.state !== StateMode.STOPPED) {
+      ws.send(`STATE:${StateMode.STOPPED}`)
+      cache.state = StateMode.STOPPED
     }
     return
   }

@@ -1,4 +1,4 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { getMediaSessionCover, timeInSecondsToString } from '../utils'
 
 const site: Site = {
@@ -10,7 +10,8 @@ const site: Site = {
     player: () => 'Plex',
     state: () => {
       const video = document.querySelector('video')
-      return video?.paused ? 2 : 1
+      if (!video) return StateMode.STOPPED
+      return video.paused ? StateMode.PAUSED : StateMode.PLAYING
     },
     title: () => document.querySelector<HTMLElement>('[class*="MetadataPosterTitle-title"]')?.innerText || '',
     artist: () => document.querySelector<HTMLElement>('[data-testid="metadataYear"]')?.innerText || '',
@@ -23,17 +24,17 @@ const site: Site = {
     repeat: () => {
       const repeatButton = document.querySelector('button[data-testid="repeatButton"]')
       if (repeatButton) {
-        if (repeatButton.className.includes('Active')) return 2
+        if (repeatButton.className.includes('Active')) return RepeatMode.ALL
       } else {
         const repeatOneButton = document.querySelector('button[data-testid="repeatOneButton"]')
-        if (repeatOneButton) return 1
+        if (repeatOneButton) return RepeatMode.ONE
       }
-      return 0
+      return RepeatMode.NONE
     },
-    shuffle: () => (document.querySelector('button[data-testid="shuffleButton"]')?.className.includes('Active') ? 1 : 0)
+    shuffle: () => (document.querySelector('button[data-testid="shuffleButton"]')?.className.includes('Active') || false)
   },
   events: {
-    playpause: () => {
+    togglePlaying: () => {
       const button = document.querySelector('button[data-testid="pauseButton"]') || document.querySelector('button[data-testid="resumeButton"]')
       if (!button) return
       button.dispatchEvent(new MouseEvent('mousedown', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
@@ -59,18 +60,18 @@ const site: Site = {
     setVolume: (volume: number) => {
       const video = document.querySelector('video')
       if (video) {
-        video.volume = volume
+        video.volume = volume / 100
         if (volume === 0) video.muted = true
         else video.muted = false
       }
     },
-    repeat: () => {
+    toggleRepeat: () => {
       const button = document.querySelector('button[data-testid="repeatButton"]') || document.querySelector('button[data-testid="repeatOneButton"]')
       if (!button) return
       button.dispatchEvent(new MouseEvent('mousedown', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
       button.dispatchEvent(new MouseEvent('mouseup', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
     },
-    shuffle: () => {
+    toggleShuffle: () => {
       const button = document.querySelector('button[data-testid="shuffleButton"]')
       if (!button) return
       button.dispatchEvent(new MouseEvent('mousedown', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
@@ -78,7 +79,7 @@ const site: Site = {
     },
     toggleThumbsUp: null,
     toggleThumbsDown: null,
-    rating: null
+    setRating: null
   }
 }
 

@@ -1,4 +1,4 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { getMediaSessionCover, timeInSecondsToString } from '../utils'
 
 const site: Site = {
@@ -6,7 +6,7 @@ const site: Site = {
   info: {
     player: () => 'Apple Music',
     // Supports mediaSession.metadata, but not mediaSession.playbackState
-    state: () => (document.querySelector('audio')?.paused ? 2 : 1),
+    state: () => (document.querySelector('audio')?.paused ? StateMode.PAUSED : StateMode.PLAYING),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
@@ -17,17 +17,17 @@ const site: Site = {
     rating: null,
     repeat: () => {
       const repeatButton = document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-repeat')?.shadowRoot?.querySelector('.button--repeat')
-      return repeatButton?.classList.contains('mode--0') ? 0 : repeatButton?.classList.contains('mode--1') ? 2 : 1
+      return repeatButton?.classList.contains('mode--0') ? RepeatMode.NONE : repeatButton?.classList.contains('mode--1') ? RepeatMode.ONE : RepeatMode.ALL
     },
     shuffle: () => {
       const shuffleButton = document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-shuffle')?.shadowRoot?.querySelector('.button--shuffle')
-      return shuffleButton?.classList.contains('shuffled') ? 1 : 0
+      return shuffleButton?.classList.contains('shuffled') || false
     }
   },
   events: {
-    playpause: () => {
+    togglePlaying: () => {
       const audio = document.querySelector('audio')
-      site.info.state() === 1 ? audio?.pause() : audio?.play()
+      site.info.state() === StateMode.PLAYING ? audio?.pause() : audio?.play()
     },
     next: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-item-skip[class="next"]')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--next')?.click(),
     previous: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-item-skip[class="previous"]')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--previous')?.click(),
@@ -38,13 +38,13 @@ const site: Site = {
     setPositionPercentage: null,
     setVolume: (volume: number) => {
       const audio = document.querySelector('audio')
-      if (audio) audio.volume = volume
+      if (audio) audio.volume = volume / 100
     },
-    repeat: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-repeat')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--repeat')?.click(),
-    shuffle: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-shuffle')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--shuffle')?.click(),
+    toggleRepeat: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-repeat')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--repeat')?.click(),
+    toggleShuffle: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-shuffle')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--shuffle')?.click(),
     toggleThumbsUp: null,
     toggleThumbsDown: null,
-    rating: null
+    setRating: null
   }
 }
 

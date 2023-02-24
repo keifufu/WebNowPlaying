@@ -7,7 +7,7 @@ const saveOptionsFromForm = () => {
   const updateFrequencyMs = document.querySelector<HTMLInputElement>('#updateFrequencyMs')
   const useGeneric = document.querySelector<HTMLInputElement>('#useGeneric')
   const useGenericList = document.querySelector<HTMLInputElement>('#useGenericList')
-  const isListBlacklist = document.querySelector<HTMLSelectElement>('#isListBlacklist')
+  const isListBlocked = document.querySelector<HTMLSelectElement>('#isListBlocked')
   const genericList = document.querySelector<HTMLTextAreaElement>('#genericList')
 
   const newSettings: Settings = {
@@ -15,7 +15,7 @@ const saveOptionsFromForm = () => {
     updateFrequencyMs: parseInt(updateFrequencyMs?.value || defaultSettings.updateFrequencyMs.toString()),
     useGeneric: useGeneric?.checked || defaultSettings.useGeneric,
     useGenericList: useGenericList?.checked || defaultSettings.useGenericList,
-    isListBlacklist: isListBlacklist?.value === 'blacklist' || defaultSettings.isListBlacklist,
+    isListBlocked: isListBlocked?.value === 'block' || defaultSettings.isListBlocked,
     genericList: genericList?.value.split('\n').filter((e) => e.trim()) || defaultSettings.genericList
   }
 
@@ -51,14 +51,14 @@ async function loadOptionsIntoForm() {
   const updateFrequencyMs = document.querySelector<HTMLInputElement>('#updateFrequencyMs')
   const useGeneric = document.querySelector<HTMLInputElement>('#useGeneric')
   const useGenericList = document.querySelector<HTMLInputElement>('#useGenericList')
-  const isListBlacklist = document.querySelector<HTMLInputElement>('#isListBlacklist')
+  const isListBlocked = document.querySelector<HTMLInputElement>('#isListBlocked')
   const genericList = document.querySelector<HTMLTextAreaElement>('#genericList')
 
   if (swPort) swPort.value = settings.swPort.toString()
   if (updateFrequencyMs) updateFrequencyMs.value = settings.updateFrequencyMs.toString()
   if (useGeneric) useGeneric.checked = settings.useGeneric
   if (useGenericList) useGenericList.checked = settings.useGenericList
-  if (isListBlacklist) isListBlacklist.value = settings.isListBlacklist ? 'blacklist' : 'whitelist'
+  if (isListBlocked) isListBlocked.value = settings.isListBlocked ? 'block' : 'allow'
   if (genericList) genericList.value = settings.genericList.join('\n')
 }
 

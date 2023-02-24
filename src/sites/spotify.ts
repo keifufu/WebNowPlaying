@@ -1,4 +1,4 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { getMediaSessionCover } from '../utils'
 
 const site: Site = {
@@ -6,7 +6,7 @@ const site: Site = {
   info: {
     player: () => 'Spotify',
     // Supports mediaSession.metadata, but not mediaSession.playbackState
-    state: () => (document.querySelectorAll('.player-controls__buttons button')[2].getAttribute('aria-label') === 'Pause' ? 1 : 2),
+    state: () => (document.querySelectorAll('.player-controls__buttons button')[2].getAttribute('aria-label') === 'Pause' ? StateMode.PAUSED : StateMode.PLAYING),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
@@ -17,14 +17,14 @@ const site: Site = {
     rating: () => (document.querySelectorAll('.Root__now-playing-bar button')[1].getAttribute('aria-checked') === 'true' ? 5 : 0),
     repeat: () => {
       const state = document.querySelectorAll('.player-controls__buttons button')[4].getAttribute('aria-checked')
-      if (state === 'true') return 2
-      if (state === 'mixed') return 1
-      return 0
+      if (state === 'true') return RepeatMode.ALL
+      if (state === 'mixed') return RepeatMode.ONE
+      return RepeatMode.NONE
     },
-    shuffle: () => (document.querySelector('.player-controls__buttons button')?.getAttribute('aria-checked') === 'true' ? 1 : 0)
+    shuffle: () => (document.querySelector('.player-controls__buttons button')?.getAttribute('aria-checked') === 'true')
   },
   events: {
-    playpause: () => document.querySelectorAll<HTMLButtonElement>('.player-controls__buttons button')[2]?.click(),
+    togglePlaying: () => document.querySelectorAll<HTMLButtonElement>('.player-controls__buttons button')[2]?.click(),
     next: () => document.querySelectorAll<HTMLButtonElement>('.player-controls__buttons button')[3]?.click(),
     previous: () => document.querySelectorAll<HTMLButtonElement>('.player-controls__buttons button')[1]?.click(),
     setPositionSeconds: null,
@@ -53,7 +53,7 @@ const site: Site = {
       const el = document.querySelector('.volume-bar > div > div > div')
       if (!el) return
       const loc = el.getBoundingClientRect()
-      const vol = volume * loc.width
+      const vol = (volume / 100) * loc.width
 
       el.dispatchEvent(new MouseEvent('mousedown', {
         bubbles: true,
@@ -70,11 +70,11 @@ const site: Site = {
         clientY: loc.top + (loc.height / 2)
       }))
     },
-    repeat: () => document.querySelectorAll<HTMLButtonElement>('.player-controls__buttons button')[4]?.click(),
-    shuffle: () => document.querySelector<HTMLButtonElement>('.player-controls__buttons button')?.click(),
+    toggleRepeat: () => document.querySelectorAll<HTMLButtonElement>('.player-controls__buttons button')[4]?.click(),
+    toggleShuffle: () => document.querySelector<HTMLButtonElement>('.player-controls__buttons button')?.click(),
     toggleThumbsUp: () => document.querySelectorAll<HTMLButtonElement>('.Root__now-playing-bar button')[1]?.click(),
     toggleThumbsDown: null,
-    rating: (rating: number) => {
+    setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
         site.events.toggleThumbsUp?.()
       else if (rating < 3 && site.info.rating?.() === 5)

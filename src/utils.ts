@@ -31,7 +31,7 @@ export type Settings = {
   updateFrequencyMs: number
   useGeneric: boolean
   useGenericList: boolean
-  isListBlacklist: boolean
+  isListBlocked: boolean
   genericList: string[]
 }
 
@@ -40,7 +40,7 @@ export const defaultSettings: Settings = {
   updateFrequencyMs: 50,
   useGeneric: false,
   useGenericList: false,
-  isListBlacklist: false,
+  isListBlocked: false,
   genericList: ['streamable.com', 'www.adultswim.com']
 }
 
@@ -53,7 +53,7 @@ export function getSettings(): Promise<Settings> {
       updateFrequencyMs: defaultSettings.updateFrequencyMs,
       useGeneric: defaultSettings.useGeneric,
       useGenericList: defaultSettings.useGenericList,
-      isListBlacklist: defaultSettings.isListBlacklist,
+      isListBlocked: defaultSettings.isListBlocked,
       genericList: defaultSettings.genericList
     }, (items: Settings) => {
       resolve(items)

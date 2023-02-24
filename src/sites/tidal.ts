@@ -1,4 +1,4 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 
 let lastKnownVolume = 100
 
@@ -6,7 +6,7 @@ const site: Site = {
   ready: () => document.querySelector('#footerPlayer') !== null,
   info: {
     player: () => 'Tidal',
-    state: () => (document.querySelectorAll('#playbackControlBar button')[2].getAttribute('data-test') === 'pause' ? 1 : 2),
+    state: () => (document.querySelectorAll('#playbackControlBar button')[2].getAttribute('data-test') === 'pause' ? StateMode.PLAYING : StateMode.PAUSED),
     title: () => document.querySelector<HTMLSpanElement>('#footerPlayer span')?.innerText || '',
     artist: () => document.querySelectorAll<HTMLSpanElement>('#footerPlayer span')[1]?.innerText || '',
     album: () =>
@@ -25,15 +25,15 @@ const site: Site = {
     rating: () => (document.querySelector('#footerPlayer .favorite-button')?.getAttribute('aria-checked') === 'true' ? 5 : 0),
     repeat: () => {
       // eslint-disable-next-line prefer-destructuring
-      const repeatButton = document.querySelectorAll('#playbackControlBar button')[4]
-      if (repeatButton.getAttribute('aria-checked') === 'false') return 0
-      if (repeatButton.getAttribute('data-test') === 'One') return 2
-      return 1
+      const repeatButtonDataType = document.querySelectorAll('#playbackControlBar button')[4]?.getAttribute('data-type')
+      if (repeatButtonDataType === 'button__repeatAll') return RepeatMode.ALL
+      if (repeatButtonDataType === 'button__repeatSingle') return RepeatMode.ONE
+      return RepeatMode.NONE
     },
-    shuffle: () => (document.querySelector('#playbackControlBar button')?.getAttribute('aria-checked') === 'true' ? 1 : 0)
+    shuffle: () => (document.querySelector('#playbackControlBar button')?.getAttribute('aria-checked') === 'true')
   },
   events: {
-    playpause: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[2].click()),
+    togglePlaying: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[2].click()),
     next: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[3].click()),
     previous: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[1].click()),
     setPositionSeconds: null,
@@ -126,11 +126,11 @@ const site: Site = {
         }
       }, 25)
     }, */
-    repeat: () => document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[4]?.click(),
-    shuffle: () => document.querySelector<HTMLButtonElement>('#playbackControlBar button')?.click(),
+    toggleRepeat: () => document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[4]?.click(),
+    toggleShuffle: () => document.querySelector<HTMLButtonElement>('#playbackControlBar button')?.click(),
     toggleThumbsUp: () => document.querySelector<HTMLButtonElement>('#footerPlayer .favorite-button')?.click(),
     toggleThumbsDown: null,
-    rating: (rating: number) => {
+    setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
         site.events.toggleThumbsUp?.()
       else if (rating < 3 && site.info.rating?.() === 5)
