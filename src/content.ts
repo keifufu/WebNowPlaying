@@ -105,8 +105,7 @@ let cache: { [key: string]: any } = {}
 
 let _ws: WebSocket
 const ws = {
-  async init() {
-    settings = await getSettings()
+  init() {
     try {
       _ws = new WebSocket(`ws://localhost:${settings.swPort}`)
       _ws.onopen = ws.onOpen
@@ -252,7 +251,10 @@ window.addEventListener('beforeunload', () => {
     _ws.close()
     sendEvent('wsDisconnected')
   }
-})
+});
 
-// Only initialize the websocket we match the host
-if (getCurrentSite() !== null) ws.init()
+(async () => {
+  settings = await getSettings()
+  // Only initialize the websocket we match the host
+  if (getCurrentSite() !== null) ws.init()
+})()
