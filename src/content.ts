@@ -24,7 +24,7 @@ function getCurrentSite() {
 
   if (host === 'music.apple.com')
     return Applemusic
-  else if (host.endsWith('bandcamp.com'))
+  else if (host.endsWith('bandcamp.com') || document.querySelector('[content="@bandcamp"]') !== null)
     return Bandcamp
   else if (host === 'www.deezer.com')
     return Deezer
