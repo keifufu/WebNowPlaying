@@ -1,7 +1,7 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { timeInSecondsToString } from '../utils'
 
-let shuffleState = 0
+let shuffleState = false
 let playlistLoaded = false
 
 const site: Site = {
@@ -12,13 +12,10 @@ const site: Site = {
   info: {
     player: () => 'Youtube Embed',
     state: () => {
-      let state = document.querySelector<HTMLVideoElement>('.html5-main-video')?.paused ? 2 : 1
-      // I copied this from the original, documentation says 3 isn't used, but apparently it is?
-      if (document.querySelector('.ytp-play-button')?.getAttribute('aria-label') === null)
-        state = 3
+      let state = document.querySelector<HTMLVideoElement>('.html5-main-video')?.paused ? StateMode.PAUSED : StateMode.PLAYING
       // It is possible for the video to be "playing" but not started
-      if (state === 1 && (document.querySelector<HTMLVideoElement>('.html5-main-video')?.played.length || 0) <= 0)
-        state = 2
+      if (state === StateMode.PLAYING && (document.querySelector<HTMLVideoElement>('.html5-main-video')?.played.length || 0) <= 0)
+        state = StateMode.PAUSED
       return state
     },
     title: () => document.querySelector<HTMLElement>('.ytp-title-text')?.innerText || '', // The title of the current song
@@ -44,11 +41,11 @@ const site: Site = {
       return (video.volume * 100)
     },
     rating: () => 0,
-    repeat: () => 0, // 0 = no repeat, 1 = repeat song, 2 = repeat playlist
+    repeat: () => RepeatMode.NONE,
     shuffle: () => shuffleState
   },
   events: {
-    playpause: () => document.querySelector<HTMLButtonElement>('.ytp-play-button')?.click(),
+    togglePlaying: () => document.querySelector<HTMLButtonElement>('.ytp-play-button')?.click(),
     next: () => {
       const list = new URLSearchParams(document.querySelector<HTMLAnchorElement>('.ytp-title-link')?.search).get('list')
       if (shuffleState && list) {
@@ -103,23 +100,23 @@ const site: Site = {
     setVolume: (volume: number) => {
       const video = document.querySelector<HTMLVideoElement>('.html5-main-video')
       if (video) {
-        video.volume = volume
+        video.volume = volume / 100
         if (volume === 0) video.muted = true
         else video.muted = false
       }
     },
-    repeat: () => {
+    toggleRepeat: () => {
       const video = document.querySelector<HTMLVideoElement>('.html5-main-video')
       if (video) video.loop = !video.loop
     },
-    shuffle: () => {
+    toggleShuffle: () => {
       const list = new URLSearchParams(document.querySelector<HTMLAnchorElement>('.ytp-title-link')?.search).get('list')
-      if (list) shuffleState = Number(!shuffleState)
-      else shuffleState = 0
+      if (list) shuffleState = !shuffleState
+      else shuffleState = false
     },
     toggleThumbsUp: null,
     toggleThumbsDown: null,
-    rating: null
+    setRating: null
   }
 }
 

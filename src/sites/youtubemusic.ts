@@ -1,4 +1,4 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { getMediaSessionCover } from '../utils'
 
 // I'm not using mediaSession here because of ads.
@@ -7,7 +7,7 @@ const site: Site = {
   ready: () => document.querySelector('video') !== null && (document.querySelector<HTMLButtonElement>('.title.ytmusic-player-bar')?.innerText.length || 0) > 0,
   info: {
     player: () => 'Youtube Music',
-    state: () => (document.querySelector('video')?.paused ? 2 : 1),
+    state: () => (document.querySelector('video')?.paused ? StateMode.PAUSED : StateMode.PLAYING),
     title: () => document.querySelector<HTMLElement>('.title.ytmusic-player-bar')?.innerText || '',
     artist: () => document.querySelector<HTMLElement>('.byline.ytmusic-player-bar a')?.innerText || '',
     album: () => document.querySelectorAll<HTMLElement>('.byline.ytmusic-player-bar a')[1]?.innerText || '',
@@ -33,15 +33,15 @@ const site: Site = {
     },
     repeat: () => {
       const repeatMode = document.querySelector('ytmusic-player-bar')?.getAttribute('repeat-mode_')
-      if (repeatMode === 'ALL') return 1
-      if (repeatMode === 'ONE') return 2
-      return 0
+      if (repeatMode === 'ALL') return RepeatMode.ALL
+      if (repeatMode === 'ONE') return RepeatMode.ONE
+      return RepeatMode.NONE
     },
     // Youtube music doesn't do shuffling the traditional way, it just shuffles the current queue with no way of undoing it
-    shuffle: () => 0
+    shuffle: () => false
   },
   events: {
-    playpause: () => document.querySelector<HTMLButtonElement>('#play-pause-button')?.click(),
+    togglePlaying: () => document.querySelector<HTMLButtonElement>('#play-pause-button')?.click(),
     next: () => document.querySelector<HTMLButtonElement>('.next-button')?.click(),
     previous: () => document.querySelector<HTMLButtonElement>('.previous-button')?.click(),
     setPositionSeconds: null,
@@ -68,18 +68,17 @@ const site: Site = {
     },
     setVolume: (volume: number) => {
       const video = document.querySelector('video')
-      if (!video) return
-      if (video.muted && volume > 0)
-        video.muted = false
-      if (volume === 0)
-        video.muted = true
-      video.volume = volume
+      if (video) {
+        video.volume = volume / 100
+        if (volume === 0) video.muted = true
+        else video.muted = false
+      }
     },
-    repeat: () => document.querySelector<HTMLButtonElement>('.repeat')?.click(),
-    shuffle: () => document.querySelector<HTMLButtonElement>('.shuffle')?.click(),
+    toggleRepeat: () => document.querySelector<HTMLButtonElement>('.repeat')?.click(),
+    toggleShuffle: () => document.querySelector<HTMLButtonElement>('.shuffle')?.click(),
     toggleThumbsUp: () => document.querySelectorAll<HTMLButtonElement>('.middle-controls-buttons button')[1]?.click(),
     toggleThumbsDown: () => document.querySelector<HTMLButtonElement>('.middle-controls-buttons button')?.click(),
-    rating: (rating: number) => {
+    setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
         site.events.toggleThumbsUp?.()
       else if (rating < 3 && site.info.rating?.() !== 1)

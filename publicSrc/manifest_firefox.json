@@ -22,9 +22,7 @@
   "permissions": [
     "storage"
   ],
-  "host_permissions": [
-    "*://*/*"
-  ],
+  "host_permissions": ["<all_urls>"],
   "browser_specific_settings": {
     "gecko": {
       "id": "webnowplayingredux@keifufu.dev",

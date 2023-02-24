@@ -1,6 +1,6 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable prefer-destructuring */
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { capitalize, getMediaSessionCover, timeInSecondsToString } from '../utils'
 
 // Mostly also copied from the original extension, other than refactoring it and adding
@@ -36,9 +36,9 @@ const site: Site = {
     player: () => capitalize(window.location.hostname.split('.').slice(-2).join('.')),
     // navigator.mediaSession.state is barely ever set, so don't even bother with it
     state: () => {
-      if (!element) return 0
-      if (element.paused) return 2
-      else return 1
+      if (!element) return StateMode.STOPPED
+      if (element.paused) return StateMode.PAUSED
+      else return StateMode.PLAYING
     },
     title: () => {
       if (navigator.mediaSession.metadata?.title)
@@ -111,11 +111,11 @@ const site: Site = {
     position: () => timeInSecondsToString(element?.currentTime || 0),
     volume: () => (element?.muted ? 0 : (element?.volume || 1) * 100),
     rating: () => 0,
-    repeat: () => (element?.loop ? 1 : 0),
-    shuffle: () => 0
+    repeat: () => (element?.loop ? RepeatMode.ONE : RepeatMode.NONE),
+    shuffle: () => false
   },
   events: {
-    playpause: () => {
+    togglePlaying: () => {
       if (!element) return
       if (element.paused) element.play()
       else element.pause()
@@ -137,16 +137,16 @@ const site: Site = {
       if (!element) return
       if (element.muted) element.muted = false
       if (volume === 0) element.muted = true
-      element.volume = volume
+      element.volume = volume / 100
     },
-    repeat: () => {
+    toggleRepeat: () => {
       if (!element) return
       element.loop = !element.loop
     },
-    shuffle: null,
+    toggleShuffle: null,
     toggleThumbsUp: null,
     toggleThumbsDown: null,
-    rating: null
+    setRating: null
   }
 }
 

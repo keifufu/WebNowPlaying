@@ -1,11 +1,11 @@
-import { Site } from '../content'
+import { RepeatMode, Site, StateMode } from '../content'
 import { timeInSecondsToString } from '../utils'
 
 const site: Site = {
   ready: () => document.querySelector('.video-player__default-player') !== null && document.querySelector('video') !== null,
   info: {
     player: () => 'Twitch',
-    state: () => (document.querySelector('video')?.paused ? 2 : 1),
+    state: () => (document.querySelector('video')?.paused ? StateMode.PAUSED : StateMode.PLAYING),
     title: () => document.querySelector<HTMLElement>('h2[data-a-target="stream-title"]')?.innerText || '',
     artist: () => document.querySelector<HTMLElement>('h1.tw-title')?.innerText || '',
     album: () => document.querySelector<HTMLElement>('a[data-a-target="stream-game-link"] > span')?.innerText || '',
@@ -39,11 +39,11 @@ const site: Site = {
     volume: () => (document.querySelector('video')?.volume || 1) * 100,
     // Rating could be following, but ffz and/or bttv fuck it up so I can't get it consistently
     rating: () => 0,
-    repeat: () => 0,
-    shuffle: () => 0
+    repeat: () => RepeatMode.NONE,
+    shuffle: () => false
   },
   events: {
-    playpause: () => (site.info.state() === 2 ? document.querySelector('video')?.play() : document.querySelector('video')?.pause()),
+    togglePlaying: () => (site.info.state() === StateMode.PAUSED ? document.querySelector('video')?.play() : document.querySelector('video')?.pause()),
     next: () => {
       // If we are not live
       const video = document.querySelector('video')
@@ -65,13 +65,13 @@ const site: Site = {
     setPositionPercentage: null,
     setVolume: (volume: number) => {
       const video = document.querySelector('video')
-      if (video) video.volume = volume
+      if (video) video.volume = volume / 100
     },
-    repeat: null,
-    shuffle: null,
+    toggleRepeat: null,
+    toggleShuffle: null,
     toggleThumbsUp: null,
     toggleThumbsDown: null,
-    rating: null
+    setRating: null
   }
 }
 

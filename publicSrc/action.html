@@ -137,9 +137,9 @@
         <div class="suboptions">
           <label>
           <input type="checkbox" id="useGenericList" />
-            <select id="isListBlacklist">
-              <option value="whitelist">whitelist</option>
-              <option value="blacklist">blacklist</option>
+            <select id="isListBlocked">
+              <option value="block">allow</option>
+              <option value="allow">block</option>
             </select>
             &nbsp;these sites.
           </label>
@@ -147,14 +147,17 @@
         </div>
       </div>
   
+      <p style="float:left;">Adapter settings</p>
+      <p style="font-size: 1rem;font-weight: 300;">&#160;</p>
+      <div class="suboptions">
+        <label>
+          <input type="checkbox" id="useRainmeterAdapter" /> Connect to the Rainmeter adapter
+        </label>
+      </div>
+
       <p style="float:left;">Websocket settings</p>
       <p style="font-size: 1rem;font-weight: 300;">&#160;</p>
-      <div id="websocketOptions" class="suboptions">
-        <label>
-          Port:
-          <input id="swPort" class="input" />
-          (default: 8974)
-        </label>
+      <div class="suboptions">
         <label>
           Update frequency (in ms):
           <input id="updateFrequencyMs" class="input" />
