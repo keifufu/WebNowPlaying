@@ -149,6 +149,7 @@ const ws = {
   },
   onMessage(event: any) {
     // TODO: websocket should still connect and all even if plugin is outdated (maybe hardcode an exception for anything below 1.0.0 since communication changed there)
+    if (!event.data) return
     const [type, data] = event.data.split(' ')
     if (type === 'VERSION') {
       // The version is major.minor.patch, compare version against what the extension knows is the latest version
