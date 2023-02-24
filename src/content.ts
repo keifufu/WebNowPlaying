@@ -131,6 +131,7 @@ const ws = {
   },
   send(data: string) {
     if (_ws.readyState !== WebSocket.OPEN) return
+    console.log(data)
     _ws.send(data)
   },
   onOpen() {
@@ -243,11 +244,12 @@ function sendUpdate() {
   values.forEach((key) => {
     try {
       let value = site.info[key]?.()
+      // For numbers, round it to an integer
+      if (typeof value === 'number')
+        value = Math.round(value)
       // Check for null, and not just falsy, because 0 and '' are falsy
       if (value !== null && value !== cache[key]) {
-        // For numbers, trim to 2 decimal places
-        if (typeof value === 'number')
-          value = parseFloat(value.toFixed(2))
+        // TODO: change : to ' ' for consistency
         ws.send(`${key.toUpperCase()}:${value}`)
         cache[key] = value
       }
