@@ -33,6 +33,7 @@ Edge, Opera, etc. also use the Chrome Web Store
 - Deezer volume support
 - Pandora volume support
 - Tidal volume support
+- Allow users to report broken sites within the extension
 
 ## Building from source
 - Install [Node.js](https://nodejs.org)

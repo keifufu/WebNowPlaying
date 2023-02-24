@@ -43,6 +43,12 @@ module.exports = {
       'warn',
       2
     ],
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      {
+        args: 'none'
+      }
+    ],
     quotes: [
       'warn',
       'single'
@@ -460,12 +466,6 @@ module.exports = {
     ],
     'no-undefined': [
       'off'
-    ],
-    'no-unused-vars': [
-      'warn',
-      {
-        args: 'none'
-      }
     ],
     'no-use-before-define': [
       'off'
