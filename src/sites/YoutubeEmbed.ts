@@ -40,7 +40,7 @@ const site: Site = {
     position: () => timeInSecondsToString(document.querySelector<HTMLVideoElement>('.html5-main-video')?.currentTime || 0),
     volume: () => {
       const video = document.querySelector<HTMLVideoElement>('.html5-main-video')
-      if (!video || video.muted) return 0
+      if (!video || video.muted) return 100
       return (video.volume * 100)
     },
     rating: () => 0,

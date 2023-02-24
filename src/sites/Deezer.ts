@@ -12,7 +12,7 @@ const site: Site = {
     cover: () => getMediaSessionCover(),
     duration: () => document.querySelector<HTMLElement>('.slider-counter-max')?.innerText || '0:00',
     position: () => document.querySelector<HTMLElement>('.slider-counter-current')?.innerText || '0:00',
-    volume: () => 0, // TODO: Not supported for now
+    volume: () => 100, // TODO: Not supported for now
     rating: () => (document.querySelectorAll('.track-actions svg')[2].getAttribute('data-testid') === 'HeartIcon' ? 0 : 5),
     repeat: () => {
       // eslint-disable-next-line prefer-destructuring

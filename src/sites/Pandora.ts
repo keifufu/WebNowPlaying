@@ -31,7 +31,7 @@ const site: Site = {
     },
     duration: () => document.querySelectorAll<HTMLElement>('.VolumeDurationControl__Duration span')[2]?.innerText || '0:00',
     position: () => document.querySelectorAll<HTMLElement>('.VolumeDurationControl__Duration span')[0]?.innerText || '0:00',
-    volume: () => 0, // TODO: volume
+    volume: () => 100, // TODO: volume
     rating: () => {
       const thumbsUp = document.querySelector<HTMLButtonElement>('.ThumbUpButton')
       if (thumbsUp?.getAttribute('aria-checked') === 'true') return 5
