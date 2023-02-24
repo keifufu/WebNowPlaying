@@ -6,7 +6,7 @@ const site: Site = {
   info: {
     player: () => 'Spotify',
     // Supports mediaSession.metadata, but not mediaSession.playbackState
-    state: () => (document.querySelectorAll('.player-controls__buttons button')[2].getAttribute('aria-label') === 'Pause' ? StateMode.PAUSED : StateMode.PLAYING),
+    state: () => (document.querySelectorAll('.player-controls__buttons button')[2].getAttribute('aria-label') === 'Pause' ? StateMode.PLAYING : StateMode.PAUSED),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
