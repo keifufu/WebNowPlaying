@@ -101,6 +101,8 @@ let wsConnected = false
 let outdatedTimeout: NodeJS.Timeout
 let updateInterval: NodeJS.Timeout
 
+let cache: { [key: string]: any } = {}
+
 let _ws: WebSocket
 const ws = {
   async init() {
@@ -117,6 +119,7 @@ const ws = {
   },
   retry() {
     if (wsConnected) return
+    cache = {}
     sendEvent('wsDisconnected')
     clearTimeout(outdatedTimeout)
     clearInterval(updateInterval)
@@ -210,7 +213,6 @@ function handleEvent(event: any) {
   }
 }
 
-const cache: { [key: string]: any } = {}
 function sendUpdate() {
   if (!wsConnected) return
 
