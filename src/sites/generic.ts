@@ -109,7 +109,7 @@ const site: Site = {
     // element.duration/element.currentTime.
     duration: () => timeInSecondsToString(element?.duration || 0),
     position: () => timeInSecondsToString(element?.currentTime || 0),
-    volume: () => (element?.muted ? 0 : (element?.volume || 0) * 100),
+    volume: () => (element?.muted ? 0 : (element?.volume || 1) * 100),
     rating: () => 0,
     repeat: () => (element?.loop ? 1 : 0),
     shuffle: () => 0

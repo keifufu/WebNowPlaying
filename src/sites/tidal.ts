@@ -1,6 +1,6 @@
 import { Site } from '../content'
 
-let lastKnownVolume = 50
+let lastKnownVolume = 100
 
 const site: Site = {
   ready: () => document.querySelector('#footerPlayer') !== null,

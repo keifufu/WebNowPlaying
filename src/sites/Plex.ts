@@ -18,7 +18,7 @@ const site: Site = {
     cover: () => getMediaSessionCover(),
     duration: () => timeInSecondsToString(document.querySelector('video')?.duration || 0),
     position: () => timeInSecondsToString(document.querySelector('video')?.currentTime || 0),
-    volume: () => (document.querySelector('video')?.volume || 0) * 100,
+    volume: () => (document.querySelector('video')?.volume || 1) * 100,
     rating: () => 0,
     repeat: () => {
       const repeatButton = document.querySelector('button[data-testid="repeatButton"]')
