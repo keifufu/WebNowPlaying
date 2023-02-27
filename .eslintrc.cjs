@@ -1,4 +1,4 @@
-// pnpm i eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-import -D
+// pnpm i eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-import eslint-plugin-tailwindcss -D
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -11,7 +11,8 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:import/typescript'
+    'plugin:import/typescript',
+    'plugin:tailwindcss/recommended'
   ],
   env: {
     node: true,

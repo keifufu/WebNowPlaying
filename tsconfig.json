@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "lib": [
-      "DOM",
-      "ES2021.String"
-    ],
-    "outDir": "./dist/",
-    "noImplicitAny": true,
-    "module": "es6",
-    "target": "es5",
-    "jsx": "react",
-    "allowJs": true,
+    "strict": true,
+    "lib": ["DOM", "ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "node",
-    "strictNullChecks": true // this is important, keep it!
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": ["vite/client", "chrome"],
+    "noEmit": false,
+    "isolatedModules": true
   }
 }

@@ -1,3 +1,6 @@
+import { defaultSettings } from '../shared/utils'
+
+export { } // isolatedModules issue
 const openTabs: { [key: string]: boolean } = {}
 
 const updateTitle = () => {
@@ -6,7 +9,14 @@ const updateTitle = () => {
 }
 updateTitle()
 
-chrome.runtime.onMessage.addListener((request, sender) => {
+let _settings = defaultSettings
+chrome.storage.sync.get({
+  settings: defaultSettings
+}, (items) => {
+  _settings = items.settings
+})
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.event) {
     case 'outdated':
       chrome.action.setBadgeText({ text: '!' })
@@ -27,7 +37,16 @@ chrome.runtime.onMessage.addListener((request, sender) => {
       updateTitle()
       chrome.action.setBadgeText({ text: '' }) // Reset it in case it was set to '!'
       break
+    case 'getSettings':
+      sendResponse(_settings)
+      break
+    case 'saveSettings':
+      _settings = request.settings
+      chrome.storage.sync.set({ settings: request.settings })
+      break
     default:
       break
   }
+  /* Return true to keep port open */
+  return true
 })

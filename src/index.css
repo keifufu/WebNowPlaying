@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 100%; /* Without this, it seems scaled fine when running pnpm start, but not in a popup once the extension is loaded */
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Remove scrollbars (WebKit) */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove scrollbars (Firefox) */
+* {
+  scrollbar-width: none;  
+}
+
+/* Overflow is bad */
+* { overflow: hidden; }
+
+/* Extension popout size */
+html {
+  min-width: 550px;
+  min-height: 478px;
+}
+
+/* Global anchor styles */
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }

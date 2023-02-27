@@ -1,8 +1,14 @@
-# WebNowPlaying Redux
-A fork of the [original](https://github.com/tjhrulz/WebNowPlaying-BrowserExtension) WebNowPlaying browser extension, rebuilt from scratch to make development easier.  
-Intended to work together with the [original](https://github.com/tjhrulz/WebNowPlaying) WebNowPlaying Rainmeter plugin.
+# WebNowPlaying-Redux
+A browser extension that provides information and controls for media playing in the browser to external adapters.  
+It detects information about the media being played, such as the title, artist, album, and more.
 
-### Supported websites
+// TODO: explain a bit more about events and adapters
+
+## Adapters
+- [WebNowPlaying-Redux-Rainmeter](https://github.com/keifufu/WebNowPlaying-Redux-Rainmeter) by [keifufu](https://github.com/keifufu), [tjhrulz](https://github.com/tjhrulz/)
+- Want to create or submit your own adapter? Click [here](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/CreatingAdapters.md)!
+
+## Supported websites
 - Apple Music
 - Bandcamp
 - Deezer
@@ -17,23 +23,21 @@ Intended to work together with the [original](https://github.com/tjhrulz/WebNowP
 - YouTube Music
 - Any website with a video or music element might work, you can enable them in the options (Click the extension icon)
 
-I will consider adding other websites if there is demand for it.  
-Please do keep in mind that I can't easily develop for paid services,
-unless they have a fully functioning demo.  
-For example, Amazon Music's demo has half it's UI elements hidden, you can't skip through songs, etc.
+I will consider adding other websites where there is demand for.  
+Please do keep in mind that I can't easily develop for paid services.
 
 ## Installing
+// TODO: update webstore links below
 Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux/)  
 Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/ejimjbbegnadfnpgnnfngljgmgpddnmp)  
 Edge, Opera, etc. also use the Chrome Web Store
 
 ## TODO
-- Improved Youtube support, better playlist looping and section skipping would be nice
+- Section skipping on Youtube
 - Netflix support
 - Deezer volume support
 - Pandora volume support
 - Tidal volume support
-- Allow users to report broken sites within the extension
 
 ## Building from source
 - Install [Node.js](https://nodejs.org)

@@ -3,10 +3,13 @@
   "name": "WebNowPlaying Redux",
   "short_name": "WebNowPlaying Redux",
   "description": "Ever wished music info from your web browser could be used in Rainmeter? Well now it can!",
-  "version": "1.2",
-  "icons": { "256": "icon256.png" },
+  "version": "1.0.0",
+  "icons": {
+    "128": "icons/icon-darkmode-128.png",
+    "256": "icons/icon-darkmode-256.png"
+  },
   "action": {
-    "default_popup": "action.html",
+    "default_popup": "index.html",
     "default_title": "WebNowPlaying Redux"
   },
   "content_scripts": [
@@ -17,10 +20,16 @@
     }
   ],
   "background": {
-    "service_worker": "sw.js"
+    "scripts": ["sw.js"]
   },
   "permissions": [
     "storage"
   ],
-  "host_permissions": ["<all_urls>"]
+  "host_permissions": ["<all_urls>"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "webnowplayingredux@keifufu.dev",
+      "strict_min_version": "109.0"
+    }
+  }
 }
