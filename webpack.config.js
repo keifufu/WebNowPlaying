@@ -2,9 +2,8 @@ const path = require('path')
 
 module.exports = {
   entry: {
-    content: path.resolve(__dirname, 'src/content.ts'),
-    action: path.resolve(__dirname, 'src/action.ts'),
-    sw: path.resolve(__dirname, 'src/sw.ts')
+    content: path.resolve(__dirname, 'extSrc/content.ts'),
+    sw: path.resolve(__dirname, 'extSrc/sw.ts')
   },
   mode: 'production',
   module: {
@@ -21,7 +20,6 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist/all'),
-    filename: '[name].js',
-    clean: true
+    filename: '[name].js'
   }
 }

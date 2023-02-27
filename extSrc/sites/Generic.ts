@@ -216,7 +216,7 @@ function setupElementEvents() {
   for (let i = 0; i < document.getElementsByTagName('audio').length; i++) {
     // @TO_DO may have to not check if null in case someone else has a time update event already (Although in those cases I may break their site)
     if (document.getElementsByTagName('audio')[i].ontimeupdate === null) {
-      document.getElementsByTagName('audio')[i].ontimeupdate = () => function() {
+      document.getElementsByTagName('audio')[i].ontimeupdate = function() {
         elements.push(this)
       }
     }
