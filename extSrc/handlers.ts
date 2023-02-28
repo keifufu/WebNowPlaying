@@ -59,8 +59,6 @@ export function SendUpdateLegacy(self: WNPReduxWebSocket) {
       // Conversion to legacy values
       if (key === 'state')
         value = value === StateMode.PLAYING ? 1 : 0
-      else if (key === 'volume')
-        value = Math.round(value as number / 100)
       else if (key === 'repeat')
         value = value === RepeatMode.ALL ? 2 : value === RepeatMode.ONE ? 1 : 0
       else if (key === 'shuffle')
