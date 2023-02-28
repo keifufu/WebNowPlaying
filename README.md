@@ -1,5 +1,3 @@
-// TODO: updateFrequencyMs is missing from the settings panel, oops
-
 # WebNowPlaying-Redux
 A browser extension that provides information and controls for media playing in the browser to external adapters.  
 It detects information about the media being played, such as the title, artist, album, and more.

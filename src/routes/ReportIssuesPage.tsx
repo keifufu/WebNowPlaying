@@ -77,12 +77,12 @@ const ReportIssuesPage: Component = () => {
         </Show>
       </button>
       <div class='-mx-3 my-2 w-[111%] border-t border-solid border-zinc-500' />
-      <Checkbox text='Automatically report when sites return unexpected information' checked={settings().useTelemetry} onChange={onChange} />
+      <Checkbox text='Automatically report when sites appear broken' checked={settings().useTelemetry} onChange={onChange} />
       <div class='mt-2 text-sm text-gray-500'>
         This will help us improve the extension by sending information about sites that appear to not be working properly. This information will be sent anonymously and will not contain any personal information.
         <br />
         <br />
-        The following information will be sent: extension version, description about what went wrong, site name (eg: youtube.com, not the url)
+        The following information will be sent: What data type failed (but not the data itself), what site was being used (but not the URL), and extension version
       </div>
     </div>
   )

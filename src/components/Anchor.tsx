@@ -9,7 +9,7 @@ const Anchor: Component<{ text: string, highlight?: boolean, link?: string, onCl
     <a
       // eslint-disable-next-line tailwindcss/no-custom-classname
       class={clsx(
-        'cursor-pointer',
+        'text-center',
         [props.highlight && theme() === 'dark' && 'text-cyan-500'],
         [props.highlight && theme() === 'light' && 'text-cyan-700'],
       )}

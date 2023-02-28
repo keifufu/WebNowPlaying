@@ -18,7 +18,9 @@ export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Pandora' 
 export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Pandora', 'Plex', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'Youtube', 'Youtube Embeds', 'Youtube Music']
 
 export type Settings = {
-  updateFrequencyMs: number
+  updateFrequencyMs: {
+    [port: number]: number
+  }
   useGeneric: boolean
   useGenericList: boolean
   isListBlocked: boolean
@@ -30,7 +32,7 @@ export type Settings = {
 }
 
 export const defaultSettings: Settings = {
-  updateFrequencyMs: 50,
+  updateFrequencyMs: {},
   useGeneric: false,
   useGenericList: false,
   isListBlocked: false,
