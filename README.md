@@ -38,6 +38,7 @@ Edge, Opera, etc. also use the Chrome Web Store
 - Deezer volume support
 - Pandora volume support
 - Tidal volume support
+- volume should return 100 if it fails to get it, but it shouldn't default to it as that has now caused it to return 100 when videos are at 0 (muted)
 
 ## Building from source
 - Install [Node.js](https://nodejs.org)
