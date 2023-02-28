@@ -1,13 +1,4 @@
-import { defaultSettings, Settings } from '../shared/utils'
-
-export { } // isolatedModules issue
-const openTabs: { [key: string]: boolean } = {}
-
-const updateTitle = () => {
-  const tabs = Object.keys(openTabs).length
-  chrome.action.setTitle({ title: `${tabs} tab${tabs === 1 ? '' : 's'} connected` })
-}
-updateTitle()
+import { defaultSettings, getVersionFromGithub, Settings } from '../shared/utils'
 
 let saveTimeout: NodeJS.Timeout
 let _settings = defaultSettings
@@ -30,31 +21,35 @@ if (typeof browser === 'undefined') {
   })
 }
 
+const ghCache: Record<string, string> = {}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.event) {
-    case 'outdated':
+    case 'setOutdated':
       chrome.action.setBadgeText({ text: '!' })
       chrome.action.setBadgeBackgroundColor({ color: [255, 0, 0, 255] })
-      chrome.action.setTitle({ title: 'WebNowPlaying plugin is outdated' })
+      chrome.action.setTitle({ title: 'One of the adapters is outdated. Click to check.' })
       break
-    case 'wsConnected':
-      if (!sender.tab || !sender.tab.id) break
-      if (openTabs[sender.tab.id]) break
-      openTabs[sender.tab.id] = true
-      updateTitle()
-      chrome.action.setBadgeText({ text: '' }) // Reset it in case it was set to '!'
+    case 'resetOutdated':
+      chrome.action.setBadgeText({ text: '' })
+      chrome.action.setTitle({ title: '' })
       break
-    case 'wsDisconnected':
-      if (!sender.tab || !sender.tab.id) break
-      if (!openTabs[sender.tab.id]) break
-      delete openTabs[sender.tab.id]
-      updateTitle()
-      chrome.action.setBadgeText({ text: '' }) // Reset it in case it was set to '!'
+    case 'getGithubVersion':
+      if (!request.gh) return
+      if (ghCache[request.gh]) {
+        sendResponse(ghCache[request.gh])
+      } else {
+        getVersionFromGithub(request.gh).then((version) => {
+          if (version !== 'Error') ghCache[request.gh] = version
+          sendResponse(version)
+        })
+      }
       break
     case 'getSettings':
       sendResponse(_settings)
       break
     case 'saveSettings':
+      if (!request.settings) return
       _settings = request.settings
       clearTimeout(saveTimeout)
       saveTimeout = setTimeout(() => {

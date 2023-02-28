@@ -1,4 +1,4 @@
-import { Adapter, BuiltInAdapters, CustomAdapter, defaultSettings, sendEvent, Settings } from '../shared/utils'
+import { Adapter, BuiltInAdapters, CustomAdapter, defaultSettings, isVersionOutdated, sendEvent, Settings } from '../shared/utils'
 import { OnMessageLegacy, OnMessageRev1, SendUpdateLegacy, SendUpdateRev1 } from './handlers'
 import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
@@ -96,12 +96,6 @@ export function getCurrentSite() {
   return null
 }
 
-// TODO: active tab display totally fucked with possibly multiple connections per tab
-// TODO: update all connected adapters immediately when one receives a event, not just the one that received it
-// TODO: update check for adapter
-
-// we mark it as outdated here, and that warning will disappear once the user clicks on the extension icon
-// (we remove the outdated flag in App.tsx or so)
 export class WNPReduxWebSocket {
   _ws: WebSocket | null = null
   _adapter: Adapter | CustomAdapter
@@ -173,7 +167,7 @@ export class WNPReduxWebSocket {
     this.retry()
   }
 
-  private onMessage(event: MessageEvent<string>) {
+  private async onMessage(event: MessageEvent<string>) {
     if (this.communicationRevision) {
       switch (this.communicationRevision) {
         case 'legacy':
@@ -184,19 +178,32 @@ export class WNPReduxWebSocket {
           break
         default: break
       }
+
+      // Send an update for all connected adapters
+      updateAll()
     } else {
-      // 'version:' is for compatibility with WNP for Rainmeter 0.5.0 (legacy)
       // eslint-disable-next-line no-lonely-if
-      if (event.data.toLowerCase().startsWith('version:')) this.communicationRevision = 'legacy'
-      // Any WNPRedux adapter will send 'ADAPTER_VERSION <version>;WNPRLIB_REVISION <revision>' after connecting
-      else if (event.data.startsWith('ADAPTER_VERSION ')) [, this.communicationRevision] = event.data.split(';')[1].split(' ')
-      // The first message wasn't version related, so it's probably WNP for Rainmeter < 0.5.0 (legacy)
-      else this.communicationRevision = 'legacy'
+      if (event.data.toLowerCase().startsWith('version:')) {
+        // 'version:' is for compatibility with WNP for Rainmeter 0.5.0 (legacy)
+        this.communicationRevision = 'legacy'
+      } else if (event.data.startsWith('ADAPTER_VERSION ')) {
+        // Any WNPRedux adapter will send 'ADAPTER_VERSION <version>;WNPRLIB_REVISION <revision>' after connecting
+        [, this.communicationRevision] = event.data.split(';')[1].split(' ')
+        // Check if the adapter is outdated
+        const [adapterVersion] = event.data.split(' ')[1].split(';')
+        if ((this._adapter as Adapter).gh) {
+          const githubVersion = await sendEvent('getGithubVersion', { gh: (this._adapter as Adapter).gh })
+          if (githubVersion === 'Error') return
+          if (isVersionOutdated(adapterVersion, githubVersion)) sendEvent('setOutdated')
+        }
+      } else {
+        // The first message wasn't version related, so it's probably WNP for Rainmeter < 0.5.0 (legacy)
+        this.communicationRevision = 'legacy'
+      }
     }
   }
 
-
-  private sendUpdate() {
+  sendUpdate() {
     if (!this._ws || this._ws.readyState !== WebSocket.OPEN) return
     switch (this.communicationRevision) {
       case 'legacy':
@@ -218,7 +225,13 @@ window.addEventListener('beforeunload', () => {
     socket.close()
     // TODO: sendEvent('wsDisconnected')
   })
-});
+})
+
+function updateAll() {
+  sockets.forEach((socket) => {
+    socket.sendUpdate()
+  })
+}
 
 (async () => {
   settings = await sendEvent('getSettings')
