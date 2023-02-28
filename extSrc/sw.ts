@@ -1,4 +1,4 @@
-import { defaultSettings } from '../shared/utils'
+import { defaultSettings, Settings } from '../shared/utils'
 
 export { } // isolatedModules issue
 const openTabs: { [key: string]: boolean } = {}
@@ -9,12 +9,26 @@ const updateTitle = () => {
 }
 updateTitle()
 
+let saveTimeout: NodeJS.Timeout
 let _settings = defaultSettings
-chrome.storage.sync.get({
-  settings: defaultSettings
-}, (items) => {
-  _settings = items.settings
-})
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+if (typeof browser === 'undefined') {
+  chrome.storage.sync.get({
+    ...defaultSettings
+  }, (items) => {
+    _settings = items as Settings
+  })
+} else {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line no-undef
+  browser.storage.sync.get({
+    ...defaultSettings
+  }).then((items: Settings) => {
+    _settings = items
+  })
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.event) {
@@ -42,7 +56,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break
     case 'saveSettings':
       _settings = request.settings
-      chrome.storage.sync.set({ settings: request.settings })
+      clearTimeout(saveTimeout)
+      saveTimeout = setTimeout(() => {
+        chrome.storage.sync.set({ ..._settings })
+      }, 500)
       break
     default:
       break
