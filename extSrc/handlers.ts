@@ -5,32 +5,26 @@ export function OnMessageLegacy(self: WNPReduxWebSocket, message: string) {
   if (!site || !site.ready()) return self.send('Error:Error sending event: No site found or site not ready.')
 
   try {
-    if (message.toLowerCase() === 'playpause') {
-      site.events.togglePlaying?.()
-    } else if (message.toLowerCase() === 'next') {
-      site.events.next?.()
-    } else if (message.toLowerCase() === 'previous') {
-      site.events.previous?.()
-    } else if (message.toLowerCase().includes('setposition ') || message.toLowerCase().includes('setprogress ')) {
-      // Example string: SetPosition 34:SetProgress 0,100890207715134:
-      const [positionInSeconds] = message.toLowerCase().split('setposition ')[1].split(':')
-      const [, positionPercentage] = message.toLowerCase().split(':')[1].split('setprogress ')
-      site.events.setPositionSeconds?.(parseInt(positionInSeconds))
-      site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
-    } else if (message.toLowerCase().includes('setvolume ')) {
-      const [, volume] = message.split(' ')
-      site.events.setVolume?.(parseInt(volume))
-    } else if (message.toLowerCase() === 'repeat') {
-      site.events.toggleRepeat?.()
-    } else if (message.toLowerCase() === 'shuffle') {
-      site.events.toggleShuffle?.()
-    } else if (message.toLowerCase() === 'togglethumbsup') {
-      site.events.toggleThumbsUp?.()
-    } else if (message.toLowerCase() === 'togglethumbsdown') {
-      site.events.toggleThumbsDown?.()
-    } else if (message.toLowerCase().includes('rating ')) {
-      const [, rating] = message.split(' ')
-      site.events.setRating?.(parseInt(rating))
+    const [type, data] = message.toUpperCase().split(' ')
+    switch (type) {
+      case 'PLAYPAUSE': site.events.togglePlaying?.(); break
+      case 'NEXT': site.events.next?.(); break
+      case 'PREVIOUS': site.events.previous?.(); break
+      case 'SETPOSITION': {
+        // Example string: SetPosition 34:SetProgress 0,100890207715134:
+        const [positionInSeconds, positionPercentageStr] = data.split(':')
+        const [, positionPercentage] = positionPercentageStr.split('SETPROGRESS ')
+        site.events.setPositionSeconds?.(parseInt(positionInSeconds))
+        site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
+        break
+      }
+      case 'SETVOLUME': site.events.setVolume?.(parseInt(data)); break
+      case 'REPEAT': site.events.toggleRepeat?.(); break
+      case 'SHUFFLE': site.events.toggleShuffle?.(); break
+      case 'TOGGLETHUMBSUP': site.events.toggleThumbsUp?.(); break
+      case 'TOGGLETHUMBSDOWN': site.events.toggleThumbsDown?.(); break
+      case 'RATING': site.events.setRating?.(parseInt(data)); break
+      default: break
     }
   } catch (e) {
     self.send(`Error:Error sending event to ${site.info.player()}`)
@@ -58,7 +52,7 @@ export function SendUpdateLegacy(self: WNPReduxWebSocket) {
 
       // Conversion to legacy values
       if (key === 'state')
-        value = value === StateMode.PLAYING ? 1 : 0
+        value = value === StateMode.PLAYING ? 1 : value === StateMode.PAUSED ? 2 : 0
       else if (key === 'repeat')
         value = value === RepeatMode.ALL ? 2 : value === RepeatMode.ONE ? 1 : 0
       else if (key === 'shuffle')
