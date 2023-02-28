@@ -48,7 +48,7 @@ export function SendUpdateLegacy(self: WNPReduxWebSocket) {
     return
   }
 
-  const values: (keyof SiteInfo)[] = ['state', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
+  const values: (keyof SiteInfo)[] = ['state', 'player', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
   values.forEach((key) => {
     try {
       let value = site.info[key]?.()
@@ -129,7 +129,7 @@ export function SendUpdateRev1(self: WNPReduxWebSocket) {
     return
   }
 
-  const values: (keyof SiteInfo)[] = ['state', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
+  const values: (keyof SiteInfo)[] = ['state', 'player', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
   values.forEach((key) => {
     try {
       let value = site.info[key]?.()
