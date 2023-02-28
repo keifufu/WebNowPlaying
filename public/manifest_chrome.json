@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WebNowPlaying Redux",
   "short_name": "WebNowPlaying Redux",
-  "description": "Ever wished music info from your web browser could be used in Rainmeter? Well now it can!",
+  "description": "A browser extension that provides information and controls for media playing in the browser to external adapters.",
   "version": "1.0.0",
   "icons": {
     "128": "icons/icon-darkmode-128.png",
