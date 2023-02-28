@@ -53,7 +53,7 @@ export const useSettings = () => {
 
         if (changed) {
           console.debug('saving')
-          sendEvent('saveSettings', newSettings)
+          sendEvent('saveSettings', { settings: newSettings })
           _setSettings(newSettings)
         }
       }

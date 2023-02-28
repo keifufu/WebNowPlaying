@@ -55,12 +55,12 @@ export const BuiltInAdapters: Adapter[] = [
   }
 ]
 
-export const sendEvent = (event: 'outdated' | 'wsConnected' | 'wsDisconnected' | 'getSettings' | 'saveSettings', settings?: Settings): Promise<any> => new Promise((resolve) => {
+export const sendEvent = (event: 'setOutdated' | 'resetOutdated' | 'getGithubVersion' | 'getSettings' | 'saveSettings', opts?: { settings?: Settings, gh?: string }): Promise<any> => new Promise((resolve) => {
   if (!window?.chrome?.runtime?.id) {
     resolve(defaultSettings)
     return
   }
-  chrome.runtime.sendMessage({ event, settings }, (response) => {
+  chrome.runtime.sendMessage({ event, settings: opts?.settings, gh: opts?.gh }, (response) => {
     resolve(response)
   })
 })

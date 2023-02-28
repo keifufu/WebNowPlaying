@@ -32,9 +32,6 @@ export function OnMessageLegacy(self: WNPReduxWebSocket, message: string) {
       const [, rating] = message.split(' ')
       site.events.setRating?.(parseInt(rating))
     }
-
-    // Send update immediately, for a snappier Widget UI
-    SendUpdateLegacy(self)
   } catch (e) {
     self.send(`Error:Error sending event to ${site.info.player()}`)
     self.send(`ErrorD:${e}`)
@@ -118,9 +115,6 @@ export function OnMessageRev1(self: WNPReduxWebSocket, message: string) {
       case Events.SET_RATING: site.events.setRating?.(parseInt(data)); break
       default: break
     }
-
-    // Send update immediately, for a snappier Widget UI
-    SendUpdateRev1(self)
   } catch (e) {
     self.send(`ERROR Error sending event to ${site.info.player()}`)
     self.send(`ERRORDEBUG ${e}`)
