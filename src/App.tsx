@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from '@solidjs/router'
 import clsx from 'clsx'
 import { Component } from 'solid-js'
+import { getExtensionVersion } from '../shared/utils'
 import Hyperlink from './components/Hyperlink'
 import RouterLink from './components/RouterLink'
 import { useTheme } from './hooks/useTheme'
@@ -8,11 +9,6 @@ import AdaptersPage from './routes/AdaptersPage'
 import ReportIssuesPage from './routes/ReportIssuesPage'
 import SupportedSitesPage from './routes/SupportedSitesPage'
 import UnsupportedSitesPage from './routes/UnsupportedSitesPage'
-
-function getExtensionVersion() {
-  if (typeof window.chrome?.runtime?.getManifest === 'function') return chrome.runtime.getManifest().version
-  else return '0.0.0'
-}
 
 const App: Component = () => {
   const { theme, toggleTheme } = useTheme()
@@ -22,7 +18,7 @@ const App: Component = () => {
       clsx(
         'flex h-screen select-none flex-col',
         [theme() === 'dark' && 'bg-[#2b2a33] text-white'],
-        [theme() === 'light' && 'bg-white text-black'],
+        [theme() === 'light' && 'bg-slate-100 text-gray-800'],
       )
     }>
       <div class='mx-2 mt-2 flex h-min shrink-0 justify-between rounded-md border border-solid border-zinc-500 px-4 pt-1 pb-2'>
@@ -31,12 +27,12 @@ const App: Component = () => {
         <RouterLink text='Unsupported sites' link='/unsupportedSites' />
         <RouterLink text='Report Issues' link='/reportIssues' />
       </div>
-      <div class='m-2 flex h-full grow rounded-md border border-solid border-zinc-500 p-2'>
+      <div class='m-2 flex h-full grow overflow-hidden rounded-md border border-solid border-zinc-500 p-2'>
         <Routes>
           <Route path='/adapters' component={AdaptersPage} />
           <Route path='/supportedSites' component={SupportedSitesPage} />
           <Route path='/unsupportedSites' component={UnsupportedSitesPage} />
-          <Route path='/ReportIssuesPage' component={ReportIssuesPage} />
+          <Route path='/reportIssues' component={ReportIssuesPage} />
           <Route path='*'>
             <Navigate href='/adapters' />
           </Route>

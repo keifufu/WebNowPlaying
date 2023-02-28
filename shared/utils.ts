@@ -26,6 +26,7 @@ export type Settings = {
   customAdapters: CustomAdapter[]
   disabledBuiltInAdapters: string[]
   disabledSites: TSupportedSites[]
+  useTelemetry: boolean
 }
 
 export const defaultSettings: Settings = {
@@ -36,7 +37,8 @@ export const defaultSettings: Settings = {
   genericList: ['streamable.com', 'www.adultswim.com'],
   customAdapters: [],
   disabledBuiltInAdapters: [],
-  disabledSites: []
+  disabledSites: [],
+  useTelemetry: false
 }
 
 export type Adapter = {
@@ -78,4 +80,9 @@ export const getVersionFromGithub = async (gh: string) => {
   } catch {
     return 'Error'
   }
+}
+
+export const getExtensionVersion = () => {
+  if (typeof window.chrome?.runtime?.getManifest === 'function') return chrome.runtime.getManifest().version
+  else return '0.0.0'
 }

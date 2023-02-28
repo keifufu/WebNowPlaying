@@ -26,15 +26,17 @@ code {
   scrollbar-width: none;  
 }
 
-/* Overflow is bad */
-* { overflow: hidden; }
-
-/* Extension popout size */
-html {
-  min-width: 550px;
-  min-height: 478px;
-}
-
 /* Global anchor styles */
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+/* Extension popout size */
+/* html for chrome, firefox wants body */
+html, body {
+  min-width: 550px;
+  max-width: 550px;
+  width: 550px;
+  min-height: 478px;
+  max-height: 478px;
+  height: 478px;
+}

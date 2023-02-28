@@ -1,5 +1,4 @@
 /* @refresh reload */
-import { HopeProvider } from '@hope-ui/solid'
 import { Router } from '@solidjs/router'
 import { render } from 'solid-js/web'
 
@@ -13,8 +12,6 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement))
 
 render(() => (
   <Router>
-    <HopeProvider>
-      <App />
-    </HopeProvider>
+    <App />
   </Router>
 ), root as HTMLElement)

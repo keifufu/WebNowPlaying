@@ -1,6 +1,6 @@
-import { Checkbox } from '@hope-ui/solid'
 import { Component, For } from 'solid-js'
 import { SupportedSites, TSupportedSites } from '../../shared/utils'
+import Checkbox from '../components/Checkbox'
 import { useSettings } from '../hooks/useSettings'
 
 type SiteProps = {
@@ -12,15 +12,14 @@ const Site: Component<SiteProps> = (props) => {
   const { settings, saveSettings } = useSettings()
 
   const onChange = () => {
-    saveSettings({ ...settings(), disabledSites: settings().disabledSites.includes(props.name) ? settings().disabledSites.filter((a) => a !== props.name) : [...settings().disabledSites, props.name] }, true)
+    saveSettings(() => ({ ...settings(), disabledSites: settings().disabledSites.includes(props.name) ? settings().disabledSites.filter((a) => a !== props.name) : [...settings().disabledSites, props.name] }), true)
   }
 
   return (
     // 48.8% for two columns
     // 32% for three columns
     <div class='m-1 flex w-[48.8%] items-center rounded-md border border-solid border-zinc-500 p-[0.21rem] pl-2'>
-      <Checkbox onChange={onChange} checked={props.enabled} />
-      {props.name}
+      <Checkbox text={props.name} bigText onChange={onChange} checked={props.enabled} />
     </div>
   )
 }
