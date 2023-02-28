@@ -1,8 +1,8 @@
-import { Checkbox, Input } from '@hope-ui/solid'
 import clsx from 'clsx'
 import { Component, createEffect, createSignal, For, Show } from 'solid-js'
 import { BuiltInAdapters, getVersionFromGithub, isVersionOutdated } from '../../shared/utils'
 import Anchor from '../components/Anchor'
+import Checkbox from '../components/Checkbox'
 import Hyperlink from '../components/Hyperlink'
 import { useSettings } from '../hooks/useSettings'
 import { useTheme } from '../hooks/useTheme'
@@ -62,7 +62,7 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
   })
 
   const onChange = () => {
-    saveSettings({ ...settings(), disabledBuiltInAdapters: settings().disabledBuiltInAdapters.includes(props.name) ? settings().disabledBuiltInAdapters.filter((a) => a !== props.name) : [...settings().disabledBuiltInAdapters, props.name] }, true)
+    saveSettings(() => ({ ...settings(), disabledBuiltInAdapters: settings().disabledBuiltInAdapters.includes(props.name) ? settings().disabledBuiltInAdapters.filter((a) => a !== props.name) : [...settings().disabledBuiltInAdapters, props.name] }), true)
   }
 
   return (
@@ -130,7 +130,7 @@ const CustomAdapter: Component<{ enabled: boolean, port: number }> = (props) => 
 
   const removePort = () => {
     if (confirmDelete()) {
-      saveSettings({ ...settings(), customAdapters: settings().customAdapters.filter((a) => a.port !== props.port) }, true)
+      saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.filter((a) => a.port !== props.port) }), true)
     } else {
       setConfirmDelete(true)
       setTimeout(() => setConfirmDelete(false), 2000)
@@ -139,19 +139,22 @@ const CustomAdapter: Component<{ enabled: boolean, port: number }> = (props) => 
 
   const onInput = (e: InputEvent) => {
     if (settings().customAdapters.some((a) => a.port === parseInt((e.target as HTMLInputElement).value))) return
-    saveSettings({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, port: parseInt((e.target as HTMLInputElement).value || '0') } : a)) })
+    saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, port: parseInt((e.target as HTMLInputElement).value || '0') } : a)) }))
   }
 
   const onChange = () => {
-    saveSettings({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, enabled: !props.enabled } : a)) }, true)
+    saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, enabled: !props.enabled } : a)) }), true)
   }
 
   return (
-    // 4c5155
     <div class='mb-2 flex w-full items-center rounded-md border border-solid border-zinc-500 p-2'>
-      <Checkbox onChange={onChange} checked={props.enabled} />
-      Custom Adapter
-      <Input onInput={onInput} placeholder='Port' border='1px solid gray' px='$2' variant='unstyled' ml='$2' value={props.port === 0 ? '' : props.port} size='xs' width='$12' />
+      <Checkbox text='Custom Adapter' bigText onChange={onChange} checked={props.enabled} />
+      <input
+        onInput={onInput}
+        placeholder='Port'
+        class='form-input ml-2 h-6 w-14 rounded-md border border-solid border-zinc-500 bg-transparent px-2 text-sm focus:ring-offset-0'
+        value={props.port === 0 ? '' : props.port}
+      />
       <div
         class={clsx(
           'ml-auto cursor-pointer hover:underline',
@@ -160,7 +163,7 @@ const CustomAdapter: Component<{ enabled: boolean, port: number }> = (props) => 
         )}
         onClick={removePort}
       >
-        {confirmDelete() ? 'Confirm Remove' : 'Remove'}
+        {confirmDelete() ? 'Press again to confirm' : 'Remove'}
       </div>
     </div>
   )
@@ -188,7 +191,7 @@ const AdaptersPage: Component = () => {
             highlight
             onClick={() => {
               if (settings().customAdapters.find((a) => a.port === 0)) return
-              saveSettings({ ...settings(), customAdapters: [...settings().customAdapters, { enabled: true, port: 0 }] }, true)
+              saveSettings(() => ({ ...settings(), customAdapters: [...settings().customAdapters, { enabled: true, port: 0 }] }), true)
             }}
           />
         </div>

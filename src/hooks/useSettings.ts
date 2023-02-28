@@ -1,13 +1,17 @@
 import { createSignal } from 'solid-js'
 import { defaultSettings, sendEvent, Settings } from '../../shared/utils'
 
+// For anyone reading this, I'm sorry. this is a mess.
+// But it works and doesn't save unnecessarily.
+// which is important since there are rate-limits to chrome.storage.sync
 let saveTimeout: NodeJS.Timeout
 const [settings, _setSettings] = createSignal<Settings>(defaultSettings)
 _setSettings(await sendEvent('getSettings'))
 export const useSettings = () => {
-  const _saveSettings = (newSettings: Settings, instant = false) => {
+  const _saveSettings = (getSettings: () => Settings, instant = false) => {
     clearTimeout(saveTimeout)
     saveTimeout = setTimeout(() => {
+      const newSettings = getSettings()
       let changed = false
       if (settings()) {
         for (const key in settings()) {
@@ -32,6 +36,14 @@ export const useSettings = () => {
                   break
                 }
               }
+            } else if (key === 'genericList') {
+              for (let i = 0; i < currValue.length; i++) {
+                // eslint-disable-next-line max-depth
+                if (currValue[i] !== newValue[i]) {
+                  changed = true
+                  break
+                }
+              }
             }
           } else if (currValue !== newValue) {
             changed = true
@@ -40,6 +52,7 @@ export const useSettings = () => {
         }
 
         if (changed) {
+          console.debug('saving')
           sendEvent('saveSettings', newSettings)
           _setSettings(newSettings)
         }
