@@ -185,6 +185,7 @@ export class WNPReduxWebSocket {
       if (event.data.startsWith('Version:')) {
         // 'Version:' WNP for Rainmeter 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
+        sendEvent('setOutdated')
       } else if (event.data.startsWith('ADAPTER_VERSION ')) {
         // Any WNPRedux adapter will send 'ADAPTER_VERSION <version>;WNPRLIB_REVISION <revision>' after connecting
         [, this.communicationRevision] = event.data.split(';')[1].split(' ')
@@ -198,6 +199,7 @@ export class WNPReduxWebSocket {
       } else {
         // The first message wasn't version related, so it's probably WNP for Rainmeter < 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
+        sendEvent('setOutdated')
       }
     }
   }
@@ -240,7 +242,7 @@ function updateAll() {
       sockets.push(new WNPReduxWebSocket(adapter))
     })
     settings.customAdapters.forEach((adapter) => {
-      if (!adapter.enabled) return
+      if (!adapter.enabled || adapter.port === 0) return
       sockets.push(new WNPReduxWebSocket(adapter))
     })
   }
