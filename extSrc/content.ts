@@ -1,4 +1,4 @@
-import { Adapter, BuiltInAdapters, CustomAdapter, defaultSettings, isVersionOutdated, sendEvent, Settings } from '../shared/utils'
+import { Adapter, BuiltInAdapters, CustomAdapter, defaultSettings, defaultUpdateFrequencyMs, isVersionOutdated, sendWsMessage, Settings } from '../shared/utils'
 import { OnMessageLegacy, OnMessageRev1, SendUpdateLegacy, SendUpdateRev1 } from './handlers'
 import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
@@ -185,21 +185,21 @@ export class WNPReduxWebSocket {
       if (event.data.startsWith('Version:')) {
         // 'Version:' WNP for Rainmeter 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
-        sendEvent('setOutdated')
+        sendWsMessage({ event: 'setOutdated' })
       } else if (event.data.startsWith('ADAPTER_VERSION ')) {
         // Any WNPRedux adapter will send 'ADAPTER_VERSION <version>;WNPRLIB_REVISION <revision>' after connecting
-        [, this.communicationRevision] = event.data.split(';')[1].split(' ')
+        this.communicationRevision = event.data.split(';')[1].split(' ')[1]
         // Check if the adapter is outdated
-        const [adapterVersion] = event.data.split(' ')[1].split(';')
+        const adapterVersion = event.data.split(' ')[1].split(';')[0]
         if ((this._adapter as Adapter).gh) {
-          const githubVersion = await sendEvent('getGithubVersion', { gh: (this._adapter as Adapter).gh })
+          const githubVersion = await sendWsMessage({ event: 'getGithubVersion', gh: (this._adapter as Adapter).gh })
           if (githubVersion === 'Error') return
-          if (isVersionOutdated(adapterVersion, githubVersion)) sendEvent('setOutdated')
+          if (isVersionOutdated(adapterVersion, githubVersion)) sendWsMessage({ event: 'setOutdated' })
         }
       } else {
         // The first message wasn't version related, so it's probably WNP for Rainmeter < 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
-        sendEvent('setOutdated')
+        sendWsMessage({ event: 'setOutdated' })
       }
     }
   }
@@ -234,7 +234,7 @@ function updateAll() {
 }
 
 (async () => {
-  settings = await sendEvent('getSettings')
+  settings = await sendWsMessage({ event: 'getSettings' })
   // Only initialize the websocket we match the host
   if (getCurrentSite() !== null) {
     BuiltInAdapters.forEach((adapter) => {

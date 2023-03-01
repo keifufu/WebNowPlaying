@@ -1,3 +1,5 @@
+import { WsMessage } from '../extSrc/sw'
+
 export const isVersionOutdated = (currentVersion: string, latestVersion: string) => {
   // The version is major.minor.patch, compare version against what the extension knows is the latest version
   // C# actually gives us a version with 4 numbers, but this just ignores the last one
@@ -59,12 +61,19 @@ export const BuiltInAdapters: Adapter[] = [
   }
 ]
 
-export const sendEvent = (event: 'setOutdated' | 'resetOutdated' | 'getGithubVersion' | 'getSettings' | 'saveSettings', opts?: { settings?: Settings, gh?: string }): Promise<any> => new Promise((resolve) => {
+// this is per site, so it won't spam the report to the sw over and over
+const reportCache: Record<string, string> = {}
+
+export const sendWsMessage = (message: WsMessage): Promise<any> => new Promise((resolve) => {
   if (!window?.chrome?.runtime?.id) {
-    resolve(defaultSettings)
+    if (message.event === 'getSettings') resolve(defaultSettings)
     return
   }
-  chrome.runtime.sendMessage({ event, settings: opts?.settings, gh: opts?.gh }, (response) => {
+  if (message.event === 'sendAutomaticReport' && message.report) {
+    if (reportCache[message.report.message]) return
+    reportCache[message.report.message] = message.report.message
+  }
+  chrome.runtime.sendMessage(message, (response) => {
     resolve(response)
   })
 })

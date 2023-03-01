@@ -1,12 +1,12 @@
 import { createSignal } from 'solid-js'
-import { defaultSettings, sendEvent, Settings } from '../../shared/utils'
+import { defaultSettings, sendWsMessage, Settings } from '../../shared/utils'
 
 // For anyone reading this, I'm sorry. this is a mess.
 // But it works and doesn't save unnecessarily.
 // which is important since there are rate-limits to chrome.storage.sync
 let saveTimeout: NodeJS.Timeout
 const [settings, _setSettings] = createSignal<Settings>(defaultSettings)
-_setSettings(await sendEvent('getSettings'))
+_setSettings(await sendWsMessage({ event: 'getSettings' }))
 export const useSettings = () => {
   const _saveSettings = (getSettings: () => Settings, instant = false) => {
     clearTimeout(saveTimeout)
@@ -53,7 +53,7 @@ export const useSettings = () => {
 
         if (changed) {
           console.debug('saving')
-          sendEvent('saveSettings', { settings: newSettings })
+          sendWsMessage({ event: 'saveSettings', settings: newSettings })
           _setSettings(newSettings)
         }
       }
