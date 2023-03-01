@@ -1,4 +1,4 @@
-import { defaultSettings, getVersionFromGithub, Settings } from '../shared/utils'
+import { defaultSettings, getExtensionVersion, getVersionFromGithub, Settings } from '../shared/utils'
 
 let saveTimeout: NodeJS.Timeout
 let _settings = defaultSettings
@@ -23,8 +23,34 @@ if (typeof browser === 'undefined') {
 
 const ghCache: Record<string, string> = {}
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+const reportCache: Record<string, string> = {}
+
+export type WsMessage = {
+  event: 'sendAutomaticReport' | 'setOutdated' | 'resetOutdated' | 'getGithubVersion' | 'getSettings' | 'saveSettings',
+  settings?: Settings,
+  gh?: string,
+  report?: { message: string }
+}
+
+chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) => {
   switch (request.event) {
+    case 'sendAutomaticReport':
+      if (!request.report) return
+      if (!_settings.useTelemetry) return
+      if (reportCache[request.report.message]) return
+      reportCache[request.report.message] = request.report.message
+      fetch('https://keifufu.dev/report', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'automatic',
+          extVersion: chrome.runtime.getManifest().version,
+          message: request.report.message
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      break
     case 'setOutdated':
       // TODO: enable this again once spicetify is updated
       // chrome.action.setBadgeText({ text: '!' })
@@ -41,7 +67,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse(ghCache[request.gh])
       } else {
         getVersionFromGithub(request.gh).then((version) => {
-          if (version !== 'Error') ghCache[request.gh] = version
+          if (version !== 'Error') ghCache[request.gh as string] = version
           sendResponse(version)
         })
       }
@@ -60,6 +86,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     default:
       break
   }
+
   /* Return true to keep port open */
   return true
 })
