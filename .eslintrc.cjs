@@ -357,7 +357,7 @@ module.exports = {
       'off'
     ],
     'no-return-assign': [
-      'warn'
+      'off'
     ],
     'no-return-await': [
       'off'
@@ -883,7 +883,7 @@ module.exports = {
       'warn'
     ],
     'prefer-destructuring': [
-      'warn'
+      'off'
     ],
     'prefer-numeric-literals': [
       'warn'
