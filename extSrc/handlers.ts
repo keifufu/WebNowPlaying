@@ -13,7 +13,7 @@ export function OnMessageLegacy(self: WNPReduxWebSocket, message: string) {
       case 'SETPOSITION': {
         // Example string: SetPosition 34:SetProgress 0,100890207715134:
         const [positionInSeconds, positionPercentageStr] = data.split(':')
-        const [, positionPercentage] = positionPercentageStr.split('SETPROGRESS ')
+        const positionPercentage = positionPercentageStr.split('SETPROGRESS ')[1]
         site.events.setPositionSeconds?.(parseInt(positionInSeconds))
         site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
         break

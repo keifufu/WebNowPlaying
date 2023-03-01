@@ -24,7 +24,6 @@ const site: Site = {
     },
     volume: () => (document.querySelector('video')?.volume || 0) * 100,
     rating: () => {
-      // eslint-disable-next-line prefer-destructuring
       const likeButton = document.querySelectorAll('.middle-controls-buttons button')[1]
       const dislikeButton = document.querySelector('.middle-controls-buttons button')
       if (likeButton.getAttribute('aria-pressed') === 'true') return 5

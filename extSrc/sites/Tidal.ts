@@ -24,7 +24,6 @@ const site: Site = {
     },
     rating: () => (document.querySelector('#footerPlayer .favorite-button')?.getAttribute('aria-checked') === 'true' ? 5 : 0),
     repeat: () => {
-      // eslint-disable-next-line prefer-destructuring
       const repeatButtonDataType = document.querySelectorAll('#playbackControlBar button')[4]?.getAttribute('data-type')
       if (repeatButtonDataType === 'button__repeatAll') return RepeatMode.ALL
       if (repeatButtonDataType === 'button__repeatSingle') return RepeatMode.ONE
