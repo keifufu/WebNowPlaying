@@ -241,7 +241,7 @@ const AdaptersPage: Component = () => {
               enabled={!settings().disabledBuiltInAdapters.includes(adapter.name)}
               gh={adapter.gh}
               port={adapter.port}
-              updateFrequencyMs={settings().updateFrequencyMs[adapter.port] || 50}
+              updateFrequencyMs={settings().updateFrequencyMs[adapter.port] || defaultUpdateFrequencyMs}
             />
           )}
         </For>
@@ -250,7 +250,7 @@ const AdaptersPage: Component = () => {
             <CustomAdapter
               enabled={adapter.enabled}
               port={adapter.port}
-              updateFrequencyMs={settings().updateFrequencyMs[adapter.port] || 50}
+              updateFrequencyMs={settings().updateFrequencyMs[adapter.port] || defaultUpdateFrequencyMs}
             />
           )}
         </For>

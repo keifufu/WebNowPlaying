@@ -17,6 +17,8 @@ export type CustomAdapter = {
 export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Pandora' | 'Plex' | 'Soundcloud' | 'Spotify' | 'Tidal' | 'Twitch' | 'Youtube' | 'Youtube Embeds' | 'Youtube Music'
 export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Pandora', 'Plex', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'Youtube', 'Youtube Embeds', 'Youtube Music']
 
+export const defaultUpdateFrequencyMs = 250
+
 export type Settings = {
   updateFrequencyMs: {
     [port: number]: number
