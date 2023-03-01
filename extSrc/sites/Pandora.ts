@@ -24,7 +24,6 @@ const site: Site = {
     cover: () => {
       let src = document.querySelector<HTMLImageElement>('.ImageLoader img')?.src
       const fullscreenImage = document.querySelector<HTMLImageElement>('.nowPlayingTopInfo__artContainer img')
-      // eslint-disable-next-line prefer-destructuring
       if (fullscreenImage) src = fullscreenImage.src
       if (!src) return ''
       return `${src.split('/').slice(0, -1).join('/')}/500W_500H.jpg`

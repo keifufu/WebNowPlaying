@@ -15,7 +15,6 @@ const site: Site = {
     volume: () => 100, // TODO: Not supported for now
     rating: () => (document.querySelectorAll('.track-actions svg')[2].getAttribute('data-testid') === 'HeartIcon' ? 0 : 5),
     repeat: () => {
-      // eslint-disable-next-line prefer-destructuring
       const svg = document.querySelectorAll('.option-item svg')[1]
       if (!svg) return RepeatMode.NONE
       const isActive = getComputedStyle(svg).color === 'rgb(239, 84, 102)'
@@ -24,7 +23,6 @@ const site: Site = {
       return RepeatMode.NONE
     },
     shuffle: () => {
-      // eslint-disable-next-line prefer-destructuring
       const svg = document.querySelectorAll('.option-item svg')[2]
       if (!svg) return false
       const isActive = getComputedStyle(svg).color === 'rgb(239, 84, 102)'

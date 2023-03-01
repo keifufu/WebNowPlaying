@@ -1,5 +1,4 @@
 /* eslint-disable no-loop-func */
-/* eslint-disable prefer-destructuring */
 import { RepeatMode, Site, StateMode } from '../content'
 import { capitalize, getMediaSessionCover, timeInSecondsToString } from '../utils'
 
