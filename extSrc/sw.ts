@@ -26,9 +26,10 @@ const ghCache: Record<string, string> = {}
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.event) {
     case 'setOutdated':
-      chrome.action.setBadgeText({ text: '!' })
-      chrome.action.setBadgeBackgroundColor({ color: [255, 0, 0, 255] })
-      chrome.action.setTitle({ title: 'One of the adapters is outdated. Click to check.' })
+      // TODO: enable this again once spicetify is updated
+      // chrome.action.setBadgeText({ text: '!' })
+      // chrome.action.setBadgeBackgroundColor({ color: [255, 0, 0, 255] })
+      // chrome.action.setTitle({ title: 'One of the adapters is outdated. Click to check.' })
       break
     case 'resetOutdated':
       chrome.action.setBadgeText({ text: '' })

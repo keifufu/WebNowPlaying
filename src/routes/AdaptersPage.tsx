@@ -21,7 +21,11 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
   const { theme } = useTheme()
 
   const checkVersion = () => {
-    setIsLoading(true)
+    // TODO: this is disabled until spicetify is updated
+    // We will display "Latest" for now
+    setVersion('Error')
+    return setVersion('2.0.0')
+    /* setIsLoading(true)
 
     getVersionFromGithub(props.gh).then((v) => {
       console.log(v)
@@ -53,7 +57,7 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
       else if (e.data.startsWith('ADAPTER_VERSION ')) setVersion(e.data.split(' ')[1].split(';')[0])
       // It send an event that isn't version related, so it's probably WNP for Rainmeter < 0.5.0
       else setVersion('0.0.0')
-    }
+    } */
   }
 
   createEffect(() => {
