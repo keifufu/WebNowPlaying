@@ -151,7 +151,7 @@ export class WNPReduxWebSocket {
 
   private onOpen() {
     this.reconnectCount = 0
-    this.updateInterval = setInterval(this.sendUpdate.bind(this), settings.updateFrequencyMs[this._adapter.port] || 50)
+    this.updateInterval = setInterval(this.sendUpdate.bind(this), settings.updateFrequencyMs[this._adapter.port] || defaultUpdateFrequencyMs)
     // If no communication revision is received within 1 second, assume it's WNP for Rainmeter < 0.5.0 (legacy)
     this.connectionTimeout = setTimeout(() => {
       if (this.communicationRevision === null) this.communicationRevision = 'legacy'
