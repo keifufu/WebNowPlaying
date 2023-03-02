@@ -85,7 +85,7 @@ export function OnMessageRev1(self: WNPReduxWebSocket, message: string) {
   }
 
   const site = getCurrentSite()
-  if (!site || !site.ready()) return self.send('ERROR:Error sending event: No site found or site not ready.')
+  if (!site || !site.ready()) return self.send('ERROR Error sending event: No site found or site not ready.')
   const [type, data] = message.split(' ')
 
   try {
