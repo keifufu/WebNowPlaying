@@ -57,7 +57,9 @@ const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E)
     return defaultValue
   }
   const result = exec(el)
-  if (!result) {
+  // Exclude 0 as volume can be 0
+  // Empty strings however are not valid
+  if (!result && result !== 0) {
     if (type) {
       sendWsMessage({
         event: 'sendAutomaticReport',
@@ -66,8 +68,10 @@ const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E)
         }
       })
     }
+    return defaultValue
   }
-  return result || defaultValue
+
+  return result
 }
 export const querySelector = <T, E extends Element>(selector: string, exec: (el: E) => T | null, defaultValue: T): T => _querySelector(selector, exec, defaultValue)
 export const querySelectorReport = <T, E extends Element>(selector: string, exec: (el: E) => T | null, defaultValue: T, type: InfoType): T => _querySelector(selector, exec, defaultValue, type)
