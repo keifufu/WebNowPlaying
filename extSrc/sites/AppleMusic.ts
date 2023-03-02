@@ -1,8 +1,8 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
+import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 const site: Site = {
-  ready: () => navigator.mediaSession.metadata !== null && document.querySelector('audio') !== null,
+  ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLAudioElement>('audio', (el) => el !== null, false),
   info: {
     player: () => 'Apple Music',
     // Supports mediaSession.metadata, but not mediaSession.playbackState
