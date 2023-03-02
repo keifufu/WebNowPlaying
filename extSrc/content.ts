@@ -247,3 +247,8 @@ function updateAll() {
     })
   }
 })()
+
+matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+  if (e.matches) sendWsMessage({ event: 'setColorScheme', colorScheme: 'light' })
+  else sendWsMessage({ event: 'setColorScheme', colorScheme: 'dark' })
+})
