@@ -1,35 +1,38 @@
 import { RepeatMode, Site, StateMode } from '../content'
+import { querySelector, querySelectorReport } from '../utils'
 
 let lastKnownVolume = 100
 
 const site: Site = {
-  ready: () => document.querySelector('#footerPlayer') !== null,
+  ready: () => querySelector<boolean, HTMLButtonElement>('#footerPlayer', (el) => el !== null, false),
   info: {
     player: () => 'Tidal',
-    state: () => (document.querySelectorAll('#playbackControlBar button')[2].getAttribute('data-test') === 'pause' ? StateMode.PLAYING : StateMode.PAUSED),
-    title: () => document.querySelector<HTMLSpanElement>('#footerPlayer span')?.innerText || '',
-    artist: () => document.querySelectorAll<HTMLSpanElement>('#footerPlayer span')[1]?.innerText || '',
+    state: () => querySelectorReport<StateMode, HTMLButtonElement>('#playbackControlBar button[data-test="pause"]', (el) => StateMode.PLAYING, StateMode.PAUSED, 'state'),
+    title: () => querySelectorReport<string, HTMLSpanElement>('#footerPlayer span', (el) => el.innerText, '', 'title'),
+    artist: () => querySelectorReport<string, HTMLSpanElement>('(#footerPlayer span)[1]', (el) => el.innerText, '', 'artist'),
     album: () =>
       // This will sometimes show the playlist instead of the album, doesn't seem like I can do much about it
       // using textContent instead of innerText because innerText is all capitalized
-      document.querySelectorAll('#footerPlayer a')[2]?.textContent || '',
-    cover: () => document.querySelector<HTMLImageElement>('#footerPlayer img')?.src.split('/').slice(0, -1).join('/') + '/1280x1280.jpg' || '',
-    duration: () => document.querySelectorAll<HTMLElement>('#footerPlayer time')[1]?.innerText || '0:00',
-    position: () => document.querySelector<HTMLElement>('#footerPlayer time')?.innerText || '0:00',
+      querySelectorReport<string, HTMLAnchorElement>('(#footerPlayer a)[2]', (el) => el.textContent, '', 'album'),
+    cover: () => querySelectorReport<string, HTMLImageElement>('#footerPlayer img', (el) => el.src.split('/').slice(0, -1).join('/') + '/1280x1280.jpg', '', 'cover'),
+    duration: () => querySelectorReport<string, HTMLTimeElement>('(#footerPlayer time)[1]', (el) => el.innerText, '0:00', 'duration'),
+    position: () => querySelectorReport<string, HTMLTimeElement>('#footerPlayer time', (el) => el.innerText, '0:00', 'position'),
     volume: () => {
-      const volumeInput = document.querySelector<HTMLInputElement>('#nativeRange input')
-      if (volumeInput)
-        lastKnownVolume = parseInt(volumeInput.value)
+      querySelector<number, HTMLInputElement>('#nativeRange input', (el) => {
+        lastKnownVolume = parseInt(el.value)
+        return lastKnownVolume
+      }, lastKnownVolume)
+
       return lastKnownVolume
     },
-    rating: () => (document.querySelector('#footerPlayer .favorite-button')?.getAttribute('aria-checked') === 'true' ? 5 : 0),
-    repeat: () => {
-      const repeatButtonDataType = document.querySelectorAll('#playbackControlBar button')[4]?.getAttribute('data-type')
+    rating: () => querySelectorReport<number, HTMLButtonElement>('#footerPlayer .favorite-button', (el) => (el.getAttribute('aria-checked') === 'true' ? 5 : 0), 0, 'rating'),
+    repeat: () => querySelectorReport<RepeatMode, HTMLButtonElement>('(#playbackControlBar button)[4]', (el) => {
+      const repeatButtonDataType = el.getAttribute('data-type')
       if (repeatButtonDataType === 'button__repeatAll') return RepeatMode.ALL
       if (repeatButtonDataType === 'button__repeatSingle') return RepeatMode.ONE
       return RepeatMode.NONE
-    },
-    shuffle: () => (document.querySelector('#playbackControlBar button')?.getAttribute('aria-checked') === 'true')
+    }, RepeatMode.NONE, 'repeat'),
+    shuffle: () => querySelectorReport<boolean, HTMLButtonElement>('#playbackControlBar button', (el) => el.getAttribute('aria-checked') === 'true', false, 'shuffle')
   },
   events: {
     togglePlaying: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[2].click()),
