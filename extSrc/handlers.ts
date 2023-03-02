@@ -2,7 +2,7 @@ import { getCurrentSite, RepeatMode, SiteInfo, StateMode, WNPReduxWebSocket } fr
 
 export function OnMessageLegacy(self: WNPReduxWebSocket, message: string) {
   const site = getCurrentSite()
-  if (!site || !site.ready()) return self.send('Error:Error sending event: No site found or site not ready.')
+  if (!site || !site.ready()) return
 
   try {
     const [type, data] = message.toUpperCase().split(' ')
@@ -85,7 +85,7 @@ export function OnMessageRev1(self: WNPReduxWebSocket, message: string) {
   }
 
   const site = getCurrentSite()
-  if (!site || !site.ready()) return self.send('ERROR Error sending event: No site found or site not ready.')
+  if (!site || !site.ready()) return
   const [type, data] = message.split(' ')
 
   try {
