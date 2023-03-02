@@ -1,6 +1,5 @@
 import { defaultSettings, getVersionFromGithub, Settings } from '../shared/utils'
 
-let saveTimeout: NodeJS.Timeout
 let _settings = defaultSettings
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -78,10 +77,7 @@ chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) 
     case 'saveSettings':
       if (!request.settings) return
       _settings = request.settings
-      clearTimeout(saveTimeout)
-      saveTimeout = setTimeout(() => {
-        chrome.storage.sync.set({ ..._settings })
-      }, 500)
+      chrome.storage.sync.set({ ..._settings })
       break
     default:
       break
