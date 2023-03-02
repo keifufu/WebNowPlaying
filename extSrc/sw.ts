@@ -29,10 +29,11 @@ const ghCache: Record<string, string> = {}
 const reportCache: Record<string, string> = {}
 
 export type WsMessage = {
-  event: 'sendAutomaticReport' | 'setOutdated' | 'resetOutdated' | 'getGithubVersion' | 'getSettings' | 'saveSettings',
+  event: 'sendAutomaticReport' | 'setOutdated' | 'resetOutdated' | 'getGithubVersion' | 'getSettings' | 'saveSettings' | 'setColorScheme',
   settings?: Settings,
   gh?: string,
-  report?: { message: string }
+  report?: { message: string },
+  colorScheme?: 'light' | 'dark'
 }
 
 const handleWsMessage = async (request: WsMessage, sendResponse: (response?: any) => void) => {
@@ -86,6 +87,18 @@ const handleWsMessage = async (request: WsMessage, sendResponse: (response?: any
       saveTimeout = setTimeout(() => {
         chrome.storage.sync.set({ ...request.settings })
       }, 500)
+      break
+    case 'setColorScheme':
+      if (!request.colorScheme) return
+      chrome.action.setIcon({
+        path: request.colorScheme === 'light' ? {
+          128: 'icons/icon-lightmode-128.png',
+          256: 'icons/icon-lightmode-256.png'
+        } : {
+          128: 'icons/icon-darkmode-128.png',
+          256: 'icons/icon-darkmode-256.png'
+        }
+      })
       break
     default:
       break
