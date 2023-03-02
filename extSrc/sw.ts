@@ -1,27 +1,31 @@
 import { defaultSettings, getVersionFromGithub, Settings } from '../shared/utils'
 
-let _settings = defaultSettings
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-if (typeof browser === 'undefined') {
-  chrome.storage.sync.get({
-    ...defaultSettings
-  }, (items) => {
-    _settings = items as Settings
-  })
-} else {
+let saveTimeout: NodeJS.Timeout
+
+const readSettings = (): Promise<Settings> => new Promise((resolve) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  // eslint-disable-next-line no-undef
-  browser.storage.sync.get({
-    ...defaultSettings
-  }).then((items: Settings) => {
-    _settings = items
-  })
-}
+  if (typeof browser === 'undefined') {
+    chrome.storage.sync.get({
+      ...defaultSettings
+    }, (items) => {
+      resolve(items as Settings)
+    })
+  } else {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line no-undef
+    browser.storage.sync.get({
+      ...defaultSettings
+    }).then((items: Settings) => {
+      resolve(items)
+    }).catch(() => {
+      resolve(defaultSettings)
+    })
+  }
+})
 
 const ghCache: Record<string, string> = {}
-
 const reportCache: Record<string, string> = {}
 
 export type WsMessage = {
@@ -31,25 +35,37 @@ export type WsMessage = {
   report?: { message: string }
 }
 
+
+const sendAutomaticReport = async (request: WsMessage, sendResponse: (response?: any) => void) => {
+  if (!request.report) return
+  if (reportCache[request.report.message]) return
+  const settings = await readSettings()
+  if (!settings.useTelemetry) return
+  reportCache[request.report.message] = request.report.message
+  fetch('https://keifufu.dev/report', {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'automatic',
+      extVersion: chrome.runtime.getManifest().version,
+      message: request.report.message
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+const wGetSettings = async (sendResponse: (response?: any) => void) => {
+  const settings = await readSettings()
+  sendResponse(settings)
+}
+
 chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) => {
   switch (request.event) {
-    case 'sendAutomaticReport':
-      if (!request.report) return
-      if (!_settings.useTelemetry) return
-      if (reportCache[request.report.message]) return
-      reportCache[request.report.message] = request.report.message
-      fetch('https://keifufu.dev/report', {
-        method: 'POST',
-        body: JSON.stringify({
-          type: 'automatic',
-          extVersion: chrome.runtime.getManifest().version,
-          message: request.report.message
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+    case 'sendAutomaticReport': {
+      sendAutomaticReport(request, sendResponse)
       break
+    }
     case 'setOutdated':
       // TODO: enable this again once spicetify is updated
       // chrome.action.setBadgeText({ text: '!' })
@@ -72,12 +88,14 @@ chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) 
       }
       break
     case 'getSettings':
-      sendResponse(_settings)
+      wGetSettings(sendResponse)
       break
     case 'saveSettings':
       if (!request.settings) return
-      _settings = request.settings
-      chrome.storage.sync.set({ ..._settings })
+      clearTimeout(saveTimeout)
+      saveTimeout = setTimeout(() => {
+        chrome.storage.sync.set({ ...request.settings })
+      }, 500)
       break
     default:
       break
