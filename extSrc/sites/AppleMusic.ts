@@ -1,19 +1,19 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, timeInSecondsToString } from '../utils'
+import { getMediaSessionCover, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 const site: Site = {
   ready: () => navigator.mediaSession.metadata !== null && document.querySelector('audio') !== null,
   info: {
     player: () => 'Apple Music',
     // Supports mediaSession.metadata, but not mediaSession.playbackState
-    state: () => (document.querySelector('audio')?.paused ? StateMode.PAUSED : StateMode.PLAYING),
+    state: () => querySelectorReport<StateMode, HTMLAudioElement>('audio', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
     cover: () => getMediaSessionCover(),
-    duration: () => timeInSecondsToString(document.querySelector('audio')?.duration || 0),
-    position: () => timeInSecondsToString(document.querySelector('audio')?.currentTime || 0),
-    volume: () => (document.querySelector('audio')?.volume || 0) * 100,
+    duration: () => querySelectorReport<string, HTMLAudioElement>('audio', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
+    position: () => querySelectorReport<string, HTMLAudioElement>('audio', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
+    volume: () => querySelectorReport<number, HTMLAudioElement>('audio', (el) => el.volume * 100, 100, 'volume'),
     rating: null,
     repeat: () => {
       const repeatButton = document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-repeat')?.shadowRoot?.querySelector('.button--repeat')
@@ -25,21 +25,13 @@ const site: Site = {
     }
   },
   events: {
-    togglePlaying: () => {
-      const audio = document.querySelector('audio')
-      site.info.state() === StateMode.PLAYING ? audio?.pause() : audio?.play()
-    },
+    togglePlaying: () => querySelectorEventReport<HTMLAudioElement>('audio', (el) => (el.paused ? el.play() : el.pause()), 'togglePlaying'),
     next: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-item-skip[class="next"]')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--next')?.click(),
+    // Apple Music's previous button already skips to the beginning of the song if the song is less than a few seconds in
     previous: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-item-skip[class="previous"]')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--previous')?.click(),
-    setPositionSeconds: (positionInSeconds: number) => {
-      const audio = document.querySelector('audio')
-      if (audio) audio.currentTime = positionInSeconds
-    },
+    setPositionSeconds: (positionInSeconds: number) => querySelectorEventReport<HTMLAudioElement>('audio', (el) => (el.currentTime = positionInSeconds), 'setPositionSeconds'),
     setPositionPercentage: null,
-    setVolume: (volume: number) => {
-      const audio = document.querySelector('audio')
-      if (audio) audio.volume = volume / 100
-    },
+    setVolume: (volume: number) => querySelectorEventReport<HTMLAudioElement>('audio', (el) => (el.volume = volume / 100), 'setVolume'),
     toggleRepeat: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-repeat')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--repeat')?.click(),
     toggleShuffle: () => document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-shuffle')?.shadowRoot?.querySelector<HTMLButtonElement>('.button--shuffle')?.click(),
     toggleThumbsUp: null,
