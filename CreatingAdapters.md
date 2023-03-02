@@ -8,7 +8,7 @@ I don't want users possibly affected by incompatibilities between WebNowPlaying-
 - Must use [WNPRedux-Adapter-Library](https://github.com/keifufu/WNPRedux-Adapter-Library)  
 - Must be open-sourced on GitHub
 - dll's or executables must be published via GitHub releases
-- Releases must be tagged as "vx.x.x" or "x.x.x"
+- GitHub releases must be tagged as "vx.x.x" or "x.x.x"
 - Must use a unique port, which cannot be changed after submitting your adapter.
 - GitHub repository should be named "WebNowPlaying-Redux-\<name\>" e.g. "WebNowPlaying-Redux-Rainmeter"
 
