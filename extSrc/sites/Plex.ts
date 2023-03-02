@@ -1,25 +1,18 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, timeInSecondsToString } from '../utils'
+import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 const site: Site = {
-  ready: () => {
-    const video = document.querySelector('video')
-    return video !== null && video.duration > 0
-  },
+  ready: () => querySelector<boolean, HTMLVideoElement>('video', (el) => el !== null && el.duration > 0, false),
   info: {
     player: () => 'Plex',
-    state: () => {
-      const video = document.querySelector('video')
-      if (!video) return StateMode.STOPPED
-      return video.paused ? StateMode.PAUSED : StateMode.PLAYING
-    },
-    title: () => document.querySelector<HTMLElement>('[class*="MetadataPosterTitle-title"]')?.innerText || '',
-    artist: () => document.querySelector<HTMLElement>('[data-testid="metadataYear"]')?.innerText || '',
+    state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.STOPPED, 'state'),
+    title: () => querySelectorReport<string, HTMLElement>('[class*="MetadataPosterTitle-title"]', (el) => el.innerText, '', 'title'),
+    artist: () => querySelectorReport<string, HTMLElement>('[data-testid="metadataYear"]', (el) => el.innerText, '', 'artist'),
     album: () => '',
     cover: () => getMediaSessionCover(),
-    duration: () => timeInSecondsToString(document.querySelector('video')?.duration || 0),
-    position: () => timeInSecondsToString(document.querySelector('video')?.currentTime || 0),
-    volume: () => (document.querySelector('video')?.volume || 0) * 100,
+    duration: () => querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
+    position: () => querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
+    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.volume * 100), 100, 'volume'),
     rating: () => 0,
     repeat: () => {
       const repeatButton = document.querySelector('button[data-testid="repeatButton"]')
@@ -31,11 +24,12 @@ const site: Site = {
       }
       return RepeatMode.NONE
     },
-    shuffle: () => (document.querySelector('button[data-testid="shuffleButton"]')?.className.includes('Active') || false)
+    shuffle: () => querySelectorReport<boolean, HTMLButtonElement>('button[data-testid="shuffleButton"]', (el) => el.className.includes('Active'), false, 'shuffle')
   },
   events: {
+    // TODO: all of these
     togglePlaying: () => {
-      const button = document.querySelector('button[data-testid="pauseButton"]') || document.querySelector('button[data-testid="resumeButton"]')
+      const button = document.querySelector('button[data-testid="pauseButton"], button[data-testid="resumeButton"]')
       if (!button) return
       button.dispatchEvent(new MouseEvent('mousedown', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
       button.dispatchEvent(new MouseEvent('mouseup', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
@@ -52,21 +46,17 @@ const site: Site = {
       button.dispatchEvent(new MouseEvent('mousedown', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
       button.dispatchEvent(new MouseEvent('mouseup', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
     },
-    setPositionSeconds: (positionInSeconds: number) => {
-      const video = document.querySelector('video')
-      if (video) video.currentTime = positionInSeconds
-    },
+    setPositionSeconds: (positionInSeconds: number) => querySelectorEventReport<HTMLVideoElement>('video', (el) => el.currentTime = positionInSeconds, 'setPositionSeconds'),
     setPositionPercentage: null,
     setVolume: (volume: number) => {
-      const video = document.querySelector('video')
-      if (video) {
-        video.volume = volume / 100
-        if (volume === 0) video.muted = true
-        else video.muted = false
-      }
+      querySelectorEventReport<HTMLVideoElement>('video', (el) => {
+        el.volume = volume / 100
+        if (volume === 0) el.muted = true
+        else el.muted = false
+      }, 'setVolume')
     },
     toggleRepeat: () => {
-      const button = document.querySelector('button[data-testid="repeatButton"]') || document.querySelector('button[data-testid="repeatOneButton"]')
+      const button = document.querySelector('button[data-testid="repeatButton"], button[data-testid="repeatOneButton"]')
       if (!button) return
       button.dispatchEvent(new MouseEvent('mousedown', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
       button.dispatchEvent(new MouseEvent('mouseup', { view: window, bubbles: true, cancelable: true, clientX: 0, clientY: 0 }))
