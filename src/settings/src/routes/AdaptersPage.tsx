@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { BsCaretRight } from 'solid-icons/bs'
 import { Component, createEffect, createSignal, For, Show } from 'solid-js'
-import { BuiltInAdapters, defaultUpdateFrequencyMs, getVersionFromGithub, isVersionOutdated } from '../../shared/utils'
+import { BuiltInAdapters, defaultUpdateFrequencyMs, getVersionFromGithub, isVersionOutdated } from '../../../utils'
 import Anchor from '../components/Anchor'
 import Checkbox from '../components/Checkbox'
 import Hyperlink from '../components/Hyperlink'

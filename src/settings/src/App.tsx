@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from '@solidjs/router'
 import clsx from 'clsx'
 import { Component } from 'solid-js'
-import { getExtensionVersion, sendWsMessage } from '../shared/utils'
+import { getExtensionVersion, sendWsMessage } from '../../utils'
 import Hyperlink from './components/Hyperlink'
 import RouterLink from './components/RouterLink'
 import { useTheme } from './hooks/useTheme'

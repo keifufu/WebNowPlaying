@@ -1,5 +1,5 @@
 import { createSignal } from 'solid-js'
-import { defaultSettings, sendWsMessage, Settings } from '../../shared/utils'
+import { defaultSettings, sendWsMessage, Settings } from '../../../utils'
 
 // For anyone reading this, I'm sorry. this is a mess.
 // But it works and doesn't save unnecessarily.

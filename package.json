@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "start": "vite",
-    "build": "rimraf ./dist/* && vite build && npx webpack && ncp ./dist/all ./dist/chrome && move-cli ./dist/all ./dist/firefox && rimraf ./dist/chrome/manifest_firefox.json && rimraf ./dist/firefox/manifest_chrome.json && move-cli ./dist/chrome/manifest_chrome.json ./dist/chrome/manifest.json && move-cli ./dist/firefox/manifest_firefox.json ./dist/firefox/manifest.json"
+    "build": "rimraf ./dist/* && vite build && npx webpack && ncp ./public ./dist/all && ncp ./dist/all ./dist/chrome && move-cli ./dist/all ./dist/firefox && rimraf ./dist/chrome/manifest_firefox.json && rimraf ./dist/firefox/manifest_chrome.json && move-cli ./dist/chrome/manifest_chrome.json ./dist/chrome/manifest.json && move-cli ./dist/firefox/manifest_firefox.json ./dist/firefox/manifest.json"
   },
   "license": "MIT",
   "dependencies": {
