@@ -1,4 +1,3 @@
-import { Adapter, BuiltInAdapters, CustomAdapter, defaultSettings, defaultUpdateFrequencyMs, isVersionOutdated, sendWsMessage, Settings } from '../shared/utils'
 import { OnMessageLegacy, OnMessageRev1, SendUpdateLegacy, SendUpdateRev1 } from './handlers'
 import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
@@ -13,6 +12,7 @@ import Twitch from './sites/Twitch'
 import Youtube from './sites/Youtube'
 import YoutubeEmbed from './sites/YoutubeEmbed'
 import YoutubeMusic from './sites/YoutubeMusic'
+import { Adapter, BuiltInAdapters, CustomAdapter, defaultSettings, defaultUpdateFrequencyMs, isVersionOutdated, sendWsMessage, Settings } from './utils'
 
 export enum StateMode { STOPPED = 'STOPPED', PLAYING = 'PLAYING', PAUSED = 'PAUSED' }
 export enum RepeatMode { NONE = 'NONE', ONE = 'ONE', ALL = 'ALL' }

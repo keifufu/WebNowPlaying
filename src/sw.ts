@@ -1,4 +1,4 @@
-import { defaultSettings, getVersionFromGithub, Settings } from '../shared/utils'
+import { defaultSettings, getVersionFromGithub, Settings } from './utils'
 
 let saveTimeout: NodeJS.Timeout
 

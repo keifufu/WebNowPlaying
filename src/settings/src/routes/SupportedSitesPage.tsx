@@ -1,5 +1,5 @@
 import { Component, For } from 'solid-js'
-import { SupportedSites, TSupportedSites } from '../../shared/utils'
+import { SupportedSites, TSupportedSites } from '../../../utils'
 import Checkbox from '../components/Checkbox'
 import { useSettings } from '../hooks/useSettings'
 
