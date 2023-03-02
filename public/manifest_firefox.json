@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "matches": [ "*://*/*"],
+      "matches": [ "<all_urls>"],
       "js": ["content.js"],
       "all_frames": true
     }
@@ -25,7 +25,6 @@
   "permissions": [
     "storage"
   ],
-  "host_permissions": ["<all_urls>"],
   "browser_specific_settings": {
     "gecko": {
       "id": "{64b2c525-24ed-4c05-aed1-95ff9e6cef70}",
