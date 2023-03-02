@@ -1,72 +1,69 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { timeInSecondsToString } from '../utils'
+import { querySelector, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 const site: Site = {
-  ready: () => document.querySelector('.video-player__default-player') !== null && document.querySelector('video') !== null,
+  ready: () => querySelector<boolean, HTMLElement>('.video-player__default-player', (el) => el !== null, false) && querySelector<boolean, HTMLVideoElement>('video', (el) => el !== null, false),
   info: {
     player: () => 'Twitch',
-    state: () => (document.querySelector('video')?.paused ? StateMode.PAUSED : StateMode.PLAYING),
-    title: () => document.querySelector<HTMLElement>('h2[data-a-target="stream-title"]')?.innerText || '',
-    artist: () => document.querySelector<HTMLElement>('h1.tw-title')?.innerText || '',
-    album: () => document.querySelector<HTMLElement>('a[data-a-target="stream-game-link"] > span')?.innerText || '',
-    cover: () => document.querySelector<HTMLImageElement>(`img[alt="${document.location.href.split('/').pop()}" i]`)?.src.replace('70x70', '600x600') || '',
+    state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
+    title: () => querySelectorReport<string, HTMLElement>('h2[data-a-target="stream-title"]', (el) => el.innerText, '', 'title'),
+    artist: () => querySelectorReport<string, HTMLElement>('h1.tw-title', (el) => el.innerText, '', 'artist'),
+    album: () => querySelectorReport<string, HTMLElement>('a[data-a-target="stream-game-link"] > span', (el) => el.innerText, '', 'album'),
+    cover: () => querySelectorReport<string, HTMLImageElement>(`img[alt="${document.location.href.split('/').pop()}" i]`, (el) => el.src.replace('70x70', '600x600'), '', 'cover'),
     duration: () => {
-      // If the duration is 1073741824, it's a live stream
       if (document.querySelector('video')?.duration === 1073741824) {
-        const duration_read = document.querySelector<HTMLElement>('span.live-time')?.innerText.split(':')
-        if (!duration_read) return '0:00'
-        duration_read.reverse()
-        let duration = 0
-        for (let i = duration_read.length - 1; i >= 0; i--)
-          duration += Number(duration_read[i]) * (60 ** i)
-        return timeInSecondsToString(duration)
+        return querySelectorReport<string, HTMLElement>('span.live-time', (el) => {
+          const duration_read = el.innerText.split(':')
+          duration_read.reverse()
+          let duration = 0
+          for (let i = duration_read.length - 1; i >= 0; i--)
+            duration += Number(duration_read[i]) * (60 ** i)
+          return timeInSecondsToString(duration)
+        }, '0:00', 'duration')
       }
-      return timeInSecondsToString(document.querySelector('video')?.duration || 0)
+      return querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration')
     },
     position: () => {
       if (document.querySelector('video')?.duration === 1073741824) {
-        const duration_read = document.querySelector<HTMLElement>('span.live-time')?.innerText.split(':')
-        if (!duration_read) return '0:00'
-        duration_read.reverse()
-        let duration = 0
-        for (let i = duration_read.length - 1; i >= 0; i--)
-          duration += Number(duration_read[i]) * (60 ** i)
-        return timeInSecondsToString(duration)
-      } else {
-        return timeInSecondsToString(document.querySelector('video')?.currentTime || 0)
+        return querySelectorReport<string, HTMLElement>('span.live-time', (el) => {
+          const duration_read = el.innerText.split(':')
+          duration_read.reverse()
+          let duration = 0
+          for (let i = duration_read.length - 1; i >= 0; i--)
+            duration += Number(duration_read[i]) * (60 ** i)
+          return timeInSecondsToString(duration)
+        }, '0:00', 'position')
       }
+      return querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position')
     },
-    volume: () => (document.querySelector('video')?.volume || 0) * 100,
+    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => el.volume * 100, 0, 'volume'),
     // Rating could be following, but ffz and/or bttv fuck it up so I can't get it consistently
     rating: () => 0,
     repeat: () => RepeatMode.NONE,
     shuffle: () => false
   },
   events: {
-    togglePlaying: () => (site.info.state() === StateMode.PAUSED ? document.querySelector('video')?.play() : document.querySelector('video')?.pause()),
+    togglePlaying: () => querySelectorEventReport<HTMLVideoElement>('video', (el) => (el.paused ? el.play() : el.pause()), 'togglePlaying'),
     next: () => {
-      // If we are not live
-      const video = document.querySelector('video')
-      if (video && video.duration !== 1073741824)
-        video.currentTime = video.duration
+      querySelectorEventReport<HTMLVideoElement>('video', (el) => {
+        if (el.duration !== 1073741824) return
+        el.currentTime = el.duration
+      }, 'next')
     },
     previous: () => {
-      // If we are not live
-      const video = document.querySelector('video')
-      if (video && video.duration !== 1073741824)
-        video.currentTime = 0
+      querySelectorEventReport<HTMLVideoElement>('video', (el) => {
+        if (el.duration !== 1073741824) return
+        el.currentTime = 0
+      }, 'previous')
     },
     setPositionSeconds: (positionInSeconds: number) => {
-      // If we are not live
-      const video = document.querySelector('video')
-      if (video && video.duration !== 1073741824)
-        video.currentTime = positionInSeconds
+      querySelectorEventReport<HTMLVideoElement>('video', (el) => {
+        if (el.duration !== 1073741824) return
+        el.currentTime = positionInSeconds
+      }, 'setPositionSeconds')
     },
     setPositionPercentage: null,
-    setVolume: (volume: number) => {
-      const video = document.querySelector('video')
-      if (video) video.volume = volume / 100
-    },
+    setVolume: (volume: number) => querySelectorEventReport<HTMLVideoElement>('video', (el) => el.volume = volume / 100, 'setVolume'),
     toggleRepeat: null,
     toggleShuffle: null,
     toggleThumbsUp: null,
