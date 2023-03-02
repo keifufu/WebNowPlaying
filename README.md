@@ -35,9 +35,7 @@ Edge, Opera, etc. also use the Chrome Web Store
 ## TODO
 - Section skipping on Youtube
 - Netflix support
-- Deezer volume support
-- Pandora volume support
-- Tidal volume support
+- Volume support for: Deezer, Pandora, Tidal
 
 ## Building from source
 - Install [Node.js](https://nodejs.org)
