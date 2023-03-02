@@ -1,5 +1,5 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover } from '../utils'
+import { getMediaSessionCover, querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../utils'
 
 const site: Site = {
   ready: () => navigator.mediaSession.metadata !== null,
@@ -10,107 +10,109 @@ const site: Site = {
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
     cover: () => getMediaSessionCover(),
-    duration: () => document.querySelectorAll<HTMLElement>('.playbackTimeline__duration > span')[1]?.innerText || '',
-    position: () => document.querySelectorAll<HTMLElement>('.playbackTimeline__timePassed > span')[1]?.innerText || '',
-    volume: () => (parseInt(document.querySelector<HTMLElement>('.volume__sliderProgress')?.style.height || '1') / (document.querySelector('.volume__sliderBackground')?.getBoundingClientRect().height || 1)) * 100,
-    rating: () => (document.querySelector('.playbackSoundBadge__like')?.className.includes('selected') ? 5 : 0),
+    duration: () => querySelectorReport<string, HTMLElement>('(.playbackTimeline__duration > span)[1]', (el) => el.innerText, '0:00', 'duration'),
+    position: () => querySelectorReport<string, HTMLElement>('(.playbackTimeline__timePassed > span)[1]', (el) => el.innerText, '0:00', 'position'),
+    volume: () => {
+      const p = querySelectorReport<number, HTMLElement>('.volume__sliderProgress', (el) => parseInt(el.style.height), 1, 'volume')
+      const h = querySelectorReport<number, HTMLElement>('.volume__sliderBackground', (el) => el.getBoundingClientRect().height, 1, 'volume')
+      return (p / h) * 100
+    },
+    rating: () => querySelectorReport<number, HTMLElement>('.playbackSoundBadge__like', (el) => (el.className.includes('selected') ? 5 : 0), 0, 'rating'),
     repeat: () => {
-      if (document.querySelectorAll('.m-one').length > 0)
-        return RepeatMode.ONE
-      if (document.querySelectorAll('.m-all').length > 0)
-        return RepeatMode.ALL
+      if (querySelector<boolean, HTMLElement>('.m-one', (el) => el !== null, false)) return RepeatMode.ONE
+      if (querySelector<boolean, HTMLElement>('.m-all', (el) => el !== null, false)) return RepeatMode.ALL
       return RepeatMode.NONE
     },
-    shuffle: () => (document.querySelectorAll('.m-shuffling').length > 0)
+    shuffle: () => querySelectorReport<boolean, HTMLElement>('.m-shuffling', (el) => el !== null, false, 'shuffle')
   },
   events: {
-    togglePlaying: () => document.querySelector<HTMLButtonElement>('.playControl')?.click(),
-    next: () => document.querySelector<HTMLButtonElement>('.skipControl__next')?.click(),
-    previous: () => document.querySelector<HTMLButtonElement>('.skipControl__previous')?.click(),
+    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('.playControl', (el) => el.click(), 'togglePlaying'),
+    next: () => querySelectorEventReport<HTMLButtonElement>('.skipControl__next', (el) => el.click(), 'next'),
+    previous: () => querySelectorEventReport<HTMLButtonElement>('.skipControl__previous', (el) => el.click(), 'previous'),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
-      const el = document.querySelector('.playbackTimeline__progressWrapper')
-      if (!el) return
-      const loc = el.getBoundingClientRect()
-      const position = positionPercentage * loc.width
+      querySelectorEventReport<HTMLElement>('.playbackTimeline__progressWrapper', (el) => {
+        const loc = el.getBoundingClientRect()
+        const position = positionPercentage * loc.width
 
-      el.dispatchEvent(new MouseEvent('mousedown', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: loc.left + position,
-        clientY: loc.top + (loc.height / 2)
-      }))
-      el.dispatchEvent(new MouseEvent('mouseup', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: loc.left + position,
-        clientY: loc.top + (loc.height / 2)
-      }))
+        el.dispatchEvent(new MouseEvent('mousedown', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + position,
+          clientY: loc.top + (loc.height / 2)
+        }))
+        el.dispatchEvent(new MouseEvent('mouseup', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + position,
+          clientY: loc.top + (loc.height / 2)
+        }))
+      }, 'setPositionPercentage')
     },
     setVolume: (volume: number) => {
-      const el = document.querySelector('.volume')
-      if (!el) return
-      el.dispatchEvent(new MouseEvent('mouseover', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: 0,
-        clientY: 0
-      }))
-      el.dispatchEvent(new MouseEvent('mousemove', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: 0,
-        clientY: 0
-      }))
+      querySelectorEvent<HTMLElement>('.volume', (el) => {
+        el.dispatchEvent(new MouseEvent('mouseover', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: 0,
+          clientY: 0
+        }))
+        el.dispatchEvent(new MouseEvent('mousemove', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: 0,
+          clientY: 0
+        }))
 
-      let counter = 0
-      let vol = volume / 100
-      const volumeReadyTest = setInterval(() => {
-        if (document.querySelector('.volume.expanded.hover')) {
-          clearInterval(volumeReadyTest)
-          const el = document.querySelector('.volume__sliderBackground')
-          if (!el) return
-          const loc = el.getBoundingClientRect()
-          vol *= loc.height
-
-          el.dispatchEvent(new MouseEvent('mousedown', {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-            clientX: loc.left + (loc.width / 2),
-            clientY: loc.bottom - vol + 5
-          }))
-          el.dispatchEvent(new MouseEvent('mouseup', {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-            clientX: loc.left + (loc.width / 2),
-            clientY: loc.bottom - vol + 5
-          }))
-
-          const el2 = document.querySelector('.volume')
-          if (!el2) return
-          el2.dispatchEvent(new MouseEvent('mouseout', {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-            clientX: 0,
-            clientY: 0
-          }))
-        } else {
-          counter += 1
-          if (counter > 10)
+        let counter = 0
+        let vol = volume / 100
+        const volumeReadyTest = setInterval(() => {
+          if (document.querySelector('.volume.expanded.hover')) {
             clearInterval(volumeReadyTest)
-        }
-      }, 25)
+            querySelectorEvent<HTMLElement>('.volume__sliderBackground', (el) => {
+              const loc = el.getBoundingClientRect()
+              vol *= loc.height
+
+              el.dispatchEvent(new MouseEvent('mousedown', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: loc.left + (loc.width / 2),
+                clientY: loc.bottom - vol + 5
+              }))
+              el.dispatchEvent(new MouseEvent('mouseup', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: loc.left + (loc.width / 2),
+                clientY: loc.bottom - vol + 5
+              }))
+
+              const el2 = document.querySelector('.volume')
+              if (!el2) return
+              el2.dispatchEvent(new MouseEvent('mouseout', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: 0,
+                clientY: 0
+              }))
+            })
+          } else {
+            counter += 1
+            if (counter > 10)
+              clearInterval(volumeReadyTest)
+          }
+        }, 25)
+      })
     },
-    toggleRepeat: () => document.querySelector<HTMLButtonElement>('.repeatControl')?.click(),
-    toggleShuffle: () => document.querySelector<HTMLButtonElement>('.shuffleControl')?.click(),
-    toggleThumbsUp: () => document.querySelector<HTMLButtonElement>('.playbackSoundBadge__like')?.click(),
+    toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('.repeatControl', (el) => el.click(), 'toggleRepeat'),
+    toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.shuffleControl', (el) => el.click(), 'toggleShuffle'),
+    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('.playbackSoundBadge__like', (el) => el.click(), 'toggleThumbsUp'),
     toggleThumbsDown: null,
     setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
