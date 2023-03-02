@@ -35,35 +35,25 @@ export type WsMessage = {
   report?: { message: string }
 }
 
-
-const sendAutomaticReport = async (request: WsMessage, sendResponse: (response?: any) => void) => {
-  if (!request.report) return
-  if (reportCache[request.report.message]) return
-  const settings = await readSettings()
-  if (!settings.useTelemetry) return
-  reportCache[request.report.message] = request.report.message
-  fetch('https://keifufu.dev/report', {
-    method: 'POST',
-    body: JSON.stringify({
-      type: 'automatic',
-      extVersion: chrome.runtime.getManifest().version,
-      message: request.report.message
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-}
-
-const wGetSettings = async (sendResponse: (response?: any) => void) => {
-  const settings = await readSettings()
-  sendResponse(settings)
-}
-
-chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) => {
+const handleWsMessage = async (request: WsMessage, sendResponse: (response?: any) => void) => {
   switch (request.event) {
     case 'sendAutomaticReport': {
-      sendAutomaticReport(request, sendResponse)
+      if (!request.report) return
+      if (reportCache[request.report.message]) return
+      const settings = await readSettings()
+      if (!settings.useTelemetry) return
+      reportCache[request.report.message] = request.report.message
+      fetch('https://keifufu.dev/report', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'automatic',
+          extVersion: chrome.runtime.getManifest().version,
+          message: request.report.message
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
       break
     }
     case 'setOutdated':
@@ -88,7 +78,7 @@ chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) 
       }
       break
     case 'getSettings':
-      wGetSettings(sendResponse)
+      sendResponse(await readSettings())
       break
     case 'saveSettings':
       if (!request.settings) return
@@ -100,6 +90,10 @@ chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) 
     default:
       break
   }
+}
+
+chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) => {
+  handleWsMessage(request, sendResponse)
 
   /* Return true to keep port open */
   return true
