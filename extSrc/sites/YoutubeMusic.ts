@@ -1,82 +1,78 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover } from '../utils'
+import { querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
 
 // I'm not using mediaSession here because of ads.
 // Of course this isn't an issue with YouTube Premium or adblock, but still.
 const site: Site = {
-  ready: () => document.querySelector('video') !== null && (document.querySelector<HTMLButtonElement>('.title.ytmusic-player-bar')?.innerText.length || 0) > 0,
+  ready: () => document.querySelector('video') !== null && querySelector<boolean, HTMLButtonElement>('.title.ytmusic-player-bar', (el) => el.innerText.length > 0, false),
   info: {
     player: () => 'Youtube Music',
-    state: () => (document.querySelector('video')?.paused ? StateMode.PAUSED : StateMode.PLAYING),
-    title: () => document.querySelector<HTMLElement>('.title.ytmusic-player-bar')?.innerText || '',
-    artist: () => document.querySelector<HTMLElement>('.byline.ytmusic-player-bar a')?.innerText || '',
-    album: () => document.querySelectorAll<HTMLElement>('.byline.ytmusic-player-bar a')[1]?.innerText || '',
-    cover: () => getMediaSessionCover(),
-    duration: () => {
-      const durationInfo = document.querySelector<HTMLElement>('.time-info.ytmusic-player-bar')?.innerText
-      if (!durationInfo) return '0:00'
-      return durationInfo.split(' / ')[1]
+    state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
+    title: () => querySelectorReport<string, HTMLElement>('.title.ytmusic-player-bar', (el) => el.innerText, '', 'title'),
+    artist: () => querySelectorReport<string, HTMLElement>('.byline.ytmusic-player-bar a', (el) => el.innerText, '', 'artist'),
+    album: () => querySelectorReport<string, HTMLElement>('(.byline.ytmusic-player-bar a)[1]', (el) => el.innerText, '', 'album'),
+    cover: () => {
+      const src = querySelectorReport<string, HTMLImageElement>('.thumbnail-image-wrapper img', (el) => el.src, '', 'cover')
+      if (!src) return ''
+      const videoId = src.replace('https://i.ytimg.com/vi/', '').split('/')[0]
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
     },
-    position: () => {
-      const durationInfo = document.querySelector<HTMLElement>('.time-info.ytmusic-player-bar')?.innerText
-      if (!durationInfo) return '0:00'
-      return durationInfo.split(' / ')[0]
-    },
-    volume: () => (document.querySelector('video')?.volume || 0) * 100,
+    duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[1], '0:00', 'duration'),
+    position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[0], '0:00', 'position'),
+    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => el.volume * 100, 100, 'volume'),
     rating: () => {
-      const likeButton = document.querySelectorAll('.middle-controls-buttons button')[1]
-      const dislikeButton = document.querySelector('.middle-controls-buttons button')
-      if (likeButton.getAttribute('aria-pressed') === 'true') return 5
-      if (dislikeButton?.getAttribute('aria-pressed') === 'true') return 1
+      const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('(.middle-controls-buttons button)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
+      if (likeButtonPressed) return 5
+      const dislikeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('.middle-controls-buttons button', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
+      if (dislikeButtonPressed) return 1
       return 0
     },
-    repeat: () => {
-      const repeatMode = document.querySelector('ytmusic-player-bar')?.getAttribute('repeat-mode_')
+    repeat: () => querySelectorReport<RepeatMode, HTMLElement>('ytmusic-player-bar', (el) => {
+      const repeatMode = el.getAttribute('repeat-mode_')
       if (repeatMode === 'ALL') return RepeatMode.ALL
       if (repeatMode === 'ONE') return RepeatMode.ONE
       return RepeatMode.NONE
-    },
+    }, RepeatMode.NONE, 'repeat'),
     // Youtube music doesn't do shuffling the traditional way, it just shuffles the current queue with no way of undoing it
     shuffle: () => false
   },
   events: {
-    togglePlaying: () => document.querySelector<HTMLButtonElement>('#play-pause-button')?.click(),
-    next: () => document.querySelector<HTMLButtonElement>('.next-button')?.click(),
-    previous: () => document.querySelector<HTMLButtonElement>('.previous-button')?.click(),
+    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('#play-pause-button', (el) => el.click(), 'togglePlaying'),
+    next: () => querySelectorEventReport<HTMLButtonElement>('.next-button', (el) => el.click(), 'next'),
+    previous: () => querySelectorEventReport<HTMLButtonElement>('.previous-button', (el) => el.click(), 'previous'),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
-      const el = document.querySelector('#progress-bar tp-yt-paper-progress')
-      if (!el) return
-      const loc = el.getBoundingClientRect()
-      const position = positionPercentage * loc.width
+      querySelectorEventReport<HTMLElement>('#progress-bar tp-yt-paper-progress', (el) => {
+        const loc = el.getBoundingClientRect()
+        const position = positionPercentage * loc.width
 
-      el.dispatchEvent(new MouseEvent('mousedown', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: loc.left + position,
-        clientY: loc.top + (loc.height / 2)
-      }))
-      el.dispatchEvent(new MouseEvent('mouseup', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: loc.left + position,
-        clientY: loc.top + (loc.height / 2)
-      }))
+        el.dispatchEvent(new MouseEvent('mousedown', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + position,
+          clientY: loc.top + (loc.height / 2)
+        }))
+        el.dispatchEvent(new MouseEvent('mouseup', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + position,
+          clientY: loc.top + (loc.height / 2)
+        }))
+      }, 'setPositionPercentage')
     },
     setVolume: (volume: number) => {
-      const video = document.querySelector('video')
-      if (video) {
-        video.volume = volume / 100
-        if (volume === 0) video.muted = true
-        else video.muted = false
-      }
+      querySelectorEventReport<HTMLVideoElement>('video', (el) => {
+        el.volume = volume / 100
+        if (volume === 0) el.muted = true
+        else el.muted = false
+      }, 'setVolume')
     },
-    toggleRepeat: () => document.querySelector<HTMLButtonElement>('.repeat')?.click(),
-    toggleShuffle: () => document.querySelector<HTMLButtonElement>('.shuffle')?.click(),
-    toggleThumbsUp: () => document.querySelectorAll<HTMLButtonElement>('.middle-controls-buttons button')[1]?.click(),
-    toggleThumbsDown: () => document.querySelector<HTMLButtonElement>('.middle-controls-buttons button')?.click(),
+    toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('.repeat', (el) => el.click(), 'toggleRepeat'),
+    toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.shuffle', (el) => el.click(), 'toggleShuffle'),
+    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('(.middle-controls-buttons button)[1]', (el) => el.click(), 'toggleThumbsUp'),
+    toggleThumbsDown: () => querySelectorEventReport<HTMLButtonElement>('.middle-controls-buttons button', (el) => el.click(), 'toggleThumbsDown'),
     setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
         site.events.toggleThumbsUp?.()
