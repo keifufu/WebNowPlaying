@@ -4,13 +4,16 @@ import { getMediaSessionCover, querySelector, querySelectorEventReport, querySel
 // I'm not using mediaSession here because of ads.
 // Of course this isn't an issue with YouTube Premium or adblock, but still.
 const site: Site = {
-  ready: () => document.querySelector('video') !== null && querySelector<boolean, HTMLButtonElement>('.title.ytmusic-player-bar', (el) => el.innerText.length > 0, false),
+  ready: () =>
+    querySelector<boolean, HTMLElement>('video', (el) => true, false)
+    && querySelector<boolean, HTMLElement>('.title.ytmusic-player-bar', (el) => el.innerText.length > 0, false),
   info: {
     player: () => 'Youtube Music',
     state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
     title: () => querySelectorReport<string, HTMLElement>('.title.ytmusic-player-bar', (el) => el.innerText, '', 'title'),
     artist: () => querySelectorReport<string, HTMLElement>('.byline.ytmusic-player-bar a', (el) => el.innerText, '', 'artist'),
-    album: () => querySelectorReport<string, HTMLElement>('(.byline.ytmusic-player-bar a)[1]', (el) => el.innerText, '', 'album'),
+    // There isn't always a album, so I'm not reporting it
+    album: () => querySelector<string, HTMLElement>('(.byline.ytmusic-player-bar a)[1]', (el) => el.innerText, ''),
     // I'm not sure if it shows ads on youtube music but I can't be bothered to not use the mediaSession cover
     // The cover img's src is sometimes a googleusercontent link
     cover: () => getMediaSessionCover(),
