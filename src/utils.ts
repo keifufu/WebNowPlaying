@@ -43,6 +43,7 @@ const parseSelector = (_selector: string) => {
 type InfoType = 'state' | 'title' | 'artist' | 'album' | 'cover' | 'duration' | 'position' | 'volume' | 'rating' | 'repeat' | 'shuffle'
 // Selector is either a normal selector, or: '(selector)[index]' for querySelectorAll
 const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E) => T | null, defaultValue: T, type?: InfoType): T => {
+  try {
   const { selector, index } = parseSelector(selectorStr)
   const el = document.querySelectorAll<E>(selector)[index]
   if (!el) {
@@ -58,8 +59,9 @@ const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E)
   }
   const result = exec(el)
   // Exclude 0 as volume can be 0
+    // Exclude false as shuffle can be false
   // Empty strings however are not valid
-  if (!result && result !== 0) {
+    if (!result && result !== 0 && result !== false) {
     if (type) {
       sendWsMessage({
         event: 'sendAutomaticReport',
@@ -72,12 +74,16 @@ const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E)
   }
 
   return result
+  } catch {
+    return defaultValue
+  }
 }
 export const querySelector = <T, E extends Element>(selector: string, exec: (el: E) => T | null, defaultValue: T): T => _querySelector(selector, exec, defaultValue)
 export const querySelectorReport = <T, E extends Element>(selector: string, exec: (el: E) => T | null, defaultValue: T, type: InfoType): T => _querySelector(selector, exec, defaultValue, type)
 
 type EventType = 'togglePlaying' | 'next' | 'previous' | 'setPositionSeconds' | 'setPositionPercentage' | 'setVolume' | 'toggleRepeat' | 'toggleShuffle' | 'toggleThumbsUp' | 'toggleThumbsDown' | 'setRating'
 export const _querySelectorEvent = <E extends Element>(selectorOrGetter: string | (() => E), action: (el: E) => any, type?: EventType): boolean => {
+  try {
   let el
   if (typeof selectorOrGetter === 'string') {
     const { selector, index } = parseSelector(selectorOrGetter)
@@ -98,6 +104,9 @@ export const _querySelectorEvent = <E extends Element>(selectorOrGetter: string 
   }
   action(el)
   return true
+  } catch {
+    return false
+  }
 }
 export const querySelectorEvent = <E extends Element>(selectorOrGetter: string | (() => E), action: (el: E) => any) => _querySelectorEvent(selectorOrGetter, action)
 export const querySelectorEventReport = <E extends Element>(selectorOrGetter: string | (() => E), action: (el: E) => any, type: EventType) => _querySelectorEvent(selectorOrGetter, action, type)
