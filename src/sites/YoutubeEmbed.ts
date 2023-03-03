@@ -7,11 +7,9 @@ let currentCoverUrl = ''
 let lastCoverVideoId = ''
 
 const site: Site = {
-  ready: () => {
-    // TODO:
-    const title = document.querySelector<HTMLElement>('.ytp-title-text')
-    return title !== null && title.innerText?.length > 0 && !document.querySelector('.html5-video-player')?.classList.contains('unstarted-mode')
-  },
+  ready: () =>
+    querySelector<boolean, HTMLElement>('.ytp-title-text', (el) => el.innerText.length > 0, false)
+    && querySelector<boolean, HTMLVideoElement>('.html5-video-player', (el) => !el.classList.contains('unstarted-mode'), false),
   info: {
     player: () => 'Youtube Embed',
     state: () => {
@@ -22,7 +20,8 @@ const site: Site = {
       return state
     },
     title: () => querySelectorReport<string, HTMLElement>('.ytp-title-text', (el) => el.innerText, '', 'title'),
-    artist: () => querySelectorReport<string, HTMLElement>('.ytp-title-expanded-title', (el) => el.innerText, '', 'artist'),
+    // Not reporting artist, as it seems to sometimes return a empty string as innerText when the artist hasn't loaded yet.
+    artist: () => querySelector<string, HTMLElement>('.ytp-title-expanded-title', (el) => el.innerText, ''),
     album: () => querySelector<string, HTMLElement>('.ytp-playlist-menu-title', (el) => el.innerText, ''),
     cover: () => {
       const videoId = new URLSearchParams(document.querySelector<HTMLAnchorElement>('.ytp-title-link')?.search).get('v')
@@ -48,7 +47,7 @@ const site: Site = {
     position: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video', (el) => (el.muted ? 0 : el.volume * 100), 0, 'volume'),
     rating: () => 0,
-    repeat: () => RepeatMode.NONE,
+    repeat: () => querySelectorReport<RepeatMode, HTMLVideoElement>('.html5-main-video', (el) => (el.loop ? RepeatMode.ONE : RepeatMode.NONE), RepeatMode.NONE, 'repeat'),
     shuffle: () => shuffleState
   },
   events: {
