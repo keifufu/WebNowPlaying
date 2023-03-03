@@ -1,5 +1,5 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
+import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../utils'
 
 // I'm not using mediaSession here because of ads.
 // Of course this isn't an issue with YouTube Premium or adblock, but still.
@@ -14,9 +14,13 @@ const site: Site = {
     artist: () => querySelectorReport<string, HTMLElement>('.byline.ytmusic-player-bar a', (el) => el.innerText, '', 'artist'),
     // There isn't always a album, so I'm not reporting it
     album: () => querySelector<string, HTMLElement>('(.byline.ytmusic-player-bar a)[1]', (el) => el.innerText, ''),
-    // I'm not sure if it shows ads on youtube music but I can't be bothered to not use the mediaSession cover
-    // The cover img's src is sometimes a googleusercontent link
-    cover: () => getMediaSessionCover(),
+    cover: () => {
+      let cover = querySelector<string, HTMLImageElement>('.thumbnail.ytmusic-player.no-transition .yt-img-shadow', (el) => el.src, '')
+      if (cover.includes('data:image')) cover = querySelector<string, HTMLImageElement>('.image.ytmusic-player-bar', (el) => el.src, '')
+      cover = cover.split('?')[0]
+      cover = cover.replace('sddefault.jpg', 'hq720.jpg')
+      return cover
+    },
     duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.trim().split(' / ')[1], '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.trim().split(' / ')[0], '0:00', 'position'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
@@ -63,11 +67,26 @@ const site: Site = {
       }, 'setPositionPercentage')
     },
     setVolume: (volume: number) => {
-      querySelectorEventReport<HTMLVideoElement>('video', (el) => {
-        el.volume = volume / 100
-        if (volume === 0) el.muted = true
-        else el.muted = false
-      }, 'setVolume')
+      let vol = volume / 100
+      querySelectorEvent<HTMLElement>('#sliderBar', (el) => {
+        const loc = el.getBoundingClientRect()
+        vol *= loc.width
+
+        el.dispatchEvent(new MouseEvent('mousedown', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + vol,
+          clientY: loc.bottom + (loc.height / 2)
+        }))
+        el.dispatchEvent(new MouseEvent('mouseup', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + vol,
+          clientY: loc.bottom + (loc.height / 2)
+        }))
+      })
     },
     toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('.repeat', (el) => el.click(), 'toggleRepeat'),
     toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.shuffle', (el) => el.click(), 'toggleShuffle'),
