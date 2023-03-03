@@ -169,6 +169,11 @@ export const BuiltInAdapters: Adapter[] = [
     name: 'Rainmeter Adapter',
     port: 8974,
     gh: 'keifufu/WebNowPlaying-Redux-Rainmeter'
+  },
+  {
+    name: 'Macro Deck Adapter',
+    port: 8698,
+    gh: 'jbcarreon123/WebNowPlaying-Redux-Macro-Deck'
   }
 ]
 
