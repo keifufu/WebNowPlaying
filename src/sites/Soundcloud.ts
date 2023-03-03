@@ -72,7 +72,7 @@ const site: Site = {
         let counter = 0
         let vol = volume / 100
         const volumeReadyTest = setInterval(() => {
-          if (document.querySelector('.volume.expanded.hover')) {
+          if (querySelector<boolean, HTMLElement>('.volume.expanded.hover', (el) => true, false)) {
             clearInterval(volumeReadyTest)
             querySelectorEvent<HTMLElement>('.volume__sliderBackground', (el) => {
               const loc = el.getBoundingClientRect()
@@ -93,15 +93,15 @@ const site: Site = {
                 clientY: loc.bottom - vol + 5
               }))
 
-              const el2 = document.querySelector('.volume')
-              if (!el2) return
-              el2.dispatchEvent(new MouseEvent('mouseout', {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                clientX: 0,
-                clientY: 0
-              }))
+              querySelectorEventReport<HTMLElement>('.volume', (el2) => {
+                el2.dispatchEvent(new MouseEvent('mouseout', {
+                  view: window,
+                  bubbles: true,
+                  cancelable: true,
+                  clientX: 0,
+                  clientY: 0
+                }))
+              }, 'setVolume')
             })
           } else {
             counter += 1
