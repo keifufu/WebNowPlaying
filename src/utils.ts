@@ -21,6 +21,7 @@ export const capitalize = (str: string) => str.toLowerCase().replace(/(?:^|\s)\S
 // Convert seconds to a time string acceptable to Rainmeter
 const pad = (num: number, size: number) => num.toString().padStart(size, '0')
 export const timeInSecondsToString = (timeInSeconds: number) => {
+  if (isNaN(timeInSeconds)) return '0:00'
   const timeInMinutes = Math.floor(timeInSeconds / 60)
   if (timeInMinutes < 60)
     return timeInMinutes + ':' + pad(Math.floor(timeInSeconds % 60), 2)
