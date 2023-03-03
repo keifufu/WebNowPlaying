@@ -3,24 +3,29 @@ import { capitalize, querySelector, querySelectorEvent, querySelectorEventReport
 
 const site: Site = {
   ready: () =>
-    querySelector<boolean, HTMLElement>('.Tuner__Audio__TrackDetail__title', (el) => el.innerText.length > 0, false),
+    querySelector<boolean, HTMLElement>('.Tuner__Audio__TrackDetail__title', (el) => el.innerText.length > 0, false)
+    && querySelector<boolean, HTMLElement>('(.VolumeDurationControl__Duration span)[2]', (el) => el.innerText.length > 0, false),
   info: {
     player: () => 'Pandora',
     state: () => {
       // If pandora asked if you are still listening it is paused
-      if (document.querySelector('.StillListeningBody') !== null) return StateMode.STOPPED
+      if (querySelector<boolean, HTMLElement>('.StillListeningBody', (el) => true, false)) return StateMode.STOPPED
       return querySelectorReport<StateMode, HTMLElement>('.PlayButton__Icon path', (el) => (el.getAttribute('d')?.includes('22.5v-21l16.5') ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state')
     },
     title: () => querySelectorReport<string, HTMLElement>('.Tuner__Audio__TrackDetail__title', (el) => el.innerText, '', 'title'),
     artist: () => querySelectorReport<string, HTMLElement>('.Tuner__Audio__TrackDetail__artist', (el) => el.innerText, '', 'artist'),
     album: () => {
-      const albumName = document.querySelector<HTMLElement>('.nowPlayingTopInfo__current__albumName')
-      if (albumName) return albumName.innerText
-      const albumURL = document.querySelector<HTMLAnchorElement>('.Tuner__Audio__TrackDetail__title')?.href.replace('://www.pandora.com/artist/', '')
+      const albumName = querySelector<string, HTMLElement>('.nowPlayingTopInfo__current__albumName', (el) => el.innerText, '')
+      if (albumName) return albumName
+      const albumURL = querySelector<string, HTMLAnchorElement>('.Tuner__Audio__TrackDetail__title', (el) => el.href.replace('://www.pandora.com/artist/', ''), '')
       if (albumURL) return capitalize(albumURL.split('/')[1].replaceAll('-', ' '))
       return ''
     },
-    cover: () => querySelectorReport<string, HTMLImageElement>('.ImageLoader img, .nowPlayingTopInfo__artContainer img', (el) => `${el.src.split('/').slice(0, -1).join('/')}/500W_500H.jpg`, '', 'cover'),
+    cover: () => {
+      const cover = querySelector<string, HTMLImageElement>('.nowPlayingTopInfo__artContainer__art img', (el) => el.src, '')
+      if (cover) return cover
+      return querySelectorReport<string, HTMLImageElement>('.ImageLoader img, .nowPlayingTopInfo__artContainer img', (el) => `${el.src.split('/').slice(0, -1).join('/')}/500W_500H.jpg`, '', 'cover')
+    },
     duration: () => querySelectorReport<string, HTMLElement>('(.VolumeDurationControl__Duration span)[2]', (el) => el.innerText, '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLElement>('.VolumeDurationControl__Duration span', (el) => el.innerText, '0:00', 'position'),
     volume: () => 100,
