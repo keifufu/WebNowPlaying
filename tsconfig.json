@@ -2,7 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "lib": ["DOM", "ESNext"],
-    "target": "ESNext",
+    "target": "ES5",
     "module": "ESNext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
