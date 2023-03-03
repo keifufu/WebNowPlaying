@@ -2,14 +2,17 @@ import { RepeatMode, Site, StateMode } from '../content'
 import { querySelector, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 const site: Site = {
-  ready: () => querySelector<boolean, HTMLElement>('.video-player__default-player', (el) => el !== null, false) && querySelector<boolean, HTMLVideoElement>('video', (el) => el !== null, false),
+  ready: () =>
+    querySelector<boolean, HTMLElement>('.video-player__default-player', (el) => true, false)
+    && querySelector<boolean, HTMLVideoElement>('video', (el) => true, false)
+    && querySelector<boolean, HTMLElement>('h2[data-a-target="stream-title"]', (el) => el.innerText.length > 0, false),
   info: {
     player: () => 'Twitch',
     state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
     title: () => querySelectorReport<string, HTMLElement>('h2[data-a-target="stream-title"]', (el) => el.innerText, '', 'title'),
     artist: () => querySelectorReport<string, HTMLElement>('h1.tw-title', (el) => el.innerText, '', 'artist'),
-    album: () => querySelectorReport<string, HTMLElement>('a[data-a-target="stream-game-link"] > span', (el) => el.innerText, '', 'album'),
-    cover: () => querySelectorReport<string, HTMLImageElement>(`img[alt="${document.location.href.split('/').pop()}" i]`, (el) => el.src.replace('70x70', '600x600'), '', 'cover'),
+    album: () => querySelectorReport<string, HTMLElement>('a[data-a-target="stream-game-link"] > span, [data-a-target="video-info-game-boxart-link"] p', (el) => el.innerText, '', 'album'),
+    cover: () => querySelectorReport<string, HTMLImageElement>(`img[alt="${site.info.artist()}" i]`, (el) => el.src.replace('70x70', '600x600'), '', 'cover'),
     duration: () => {
       if (document.querySelector('video')?.duration === 1073741824) {
         return querySelectorReport<string, HTMLElement>('span.live-time', (el) => {
