@@ -12,7 +12,7 @@ const site: Site = {
     cover: () => getMediaSessionCover(),
     duration: () => querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
-    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.volume * 100), 100, 'volume'),
+    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => 0,
     repeat: () => {
       const repeatButton = document.querySelector('button[data-testid="repeatButton"]')

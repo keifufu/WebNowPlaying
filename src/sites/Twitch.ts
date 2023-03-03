@@ -36,7 +36,7 @@ const site: Site = {
       }
       return querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position')
     },
-    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => el.volume * 100, 0, 'volume'),
+    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : el.volume * 100), 0, 'volume'),
     // Rating could be following, but ffz and/or bttv fuck it up so I can't get it consistently
     rating: () => 0,
     repeat: () => RepeatMode.NONE,
