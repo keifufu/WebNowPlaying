@@ -1,8 +1,8 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, querySelectorEventReport, querySelectorReport } from '../utils'
+import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
 
 const site: Site = {
-  ready: () => navigator.mediaSession.metadata !== null && document.querySelector('.track-link') !== null,
+  ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('.track-link', (el) => true, false),
   info: {
     player: () => 'Deezer',
     state: () => querySelectorReport<StateMode, HTMLElement>('(.player-controls svg)[1]', (el) => (el.getAttribute('data-testid') === 'PauseIcon' ? StateMode.PLAYING : StateMode.PAUSED), StateMode.PAUSED, 'state'),
