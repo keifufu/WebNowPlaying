@@ -1,8 +1,9 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { capitalize, querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
+import { capitalize, querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../utils'
 
 const site: Site = {
-  ready: () => querySelector<boolean, HTMLElement>('.Tuner__Audio__TrackDetail__title', (el) => el !== null, false),
+  ready: () =>
+    querySelector<boolean, HTMLElement>('.Tuner__Audio__TrackDetail__title', (el) => el.innerText.length > 0, false),
   info: {
     player: () => 'Pandora',
     state: () => {
@@ -30,13 +31,15 @@ const site: Site = {
       if (thumbsDown) return 1
       return 0
     },
-    repeat: () => querySelectorReport<RepeatMode, HTMLButtonElement>('.RepeatButton', (el) => {
+    // Not reporting because some views on Pandora don't have a repeat button
+    repeat: () => querySelector<RepeatMode, HTMLButtonElement>('.RepeatButton', (el) => {
       const state = el.getAttribute('aria-checked')
       if (state === 'true') return RepeatMode.ALL
       if (state === 'mixed') return RepeatMode.ONE
       return RepeatMode.NONE
-    }, RepeatMode.NONE, 'repeat'),
-    shuffle: () => querySelectorReport<boolean, HTMLButtonElement>('.ShuffleButton', (el) => el.getAttribute('aria-checked') === 'true', false, 'shuffle')
+    }, RepeatMode.NONE),
+    // Not reporting because some views on Pandora don't have a shuffle button
+    shuffle: () => querySelector<boolean, HTMLButtonElement>('.ShuffleButton', (el) => el.getAttribute('aria-checked') === 'true', false)
   },
   events: {
     togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('.PlayButton', (el) => el.click(), 'togglePlaying'),
@@ -65,10 +68,10 @@ const site: Site = {
       }, 'setPositionPercentage')
     },
     setVolume: null,
-    toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('.RepeatButton', (el) => el.click(), 'toggleRepeat'),
-    toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.ShuffleButton', (el) => el.click(), 'toggleShuffle'),
-    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('.ThumbUpButton', (el) => el.click(), 'toggleThumbsUp'),
-    toggleThumbsDown: () => querySelectorEventReport<HTMLButtonElement>('.ThumbDownButton', (el) => el.click(), 'toggleThumbsDown'),
+    toggleRepeat: () => querySelectorEvent<HTMLButtonElement>('.RepeatButton', (el) => el.click()),
+    toggleShuffle: () => querySelectorEvent<HTMLButtonElement>('.ShuffleButton', (el) => el.click()),
+    toggleThumbsUp: () => querySelectorEvent<HTMLButtonElement>('.ThumbUpButton', (el) => el.click()),
+    toggleThumbsDown: () => querySelectorEvent<HTMLButtonElement>('.ThumbDownButton', (el) => el.click()),
     setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
         site.events.toggleThumbsUp?.()
