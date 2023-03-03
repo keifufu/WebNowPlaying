@@ -23,7 +23,8 @@ const site: Site = {
       if (querySelector<boolean, HTMLElement>('.m-all', (el) => el !== null, false)) return RepeatMode.ALL
       return RepeatMode.NONE
     },
-    shuffle: () => querySelectorReport<boolean, HTMLElement>('.m-shuffling', (el) => el !== null, false, 'shuffle')
+    // Not reporting this as .m-shuffling is only present when shuffle is enabled
+    shuffle: () => querySelector<boolean, HTMLElement>('.m-shuffling', (el) => true, false)
   },
   events: {
     togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('.playControl', (el) => el.click(), 'togglePlaying'),
