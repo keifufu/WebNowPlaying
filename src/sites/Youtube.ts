@@ -3,6 +3,9 @@ import { querySelector, querySelectorEvent, querySelectorEventReport, querySelec
 
 // TODO: support the tiny player it sometimes gives you in the bottom right corner
 
+let currentCoverUrl = ''
+let lastCoverVideoId = ''
+
 // I'm not using mediaSession here because of ads.
 // Of course this isn't an issue with YouTube Premium or adblock, but still.
 const site: Site = {
@@ -21,7 +24,23 @@ const site: Site = {
     album: () => querySelector<string, HTMLElement>('#header-description a', (el) => el.innerText, ''),
     cover: () => {
       const videoId = new URLSearchParams(window.location.search).get('v')
-      return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+
+      if (videoId && lastCoverVideoId !== videoId) {
+        lastCoverVideoId = videoId
+        const img = document.createElement('img')
+        img.setAttribute('src', `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`)
+        img.addEventListener('load', () => {
+          if (img.height > 90)
+            currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+          else
+            currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+        })
+        img.addEventListener('error', () => {
+          currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+        })
+      }
+
+      return currentCoverUrl
     },
     duration: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
