@@ -68,7 +68,7 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
   })
 
   const onChange = () => {
-    saveSettings(() => ({ ...settings(), disabledBuiltInAdapters: settings().disabledBuiltInAdapters.includes(props.name) ? settings().disabledBuiltInAdapters.filter((a) => a !== props.name) : [...settings().disabledBuiltInAdapters, props.name] }), true)
+    saveSettings(() => ({ ...settings(), enabledBuiltInAdapters: settings().enabledBuiltInAdapters.includes(props.name) ? settings().enabledBuiltInAdapters.filter((a) => a !== props.name) : [...settings().enabledBuiltInAdapters, props.name] }), true)
   }
 
   const onInputUpdateFrequency = (e: InputEvent) => {
@@ -238,7 +238,7 @@ const AdaptersPage: Component = () => {
           {(adapter) => (
             <Adapter
               name={adapter.name}
-              enabled={!settings().disabledBuiltInAdapters.includes(adapter.name)}
+              enabled={settings().enabledBuiltInAdapters.includes(adapter.name)}
               gh={adapter.gh}
               port={adapter.port}
               updateFrequencyMs={settings().updateFrequencyMs[adapter.port] || defaultUpdateFrequencyMs}
