@@ -251,7 +251,7 @@ function updateAll(updateInfo: keyof SiteInfo | null, currentState: any = null) 
   // Only initialize the websocket we match the host
   if (getCurrentSite() !== null) {
     BuiltInAdapters.forEach((adapter) => {
-      if (settings.disabledBuiltInAdapters.includes(adapter.name)) return
+      if (!settings.enabledBuiltInAdapters.includes(adapter.name)) return
       sockets.push(new WNPReduxWebSocket(adapter))
     })
     settings.customAdapters.forEach((adapter) => {

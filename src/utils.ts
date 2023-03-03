@@ -141,7 +141,7 @@ export type Settings = {
   isListBlocked: boolean
   genericList: string[]
   customAdapters: CustomAdapter[]
-  disabledBuiltInAdapters: string[]
+  enabledBuiltInAdapters: string[]
   disabledSites: TSupportedSites[]
   useTelemetry: boolean
 }
@@ -153,7 +153,7 @@ export const defaultSettings: Settings = {
   isListBlocked: false,
   genericList: ['streamable.com', 'www.adultswim.com'],
   customAdapters: [],
-  disabledBuiltInAdapters: [],
+  enabledBuiltInAdapters: ['Rainmeter Adapter'],
   disabledSites: [],
   useTelemetry: false
 }
