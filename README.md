@@ -27,7 +27,7 @@ I will consider adding other websites where there is demand for.
 Please do keep in mind that I can't easily develop for paid services.
 
 ## Installing
-// TODO: update webstore links below
+// TODO: update webstore links below  
 Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux/)  
 Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/ejimjbbegnadfnpgnnfngljgmgpddnmp)  
 Edge, Opera, etc. also use the Chrome Web Store
