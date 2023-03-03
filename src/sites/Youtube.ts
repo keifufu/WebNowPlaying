@@ -46,17 +46,10 @@ const site: Site = {
     position: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => {
-      /* console.log('get rating')
       const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('#segmented-like-button button', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
       if (likeButtonPressed) return 5
       const dislikeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('#segmented-dislike-button button', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
       if (dislikeButtonPressed) return 1
-      return 0 */
-
-      const likeButtonPressed = document.querySelector('#segmented-like-button button')?.getAttribute('aria-pressed')
-      const dislikeButtonPressed = document.querySelector('#segmented-dislike-button button')?.getAttribute('aria-pressed')
-      if (likeButtonPressed === 'true') return 5
-      if (dislikeButtonPressed === 'true') return 1
       return 0
     },
     repeat: () => {
