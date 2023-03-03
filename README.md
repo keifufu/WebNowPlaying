@@ -1,8 +1,7 @@
 # WebNowPlaying-Redux
 A browser extension that provides information and controls for media playing in the browser to external adapters.  
-It detects information about the media being played, such as the title, artist, album, and more.
-
-// TODO: explain a bit more about events and adapters
+It detects information about the media being played, such as the title, artist, album, and more.  
+This information can be utilized by external adapters to manage the media, including actions like pausing, skipping, adjusting the volume, and more.
 
 ## Adapters
 - [WebNowPlaying-Redux-Rainmeter](https://github.com/keifufu/WebNowPlaying-Redux-Rainmeter) by [keifufu](https://github.com/keifufu), [tjhrulz](https://github.com/tjhrulz/)
@@ -22,13 +21,13 @@ It detects information about the media being played, such as the title, artist, 
 - YouTube
 - Youtube Embeds
 - YouTube Music
-- Any website with a video or music element might work, you can enable them in the options (Click the extension icon)
+- Any website with a video or audio element might work, you can enable them in the options (Click the extension icon)
 
-I will consider adding other websites where there is demand for.  
-Please do keep in mind that I can't easily develop for paid services.
+I will consider adding other websites where there is demand.  
+Please keep in mind that I can't easily develop for paid services.
 
 ## Installing
-// TODO: update webstore links below  
+**These are currently out of date, but they will be updated very soon**  
 Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux/)  
 Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/ejimjbbegnadfnpgnnfngljgmgpddnmp)  
 Edge, Opera, etc. also use the Chrome Web Store
