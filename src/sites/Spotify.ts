@@ -6,7 +6,12 @@ const site: Site = {
   info: {
     player: () => 'Spotify',
     // Supports mediaSession.metadata, but not mediaSession.playbackState
-    state: () => querySelectorReport<StateMode, HTMLButtonElement>('.player-controls__buttons button[aria-label="Pause"]', (el) => StateMode.PLAYING, StateMode.PAUSED, 'state'),
+    state: () => querySelectorReport<StateMode, HTMLButtonElement>('(.player-controls__buttons button svg path)[3]', (el) => {
+      const path = el.getAttribute('d')
+      const playingPath = 'M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z'
+      if (path === playingPath) return StateMode.PLAYING
+      return StateMode.PAUSED
+    }, StateMode.PAUSED, 'state'),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
