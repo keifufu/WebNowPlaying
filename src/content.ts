@@ -168,18 +168,19 @@ export class WNPReduxWebSocket {
 
   private async onMessage(event: MessageEvent<string>) {
     if (this.communicationRevision) {
+      let key: keyof SiteInfo | null = null
       switch (this.communicationRevision) {
         case 'legacy':
-          OnMessageLegacy(this, event.data)
+          key = OnMessageLegacy(this, event.data)
           break
         case '1':
-          OnMessageRev1(this, event.data)
+          key = OnMessageRev1(this, event.data)
           break
         default: break
       }
 
       // Send an update for all connected adapters
-      updateAll()
+      if (key) updateAll(key, this.cache[key])
     } else {
       // eslint-disable-next-line no-lonely-if
       if (event.data.startsWith('Version:')) {
@@ -227,10 +228,22 @@ window.addEventListener('beforeunload', () => {
   })
 })
 
-function updateAll() {
-  sockets.forEach((socket) => {
-    socket.sendUpdate()
-  })
+let timeout: NodeJS.Timeout
+let current = 0
+function updateAll(updateInfo: keyof SiteInfo | null, currentState: any = null) {
+  if (timeout) clearTimeout(timeout)
+  if (current === 25) {
+    current = 0
+    return
+  }
+  if (updateInfo) {
+    current += 1
+    sockets.forEach((socket) => {
+      socket.sendUpdate()
+      if (socket.cache[updateInfo] === currentState)
+        timeout = setTimeout(() => updateAll(updateInfo, currentState), 10)
+    })
+  }
 }
 
 (async () => {
