@@ -1,6 +1,8 @@
 import { RepeatMode, Site, StateMode } from '../content'
 import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
+// Repeat and shuffle on Apple Music don't update instantly, we click the button but it takes a few ms for info.repeat() to return the correct value
+
 const site: Site = {
   ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLAudioElement>('audio', (el) => el !== null, false),
   info: {
@@ -13,7 +15,7 @@ const site: Site = {
     cover: () => getMediaSessionCover(),
     duration: () => querySelectorReport<string, HTMLAudioElement>('audio', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLAudioElement>('audio', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
-    volume: () => querySelectorReport<number, HTMLAudioElement>('audio', (el) => el.volume * 100, 100, 'volume'),
+    volume: () => querySelectorReport<number, HTMLAudioElement>('audio', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: null,
     repeat: () => {
       const repeatButton = document.querySelector('amp-chrome-player')?.shadowRoot?.querySelector('apple-music-playback-controls')?.shadowRoot?.querySelector('amp-playback-controls-repeat')?.shadowRoot?.querySelector('.button--repeat')

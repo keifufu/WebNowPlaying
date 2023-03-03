@@ -1,8 +1,8 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
+import { getMediaSessionCover, querySelectorEventReport, querySelectorReport } from '../utils'
 
 const site: Site = {
-  ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('.track-link', (el) => el !== null, false),
+  ready: () => navigator.mediaSession.metadata !== null && document.querySelector('.track-link') !== null,
   info: {
     player: () => 'Deezer',
     state: () => querySelectorReport<StateMode, HTMLElement>('(.player-controls svg)[1]', (el) => (el.getAttribute('data-testid') === 'PauseIcon' ? StateMode.PLAYING : StateMode.PAUSED), StateMode.PAUSED, 'state'),
@@ -14,7 +14,7 @@ const site: Site = {
     position: () => querySelectorReport<string, HTMLElement>('.slider-counter-current', (el) => el.innerText, '0:00', 'position'),
     volume: () => 100,
     rating: () => querySelectorReport<number, HTMLElement>('(.track-actions svg)[2]', (el) => (el.getAttribute('data-testid') === 'HeartIcon' ? 0 : 5), 0, 'rating'),
-    repeat: () => querySelectorReport<RepeatMode, HTMLElement>('.option-item', (el) => {
+    repeat: () => querySelectorReport<RepeatMode, HTMLElement>('(.option-item svg)[1]', (el) => {
       const isActive = getComputedStyle(el).color === 'rgb(239, 84, 102)'
       if (el.getAttribute('data-testid') === 'RepeatIcon' && isActive) return RepeatMode.ALL
       if (el.getAttribute('data-testid') === 'RepeatOneIcon') return RepeatMode.ONE

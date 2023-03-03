@@ -1,5 +1,5 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
+import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
 
 // I'm not using mediaSession here because of ads.
 // Of course this isn't an issue with YouTube Premium or adblock, but still.
@@ -11,19 +11,16 @@ const site: Site = {
     title: () => querySelectorReport<string, HTMLElement>('.title.ytmusic-player-bar', (el) => el.innerText, '', 'title'),
     artist: () => querySelectorReport<string, HTMLElement>('.byline.ytmusic-player-bar a', (el) => el.innerText, '', 'artist'),
     album: () => querySelectorReport<string, HTMLElement>('(.byline.ytmusic-player-bar a)[1]', (el) => el.innerText, '', 'album'),
-    cover: () => {
-      const src = querySelectorReport<string, HTMLImageElement>('.thumbnail-image-wrapper img', (el) => el.src, '', 'cover')
-      if (!src) return ''
-      const videoId = src.replace('https://i.ytimg.com/vi/', '').split('/')[0]
-      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-    },
+    // I'm not sure if it shows ads on youtube music but I can't be bothered to not use the mediaSession cover
+    // The cover img's src is sometimes a googleusercontent link
+    cover: () => getMediaSessionCover(),
     duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[1], '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[0], '0:00', 'position'),
-    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => el.volume * 100, 100, 'volume'),
+    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => {
-      const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('(.middle-controls-buttons button)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
+      const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('(.middle-controls-buttons yt-button-shape)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
       if (likeButtonPressed) return 5
-      const dislikeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('.middle-controls-buttons button', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
+      const dislikeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('.middle-controls-buttons yt-button-shape', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
       if (dislikeButtonPressed) return 1
       return 0
     },
