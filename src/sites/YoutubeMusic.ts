@@ -21,10 +21,16 @@ const site: Site = {
       let videoId = lastCoverVideoId
 
       let cover = querySelector<string, HTMLImageElement>('.thumbnail.ytmusic-player.no-transition .yt-img-shadow', (el) => el.src, '')
+      if (cover.includes('googleusercontent')) return cover
       if (cover.includes('data:image'))
         cover = querySelector<string, HTMLImageElement>('.image.ytmusic-player-bar', (el) => el.src, '')
 
       videoId = cover.split('vi/')[1].split('/')[0]
+
+      if (!videoId) {
+        const v = new URLSearchParams(window.location.search).get('v')
+        if (v) videoId = v
+      }
 
       if (videoId && lastCoverVideoId !== videoId) {
         lastCoverVideoId = videoId
