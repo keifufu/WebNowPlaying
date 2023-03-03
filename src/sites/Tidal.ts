@@ -1,5 +1,5 @@
 import { RepeatMode, Site, StateMode } from '../content'
-import { querySelector, querySelectorReport } from '../utils'
+import { querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
 
 let lastKnownVolume = 100
 
@@ -7,7 +7,12 @@ const site: Site = {
   ready: () => querySelector<boolean, HTMLButtonElement>('#footerPlayer', (el) => el !== null, false),
   info: {
     player: () => 'Tidal',
-    state: () => querySelectorReport<StateMode, HTMLButtonElement>('#playbackControlBar button[data-test="pause"]', (el) => StateMode.PLAYING, StateMode.PAUSED, 'state'),
+    state: () => querySelectorReport<StateMode, HTMLButtonElement>('(#playbackControlBar button)[2]', (el) => {
+      const playButtonDataType = el.getAttribute('data-type')
+      if (playButtonDataType === 'button__pause') return StateMode.PAUSED
+      if (playButtonDataType === 'button__play') return StateMode.PLAYING
+      return StateMode.STOPPED
+    }, StateMode.PAUSED, 'state'),
     title: () => querySelectorReport<string, HTMLSpanElement>('#footerPlayer span', (el) => el.innerText, '', 'title'),
     artist: () => querySelectorReport<string, HTMLSpanElement>('(#footerPlayer span)[1]', (el) => el.innerText, '', 'artist'),
     album: () =>
@@ -35,33 +40,32 @@ const site: Site = {
     shuffle: () => querySelectorReport<boolean, HTMLButtonElement>('#playbackControlBar button', (el) => el.getAttribute('aria-checked') === 'true', false, 'shuffle')
   },
   events: {
-    togglePlaying: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[2].click()),
-    next: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[3].click()),
-    previous: () => (document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[1].click()),
+    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('(#playbackControlBar button)[2]', (el) => el.click(), 'togglePlaying'),
+    next: () => querySelectorEventReport<HTMLButtonElement>('(#playbackControlBar button)[3]', (el) => el.click(), 'next'),
+    previous: () => querySelectorEventReport<HTMLButtonElement>('(#playbackControlBar button)[1]', (el) => el.click(), 'previous'),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
-      const el = document.querySelector('div[data-test="interaction-layer"]')
-      if (!el) return
-      const loc = el.getBoundingClientRect()
-      const position = positionPercentage * loc.width
+      querySelectorEventReport<HTMLElement>('div[data-test="interaction-layer"]', (el) => {
+        const loc = el.getBoundingClientRect()
+        const position = positionPercentage * loc.width
 
-      el.dispatchEvent(new MouseEvent('mousedown', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: loc.left + position,
-        clientY: loc.top + (loc.height / 2)
-      }))
-      el.dispatchEvent(new MouseEvent('mouseup', {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: loc.left + position,
-        clientY: loc.top + (loc.height / 2)
-      }))
+        el.dispatchEvent(new MouseEvent('mousedown', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + position,
+          clientY: loc.top + (loc.height / 2)
+        }))
+        el.dispatchEvent(new MouseEvent('mouseup', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: loc.left + position,
+          clientY: loc.top + (loc.height / 2)
+        }))
+      }, 'setPositionPercentage')
     },
     setVolume: null,
-    // TODO: this doesn't work for now
     /* setVolume: (volume: number) => {
       const el = document.querySelector('button[data-test="volume"]')
       if (!el) return
@@ -128,9 +132,9 @@ const site: Site = {
         }
       }, 25)
     }, */
-    toggleRepeat: () => document.querySelectorAll<HTMLButtonElement>('#playbackControlBar button')[4]?.click(),
-    toggleShuffle: () => document.querySelector<HTMLButtonElement>('#playbackControlBar button')?.click(),
-    toggleThumbsUp: () => document.querySelector<HTMLButtonElement>('#footerPlayer .favorite-button')?.click(),
+    toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('(#playbackControlBar button)[4]', (el) => el.click(), 'toggleRepeat'),
+    toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('#playbackControlBar button', (el) => el.click(), 'toggleShuffle'),
+    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('#footerPlayer .favorite-button', (el) => el.click(), 'toggleThumbsDown'),
     toggleThumbsDown: null,
     setRating: (rating: number) => {
       if (rating >= 3 && site.info.rating?.() !== 5)
