@@ -35,7 +35,7 @@ const parseSelector = (_selector: string) => {
   let index = 0
   if (_selector.startsWith('(')) {
     selector = _selector.substring(1, _selector.indexOf(')'))
-    index = parseInt(_selector.substring(_selector.indexOf(')') + 2), _selector.length - 1)
+    index = parseInt(_selector.substring(_selector.indexOf(')') + 2, _selector.length - 1))
   }
   return { selector, index }
 }
@@ -44,36 +44,36 @@ type InfoType = 'state' | 'title' | 'artist' | 'album' | 'cover' | 'duration' | 
 // Selector is either a normal selector, or: '(selector)[index]' for querySelectorAll
 const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E) => T | null, defaultValue: T, type?: InfoType): T => {
   try {
-  const { selector, index } = parseSelector(selectorStr)
-  const el = document.querySelectorAll<E>(selector)[index]
-  if (!el) {
-    if (type) {
-      sendWsMessage({
-        event: 'sendAutomaticReport',
-        report: {
-          message: `[${getSiteName()}] _querySelector could not find element for ${type}`
-        }
-      })
+    const { selector, index } = parseSelector(selectorStr)
+    const el = document.querySelectorAll<E>(selector)[index]
+    if (!el) {
+      if (type) {
+        sendWsMessage({
+          event: 'sendAutomaticReport',
+          report: {
+            message: `[${getSiteName()}] _querySelector could not find element for ${type}`
+          }
+        })
+      }
+      return defaultValue
     }
-    return defaultValue
-  }
-  const result = exec(el)
-  // Exclude 0 as volume can be 0
+    const result = exec(el)
+    // Exclude 0 as volume can be 0
     // Exclude false as shuffle can be false
-  // Empty strings however are not valid
+    // Empty strings however are not valid
     if (!result && result !== 0 && result !== false) {
-    if (type) {
-      sendWsMessage({
-        event: 'sendAutomaticReport',
-        report: {
-          message: `[${getSiteName()}] _querySelector could not get result from exec for ${type}`
-        }
-      })
+      if (type) {
+        sendWsMessage({
+          event: 'sendAutomaticReport',
+          report: {
+            message: `[${getSiteName()}] _querySelector could not get result from exec for ${type}`
+          }
+        })
+      }
+      return defaultValue
     }
-    return defaultValue
-  }
 
-  return result
+    return result
   } catch {
     return defaultValue
   }
@@ -84,26 +84,26 @@ export const querySelectorReport = <T, E extends Element>(selector: string, exec
 type EventType = 'togglePlaying' | 'next' | 'previous' | 'setPositionSeconds' | 'setPositionPercentage' | 'setVolume' | 'toggleRepeat' | 'toggleShuffle' | 'toggleThumbsUp' | 'toggleThumbsDown' | 'setRating'
 export const _querySelectorEvent = <E extends Element>(selectorOrGetter: string | (() => E), action: (el: E) => any, type?: EventType): boolean => {
   try {
-  let el
-  if (typeof selectorOrGetter === 'string') {
-    const { selector, index } = parseSelector(selectorOrGetter)
-    el = document.querySelectorAll<E>(selector)[index]
-  } else {
-    el = selectorOrGetter()
-  }
-  if (!el) {
-    if (type) {
-      sendWsMessage({
-        event: 'sendAutomaticReport',
-        report: {
-          message: `[${getSiteName()}] _querySelectorEvent could not find element for ${type}`
-        }
-      })
+    let el
+    if (typeof selectorOrGetter === 'string') {
+      const { selector, index } = parseSelector(selectorOrGetter)
+      el = document.querySelectorAll<E>(selector)[index]
+    } else {
+      el = selectorOrGetter()
     }
-    return false
-  }
-  action(el)
-  return true
+    if (!el) {
+      if (type) {
+        sendWsMessage({
+          event: 'sendAutomaticReport',
+          report: {
+            message: `[${getSiteName()}] _querySelectorEvent could not find element for ${type}`
+          }
+        })
+      }
+      return false
+    }
+    action(el)
+    return true
   } catch {
     return false
   }
