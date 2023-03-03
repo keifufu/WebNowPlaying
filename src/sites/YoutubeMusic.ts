@@ -1,6 +1,9 @@
 import { RepeatMode, Site, StateMode } from '../content'
 import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../utils'
 
+let currentCoverUrl = ''
+let lastCoverVideoId = ''
+
 // I'm not using mediaSession here because of ads.
 // Of course this isn't an issue with YouTube Premium or adblock, but still.
 const site: Site = {
@@ -16,10 +19,27 @@ const site: Site = {
     album: () => querySelector<string, HTMLElement>('(.byline.ytmusic-player-bar a)[1]', (el) => el.innerText, ''),
     cover: () => {
       let cover = querySelector<string, HTMLImageElement>('.thumbnail.ytmusic-player.no-transition .yt-img-shadow', (el) => el.src, '')
-      if (cover.includes('data:image')) cover = querySelector<string, HTMLImageElement>('.image.ytmusic-player-bar', (el) => el.src, '')
-      cover = cover.split('?')[0]
-      cover = cover.replace('sddefault.jpg', 'hq720.jpg')
-      return cover
+      if (!cover.includes('data:image')) return cover
+
+      cover = querySelector<string, HTMLImageElement>('.image.ytmusic-player-bar', (el) => el.src, '')
+      const videoId = cover.split('vi/')[1].split('/')[0]
+
+      if (videoId && lastCoverVideoId !== videoId) {
+        lastCoverVideoId = videoId
+        const img = document.createElement('img')
+        img.setAttribute('src', `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`)
+        img.addEventListener('load', () => {
+          if (img.height > 90)
+            currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+          else
+            currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+        })
+        img.addEventListener('error', () => {
+          currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+        })
+      }
+
+      return currentCoverUrl
     },
     duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.trim().split(' / ')[1], '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.trim().split(' / ')[0], '0:00', 'position'),
