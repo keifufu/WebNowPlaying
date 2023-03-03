@@ -18,11 +18,13 @@ const site: Site = {
     // There isn't always a album, so I'm not reporting it
     album: () => querySelector<string, HTMLElement>('(.byline.ytmusic-player-bar a)[1]', (el) => el.innerText, ''),
     cover: () => {
-      let cover = querySelector<string, HTMLImageElement>('.thumbnail.ytmusic-player.no-transition .yt-img-shadow', (el) => el.src, '')
-      if (!cover.includes('data:image')) return cover
+      let videoId = lastCoverVideoId
 
-      cover = querySelector<string, HTMLImageElement>('.image.ytmusic-player-bar', (el) => el.src, '')
-      const videoId = cover.split('vi/')[1].split('/')[0]
+      let cover = querySelector<string, HTMLImageElement>('.thumbnail.ytmusic-player.no-transition .yt-img-shadow', (el) => el.src, '')
+      if (cover.includes('data:image'))
+        cover = querySelector<string, HTMLImageElement>('.image.ytmusic-player-bar', (el) => el.src, '')
+
+      videoId = cover.split('vi/')[1].split('/')[0]
 
       if (videoId && lastCoverVideoId !== videoId) {
         lastCoverVideoId = videoId
