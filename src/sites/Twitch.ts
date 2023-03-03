@@ -14,7 +14,7 @@ const site: Site = {
     album: () => querySelectorReport<string, HTMLElement>('a[data-a-target="stream-game-link"] > span, [data-a-target="video-info-game-boxart-link"] p', (el) => el.innerText, '', 'album'),
     cover: () => querySelectorReport<string, HTMLImageElement>(`img[alt="${site.info.artist()}" i]`, (el) => el.src.replace('70x70', '600x600'), '', 'cover'),
     duration: () => {
-      if (document.querySelector('video')?.duration === 1073741824) {
+      if (querySelector<boolean, HTMLVideoElement>('video', (el) => el.duration === 1073741824, false)) {
         return querySelectorReport<string, HTMLElement>('span.live-time', (el) => {
           const duration_read = el.innerText.split(':')
           duration_read.reverse()
@@ -27,7 +27,7 @@ const site: Site = {
       return querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration')
     },
     position: () => {
-      if (document.querySelector('video')?.duration === 1073741824) {
+      if (querySelector<boolean, HTMLVideoElement>('video', (el) => el.duration === 1073741824, false)) {
         return querySelectorReport<string, HTMLElement>('span.live-time', (el) => {
           const duration_read = el.innerText.split(':')
           duration_read.reverse()
