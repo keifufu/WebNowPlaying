@@ -29,7 +29,7 @@ const site: Site = {
   ready: () => {
     // Most elements will already have events attached but this will add it to any new elements
     setupElementEvents()
-    return element !== undefined && element !== null && element.duration > 0
+    return (element !== undefined && element !== null && element.duration > 0) || navigator.mediaSession.metadata !== null
   },
   info: {
     player: () => capitalize(window.location.hostname.split('.').slice(-2).join('.')),
