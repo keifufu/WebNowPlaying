@@ -27,7 +27,7 @@ I will consider adding other websites where there is demand.
 Please keep in mind that I can't easily develop for paid services.
 
 ## Installing
-Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux/)  
+Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux)  
 Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/jfakgfcdgpghbbefmdfjkbdlibjgnbli)  
 Edge, Opera, etc. also use the Chrome Web Store
 
