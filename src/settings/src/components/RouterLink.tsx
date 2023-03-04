@@ -12,7 +12,8 @@ const RouterLink: Component<{ text: string, link: string }> = (props) => {
       class={clsx(
         'cursor-pointer',
         [location.pathname === props.link && theme() === 'dark' && 'text-cyan-500 underline'],
-        [location.pathname === props.link && theme() === 'light' && 'text-cyan-700 underline']
+        [location.pathname === props.link && theme() === 'light' && 'text-cyan-700 underline'],
+        [location.pathname === props.link && theme() === 'konami' && 'text-cyan-300 underline']
       )}
       href={props.link}
     >

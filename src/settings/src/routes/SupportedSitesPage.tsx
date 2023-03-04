@@ -2,6 +2,7 @@ import { Component, For } from 'solid-js'
 import { SupportedSites, TSupportedSites } from '../../../utils'
 import Checkbox from '../components/Checkbox'
 import { useSettings } from '../hooks/useSettings'
+import { useBorderColorClass } from '../hooks/useTheme'
 
 type SiteProps = {
   name: TSupportedSites
@@ -10,6 +11,7 @@ type SiteProps = {
 
 const Site: Component<SiteProps> = (props) => {
   const { settings, saveSettings } = useSettings()
+  const borderColorClass = useBorderColorClass()
 
   const onChange = () => {
     saveSettings(() => ({ ...settings(), disabledSites: settings().disabledSites.includes(props.name) ? settings().disabledSites.filter((a) => a !== props.name) : [...settings().disabledSites, props.name] }), true)
@@ -18,7 +20,7 @@ const Site: Component<SiteProps> = (props) => {
   return (
     // 48.8% for two columns
     // 32% for three columns
-    <div class='m-1 flex w-[48.8%] items-center rounded-md border border-solid border-zinc-500 p-[0.21rem] pl-2'>
+    <div class={`m-1 flex w-[48.8%] items-center rounded-md border border-solid ${borderColorClass()} p-[0.21rem] pl-2`}>
       <Checkbox text={props.name} bigText onChange={onChange} checked={props.enabled} />
     </div>
   )

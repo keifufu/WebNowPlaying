@@ -6,7 +6,7 @@ import Anchor from '../components/Anchor'
 import Checkbox from '../components/Checkbox'
 import Hyperlink from '../components/Hyperlink'
 import { useSettings } from '../hooks/useSettings'
-import { useTheme } from '../hooks/useTheme'
+import { useBorderColorClass, useTheme } from '../hooks/useTheme'
 
 const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: number, updateFrequencyMs: number }> = (props) => {
   const githubLink = `https://github.com/${props.gh}`
@@ -19,6 +19,7 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
   const [githubVersion, setGithubVersion] = createSignal('')
   const [isExpanded, setIsExpanded] = createSignal(false)
   const { theme } = useTheme()
+  const borderColorClass = useBorderColorClass()
 
   const checkVersion = () => {
     // TODO: this is disabled until spicetify is updated
@@ -76,7 +77,7 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
   }
 
   return (
-    <div class='mb-2 flex w-full flex-col items-center rounded-md border border-solid border-zinc-500 p-2'>
+    <div class={`mb-2 flex w-full flex-col items-center rounded-md border border-solid ${borderColorClass()} p-2`}>
       <div class='flex w-full items-center'>
         <Checkbox onChange={onChange} checked={props.enabled} />
         <Hyperlink text={props.name} link={githubLink} />
@@ -93,7 +94,8 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
             class={clsx(
               'ml-auto cursor-pointer hover:underline',
               [theme() === 'dark' && 'text-cyan-500'],
-              [theme() === 'light' && 'text-cyan-700']
+              [theme() === 'light' && 'text-cyan-700'],
+              [theme() === 'konami' && 'text-cyan-300']
             )}
             onClick={checkVersion}
           >
@@ -109,8 +111,10 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
               'ml-auto',
               [theme() === 'dark' && version() === 'Error' && 'text-red-400'],
               [theme() === 'light' && version() === 'Error' && 'text-red-600'],
+              [theme() === 'konami' && version() === 'Error' && 'text-red-400'],
               [theme() === 'dark' && version() !== 'Error' && 'text-green-400'],
-              [theme() === 'light' && version() !== 'Error' && 'text-green-600']
+              [theme() === 'light' && version() !== 'Error' && 'text-green-600'],
+              [theme() === 'konami' && version() !== 'Error' && 'text-green-400']
             )}
           >
             {version() === 'Error' ? 'Not installed' : 'Latest'}
@@ -121,7 +125,8 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
             class={clsx(
               'ml-auto',
               [theme() === 'dark' && 'text-red-400'],
-              [theme() === 'light' && 'text-red-600']
+              [theme() === 'light' && 'text-red-600'],
+              [theme() === 'konami' && 'text-red-400']
             )}
           >
           Couldn't check for updates
@@ -132,7 +137,8 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
             class={clsx(
               'ml-auto',
               [theme() === 'dark' && 'text-red-400'],
-              [theme() === 'light' && 'text-red-600']
+              [theme() === 'light' && 'text-red-600'],
+              [theme() === 'konami' && 'text-red-400']
             )}
           >
             <Hyperlink text='Outdated' link={releasesLink} />
@@ -147,7 +153,7 @@ const Adapter: Component<{ name: string, enabled: boolean, gh: string, port: num
         Update Frequency (ms):
         <input
           onInput={onInputUpdateFrequency}
-          class='form-input mt-2 ml-2 h-6 w-14 rounded-md border border-solid border-zinc-500 bg-transparent px-2 text-sm focus:ring-offset-0'
+          class={`form-input mt-2 ml-2 h-6 w-14 rounded-md border border-solid ${borderColorClass()} bg-transparent px-2 text-sm focus:ring-offset-0`}
           value={props.updateFrequencyMs}
         />
       </div>
@@ -160,6 +166,7 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, updateFrequency
   const { settings, saveSettings } = useSettings()
   const [isExpanded, setIsExpanded] = createSignal(false)
   const { theme } = useTheme()
+  const borderColorClass = useBorderColorClass()
 
   const removePort = () => {
     if (confirmDelete()) {
@@ -184,13 +191,13 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, updateFrequency
   }
 
   return (
-    <div class='mb-2 flex w-full flex-col items-center rounded-md border border-solid border-zinc-500 p-2'>
+    <div class={`mb-2 flex w-full flex-col items-center rounded-md border border-solid ${borderColorClass()} p-2`}>
       <div class='flex w-full items-center'>
         <Checkbox text='Custom Adapter' bigText onChange={onChange} checked={props.enabled} />
         <input
           onInput={onInput}
           placeholder='Port'
-          class='form-input ml-2 h-6 w-14 rounded-md border border-solid border-zinc-500 bg-transparent px-2 text-sm focus:ring-offset-0'
+          class={`form-input ml-2 h-6 w-14 rounded-md border border-solid ${borderColorClass()} bg-transparent px-2 text-sm focus:ring-offset-0`}
           value={props.port === 0 ? '' : props.port}
         />
         <BsCaretRight
@@ -205,7 +212,8 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, updateFrequency
           class={clsx(
             'ml-auto cursor-pointer hover:underline',
             [theme() === 'dark' && 'text-cyan-500'],
-            [theme() === 'light' && 'text-cyan-700']
+            [theme() === 'light' && 'text-cyan-700'],
+            [theme() === 'konami' && 'text-cyan-300']
           )}
           onClick={removePort}
         >
@@ -220,7 +228,7 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, updateFrequency
         Update Frequency (ms):
         <input
           onInput={onInputUpdateFrequency}
-          class='form-input mt-2 ml-2 h-6 w-14 rounded-md border border-solid border-zinc-500 bg-transparent px-2 text-sm focus:ring-offset-0'
+          class={`form-input mt-2 ml-2 h-6 w-14 rounded-md border border-solid ${borderColorClass()} bg-transparent px-2 text-sm focus:ring-offset-0`}
           value={props.updateFrequencyMs}
         />
       </div>

@@ -12,6 +12,7 @@ const Anchor: Component<{ text: string, highlight?: boolean, link?: string, onCl
         'cursor-pointer',
         [props.highlight && theme() === 'dark' && 'text-cyan-500'],
         [props.highlight && theme() === 'light' && 'text-cyan-700'],
+        [props.highlight && theme() === 'konami' && 'text-cyan-300'],
       )}
       href={props.link}
       onClick={props.onClick}
