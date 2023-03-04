@@ -4,11 +4,14 @@ import { getExtensionVersion } from '../../../utils'
 import Checkbox from '../components/Checkbox'
 import Hyperlink from '../components/Hyperlink'
 import { useSettings } from '../hooks/useSettings'
+import { useBorderColorClass, useTheme } from '../hooks/useTheme'
 
 const ReportIssuesPage: Component = () => {
   const { settings, saveSettings } = useSettings()
   const [text, setText] = createSignal('')
   const [submittingState, setSubmittingState] = createSignal<'none' | 'loading' | 'sent' | 'error'>('none')
+  const { theme } = useTheme()
+  const borderColorClass = useBorderColorClass()
 
   const onChange = () => {
     saveSettings(() => ({ ...settings(), useTelemetry: !settings().useTelemetry }), true)
@@ -51,14 +54,15 @@ const ReportIssuesPage: Component = () => {
         disabled={submittingState() !== 'none' && submittingState() !== 'error'}
         onInput={onInput}
         class={clsx(
-          'mt-2 mb-1 h-full w-full resize-none rounded-md border border-solid border-zinc-500 bg-transparent p-2',
-          [submittingState() !== 'none' && submittingState() !== 'error' && 'opacity-50']
+          `mt-2 mb-1 h-full w-full resize-none rounded-md border border-solid ${borderColorClass()} bg-transparent p-2`,
+          [submittingState() !== 'none' && submittingState() !== 'error' && 'opacity-50'],
+          [theme() === 'konami' && 'placeholder:text-gray-400']
         )}
       />
       <button
         disabled={!text() || (submittingState() !== 'none' && submittingState() !== 'error')}
         class={clsx(
-          'fixed top-[12.5rem] right-[1.6rem] rounded-md border border-solid border-zinc-500 bg-transparent p-2',
+          `fixed top-[12.5rem] right-[1.6rem] rounded-md border border-solid ${borderColorClass()} bg-transparent p-2`,
           [(!text() || (submittingState() !== 'none' && submittingState() !== 'error')) && 'opacity-50']
         )}
         onClick={sendReport}
@@ -76,9 +80,12 @@ const ReportIssuesPage: Component = () => {
           Failed to send report. Retry?
         </Show>
       </button>
-      <div class='-mx-3 my-2 w-[111%] border-t border-solid border-zinc-500' />
+      <div class={`-mx-3 my-2 w-[111%] border-t border-solid ${borderColorClass()}`} />
       <Checkbox text='Automatically report when sites appear broken' checked={settings().useTelemetry} onChange={onChange} />
-      <div class='mt-2 text-sm text-gray-500'>
+      <div class={clsx(
+        'mt-2 text-sm text-gray-500',
+        [theme() === 'konami' && 'text-gray-300']
+      )}>
         This will help us improve the extension by sending information about sites that appear to not be working properly. This information will be sent anonymously and will not contain any personal information.
         <br />
         <br />
