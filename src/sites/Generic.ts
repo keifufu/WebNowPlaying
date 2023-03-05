@@ -2,18 +2,15 @@
 import { RepeatMode, Site, StateMode } from '../content'
 import { capitalize, getMediaSessionCover, timeInSecondsToString } from '../utils'
 
-// Mostly also copied from the original extension, other than refactoring it and adding
-// partial mediaSession support, the original was already good enough.
-
+let isInitialized = false
+let updateInterval: NodeJS.Timeout
 let element: HTMLMediaElement
 let artistFromTitle = ''
 
 // Function that sanitizes a title from unicode characters like '◼ ❙❙ ❚❚ ► ▮▮ ▶ ▷ ❘ ❘ ▷' and trim double whitespace
-// Easy website for unicode lookup: https://unicodeplus.com
+// Website for unicode lookup: https://unicodeplus.com
 const sanitizeTitle = (title: string) => title.replace(/[\u25A0\u2759\u275A\u25AE\u25AE\u25B6\u25BA\u25B7\u2758\u25FC]/g, '').trim().replace(/\s+/g, ' ')
 
-let isInitialized = false
-let updateInterval: NodeJS.Timeout
 const site: Site = {
   init: () => {
     if (isInitialized) return
@@ -33,8 +30,9 @@ const site: Site = {
   },
   info: {
     player: () => capitalize(window.location.hostname.split('.').slice(-2).join('.')),
-    // navigator.mediaSession.state is barely ever set, so don't even bother with it
     state: () => {
+      if (navigator.mediaSession.playbackState === 'playing') return StateMode.PLAYING
+      else if (navigator.mediaSession.playbackState === 'paused') return StateMode.PAUSED
       if (!element) return StateMode.STOPPED
       if (element.paused) return StateMode.PAUSED
       else return StateMode.PLAYING
@@ -104,7 +102,7 @@ const site: Site = {
     // Sometimes, the duration and position returned can seem weird
     // I noticed that on adultswim, it's because the video is buffering
     // and the duration keeps increasing? Either way, it doesn't seem
-    // to be an issue with timeInstantToString, and not with
+    // to be an issue with timeInSecondsToString, and not with
     // element.duration/element.currentTime.
     duration: () => timeInSecondsToString(element?.duration || 0),
     position: () => timeInSecondsToString(element?.currentTime || 0),
@@ -153,70 +151,51 @@ window.addEventListener('beforeunload', () => {
   clearInterval(updateInterval)
 })
 
-// This is barely refactored, I decided to just copy it from the original extension
-// The comments below THIS line are also from the original, as reference.
-
-// Proposed solution for dynamic instancing of content:
-// Came up with for Pandora and improved to make it more dynamic
-
-// Basically it adds to every element a function to call on time update
-// This then accumulates sources that have updated until the current element is requested
-// If the last returned element is in the updated list then it is returned
-// If it is not then whatever element was updated the most recently is returned
-// If the list is empty then it returns the last used element
-// If no element has been used in the past then it returns the first video element in that page
-// If there is no video element then it returns the first audio element in that page
-// If these is no elements at all then it returns null
-// At that point in time the accumulated elements are purged from the list
-let elements: any[] = []
+let elements: (HTMLVideoElement | HTMLAudioElement)[] = []
 function updateCurrentElement() {
-  // If any elements have been updated since last check
   if (elements.length > 0) {
-    // If last used element does not exist in array select a new one
+    // If currently used element does not exist in array, find a new one
     if (elements.indexOf(element) < 0) {
-      // Update element to the element that came in most recently
-      // @TO_DO make this ignore elements that are muted or have no sound
-      // @TO_DO prioritize elements in the list that had a state or src change more recently to break ties
-      element = elements[elements.length - 1]
+      const filtered = elements.filter((e) => (!e.muted && e.volume > 0))
+      if (filtered.length > 0) element = filtered[filtered.length - 1]
     }
-  // No elements have been updated, only try to change element if it is null
   } else if (!element) {
-    // Check all audio elements and set element to the first one with any length
-    for (let i = 0; i < document.getElementsByTagName('audio').length; i++) {
-      if (document.getElementsByTagName('audio')[i].duration > 0) {
-        element = document.getElementsByTagName('audio')[i]
+    // Find all audio elements and set element to the first one with any length
+    const audios = Array.from(document.getElementsByTagName('audio'))
+    for (const audio of audios) {
+      if (audio.duration > 0) {
+        element = audio
         break
       }
     }
-    // If no suitable audio element was found try to check for video elements
+    // If no suitable audio element was found, try again with video elements
     if (!element) {
-      // @TO_DO check if there is a way to see if a video has audio
-      for (let i = 0; i < document.getElementsByTagName('video').length; i++) {
-        if (document.getElementsByTagName('video')[i].duration > 0) {
-          element = document.getElementsByTagName('video')[i]
+      const videos = Array.from(document.getElementsByTagName('video'))
+      for (const video of videos) {
+        if (video.duration > 0) {
+          element = video
           break
         }
       }
     }
-  }
 
-  // Clear array of updated elements
-  elements = []
+    elements = []
+  }
 }
 
 function setupElementEvents() {
-  for (let i = 0; i < document.getElementsByTagName('video').length; i++) {
-    if (document.getElementsByTagName('video')[i].ontimeupdate === null) {
-      document.getElementsByTagName('video')[i].ontimeupdate = function() {
-        elements.push(this)
+  for (let i = 0; i < document.getElementsByTagName('audio').length; i++) {
+    if (document.getElementsByTagName('audio')[i].ontimeupdate === null) {
+      document.getElementsByTagName('audio')[i].ontimeupdate = function() {
+        elements.push(this as HTMLAudioElement)
       }
     }
   }
-  for (let i = 0; i < document.getElementsByTagName('audio').length; i++) {
-    // @TO_DO may have to not check if null in case someone else has a time update event already (Although in those cases I may break their site)
-    if (document.getElementsByTagName('audio')[i].ontimeupdate === null) {
-      document.getElementsByTagName('audio')[i].ontimeupdate = function() {
-        elements.push(this)
+
+  for (let i = 0; i < document.getElementsByTagName('video').length; i++) {
+    if (document.getElementsByTagName('video')[i].ontimeupdate === null) {
+      document.getElementsByTagName('video')[i].ontimeupdate = function() {
+        elements.push(this as HTMLVideoElement)
       }
     }
   }
