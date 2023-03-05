@@ -53,6 +53,9 @@ export function SendUpdateLegacy(self: WNPReduxWebSocket) {
       // For numbers, round it to an integer
       if (typeof value === 'number')
         value = Math.round(value)
+      // Trim strings
+      else if (typeof value === 'string')
+        value = value.trim()
 
       // Conversion to legacy values
       if (key === 'state')
@@ -138,6 +141,9 @@ export function SendUpdateRev1(self: WNPReduxWebSocket) {
       // For numbers, round it to an integer
       if (typeof value === 'number')
         value = Math.round(value)
+      // Trim strings
+      else if (typeof value === 'string')
+        value = value.trim()
       // Check for null, and not just falsy, because 0 and '' are falsy
       if (value !== null && value !== self.cache[key]) {
         self.send(`${key.toUpperCase()} ${value}`)
