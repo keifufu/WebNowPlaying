@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Component, createSignal, Show } from 'solid-js'
-import { getExtensionVersion } from '../../../utils'
+import { getExtensionVersion } from '../../../utils/misc'
 import Checkbox from '../components/Checkbox'
 import Hyperlink from '../components/Hyperlink'
 import { useSettings } from '../hooks/useSettings'

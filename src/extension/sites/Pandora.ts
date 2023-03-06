@@ -1,5 +1,6 @@
+import { capitalize } from '../../utils/misc'
+import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
 import { RepeatMode, Site, StateMode } from '../content'
-import { capitalize, querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../utils'
 
 const site: Site = {
   ready: () =>

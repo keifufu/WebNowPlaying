@@ -1,5 +1,6 @@
+import { timeInSecondsToString } from '../../utils/misc'
+import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
 import { RepeatMode, Site, StateMode } from '../content'
-import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 // TODO: support the tiny player it sometimes gives you in the bottom right corner
 

@@ -1,5 +1,6 @@
+import { timeInSecondsToString } from '../../utils/misc'
+import { querySelector, querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
 import { RepeatMode, Site, StateMode } from '../content'
-import { querySelector, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 const site: Site = {
   ready: () =>

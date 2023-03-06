@@ -1,5 +1,6 @@
 import { createSignal } from 'solid-js'
-import { defaultSettings, sendWsMessage, Settings } from '../../../utils'
+import { defaultSettings, Settings } from '../../../utils/settings'
+import { ServiceWorkerUtils } from '../../../utils/sw'
 
 // For anyone reading this, I'm sorry. this is a mess.
 // But it works and doesn't save unnecessarily.
@@ -7,7 +8,7 @@ import { defaultSettings, sendWsMessage, Settings } from '../../../utils'
 let saveTimeout: NodeJS.Timeout
 const [settings, _setSettings] = createSignal<Settings>(defaultSettings);
 (async () => {
-  _setSettings(await sendWsMessage({ event: 'getSettings' }))
+  _setSettings(await ServiceWorkerUtils.getSettings())
 })()
 export const useSettings = () => {
   const _saveSettings = (getSettings: () => Settings, instant = false) => {
@@ -54,8 +55,7 @@ export const useSettings = () => {
         }
 
         if (changed) {
-          console.debug('saving')
-          sendWsMessage({ event: 'saveSettings', settings: newSettings })
+          ServiceWorkerUtils.saveSettings(newSettings)
           _setSettings(newSettings)
         }
       }

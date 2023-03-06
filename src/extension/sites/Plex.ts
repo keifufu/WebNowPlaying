@@ -1,5 +1,6 @@
+import { getMediaSessionCover, timeInSecondsToString } from '../../utils/misc'
+import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport, timeInSecondsToString } from '../utils'
 
 const site: Site = {
   ready: () => querySelector<boolean, HTMLVideoElement>('video', (el) => el !== null && el.duration > 0, false),

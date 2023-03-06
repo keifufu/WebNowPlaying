@@ -1,5 +1,6 @@
+import { getMediaSessionCover } from '../../utils/misc'
+import { querySelector, querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
 import { RepeatMode, Site, StateMode } from '../content'
-import { getMediaSessionCover, querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
 
 // Not reporting duration, position and rating as it seems they disappear once deezer annoys you with its ads
 
