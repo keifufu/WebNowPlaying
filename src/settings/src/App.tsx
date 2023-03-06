@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes } from '@solidjs/router'
 import clsx from 'clsx'
 import { Component, createSignal, onMount } from 'solid-js'
-import { getExtensionVersion, sendWsMessage } from '../../utils'
+import { getExtensionVersion } from '../../utils/misc'
+import { ServiceWorkerUtils } from '../../utils/sw'
 import Hyperlink from './components/Hyperlink'
 import RouterLink from './components/RouterLink'
 import { useBorderColorClass, useTheme } from './hooks/useTheme'
@@ -10,7 +11,7 @@ import ReportIssuesPage from './routes/ReportIssuesPage'
 import SupportedSitesPage from './routes/SupportedSitesPage'
 import UnsupportedSitesPage from './routes/UnsupportedSitesPage'
 
-sendWsMessage({ event: 'resetOutdated' })
+ServiceWorkerUtils.resetOutdated()
 
 const App: Component = () => {
   const { theme, setTheme } = useTheme()

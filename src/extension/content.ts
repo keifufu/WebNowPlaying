@@ -1,3 +1,6 @@
+import { isVersionOutdated } from '../utils/misc'
+import { Adapter, BuiltInAdapters, ContentUtils, CustomAdapter, defaultUpdateFrequencyMs } from '../utils/settings'
+import { ServiceWorkerUtils } from '../utils/sw'
 import { OnMessageLegacy, OnMessageRev1, SendUpdateLegacy, SendUpdateRev1 } from './handlers'
 import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
@@ -12,7 +15,6 @@ import Twitch from './sites/Twitch'
 import Youtube from './sites/Youtube'
 import YoutubeEmbed from './sites/YoutubeEmbed'
 import YoutubeMusic from './sites/YoutubeMusic'
-import { Adapter, BuiltInAdapters, CustomAdapter, defaultSettings, defaultUpdateFrequencyMs, isVersionOutdated, sendWsMessage, Settings } from './utils'
 
 export enum StateMode { STOPPED = 'STOPPED', PLAYING = 'PLAYING', PAUSED = 'PAUSED' }
 export enum RepeatMode { NONE = 'NONE', ONE = 'ONE', ALL = 'ALL' }
@@ -51,11 +53,9 @@ export type Site = {
   }
 }
 
-// Loaded on page load (bottom of content.ts)
-let settings: Settings = defaultSettings
-
 export function getCurrentSite() {
   const host = window.location.hostname
+  const settings = ContentUtils.getSettings()
 
   // prioritize matching youtube.com/embed before youtube.com
   if (host === 'www.youtube.com' && window.location.pathname.startsWith('/embed') && !settings.disabledSites.includes('Youtube Embeds'))
@@ -123,8 +123,11 @@ export class WNPReduxWebSocket {
   }
 
   public close() {
+    this.cache = {}
+    this.communicationRevision = null
     if (this.updateInterval) clearInterval(this.updateInterval)
-    if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+    if (this.connectionTimeout) clearTimeout(this.connectionTimeout)
+    if (this._ws) {
       this._ws.onclose = null
       this._ws.close()
     }
@@ -132,11 +135,7 @@ export class WNPReduxWebSocket {
 
   // Clean up old variables and retry connection
   private retry() {
-    if (this._ws && this._ws.readyState === WebSocket.OPEN) return
-    this.cache = {}
-    this.communicationRevision = null
-    if (this.updateInterval) clearInterval(this.updateInterval)
-    if (this.connectionTimeout) clearTimeout(this.connectionTimeout)
+    this.close()
     // exponential backoff reconnect with a max of 60 seconds
     setTimeout(() => {
       this.init()
@@ -151,7 +150,7 @@ export class WNPReduxWebSocket {
 
   private onOpen() {
     this.reconnectCount = 0
-    this.updateInterval = setInterval(this.sendUpdate.bind(this), settings.updateFrequencyMs[this._adapter.port] || defaultUpdateFrequencyMs)
+    this.updateInterval = setInterval(this.sendUpdate.bind(this), ContentUtils.getSettings().updateFrequencyMs[this._adapter.port] || defaultUpdateFrequencyMs)
     // If no communication revision is received within 1 second, assume it's WNP for Rainmeter < 0.5.0 (legacy)
     this.connectionTimeout = setTimeout(() => {
       if (this.communicationRevision === null) this.communicationRevision = 'legacy'
@@ -186,21 +185,21 @@ export class WNPReduxWebSocket {
       if (event.data.startsWith('Version:')) {
         // 'Version:' WNP for Rainmeter 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
-        sendWsMessage({ event: 'setOutdated' })
+        ServiceWorkerUtils.setOutdated()
       } else if (event.data.startsWith('ADAPTER_VERSION ')) {
         // Any WNPRedux adapter will send 'ADAPTER_VERSION <version>;WNPRLIB_REVISION <revision>' after connecting
         this.communicationRevision = event.data.split(';')[1].split(' ')[1]
         // Check if the adapter is outdated
         const adapterVersion = event.data.split(' ')[1].split(';')[0]
         if ((this._adapter as Adapter).gh) {
-          const githubVersion = await sendWsMessage({ event: 'getGithubVersion', gh: (this._adapter as Adapter).gh })
+          const githubVersion = await ServiceWorkerUtils.getGithubVersion((this._adapter as Adapter).gh)
           if (githubVersion === 'Error') return
-          if (isVersionOutdated(adapterVersion, githubVersion)) sendWsMessage({ event: 'setOutdated' })
+          if (isVersionOutdated(adapterVersion, githubVersion)) ServiceWorkerUtils.setOutdated()
         }
       } else {
         // The first message wasn't version related, so it's probably WNP for Rainmeter < 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
-        sendWsMessage({ event: 'setOutdated' })
+        ServiceWorkerUtils.setOutdated()
       }
     }
   }
@@ -247,14 +246,14 @@ function updateAll(updateInfo: keyof SiteInfo | null, currentState: any = null) 
 }
 
 (async () => {
-  settings = await sendWsMessage({ event: 'getSettings' })
+  await ContentUtils.initSettings()
   // Only initialize the websocket we match the host
   if (getCurrentSite() !== null) {
     BuiltInAdapters.forEach((adapter) => {
-      if (!settings.enabledBuiltInAdapters.includes(adapter.name)) return
+      if (!ContentUtils.getSettings().enabledBuiltInAdapters.includes(adapter.name)) return
       sockets.push(new WNPReduxWebSocket(adapter))
     })
-    settings.customAdapters.forEach((adapter) => {
+    ContentUtils.getSettings().customAdapters.forEach((adapter) => {
       if (!adapter.enabled || adapter.port === 0) return
       sockets.push(new WNPReduxWebSocket(adapter))
     })
@@ -262,6 +261,6 @@ function updateAll(updateInfo: keyof SiteInfo | null, currentState: any = null) 
 })()
 
 matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
-  if (e.matches) sendWsMessage({ event: 'setColorScheme', colorScheme: 'light' })
-  else sendWsMessage({ event: 'setColorScheme', colorScheme: 'dark' })
+  if (e.matches) ServiceWorkerUtils.setColorScheme('light')
+  else ServiceWorkerUtils.setColorScheme('dark')
 })

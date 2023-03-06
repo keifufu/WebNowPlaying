@@ -1,4 +1,5 @@
-import { defaultSettings, getVersionFromGithub, Settings } from './utils'
+import { getVersionFromGithub } from '../utils/misc'
+import { defaultSettings, Settings } from '../utils/settings'
 
 let saveTimeout: NodeJS.Timeout
 
@@ -28,7 +29,7 @@ const readSettings = (): Promise<Settings> => new Promise((resolve) => {
 const ghCache: Record<string, string> = {}
 const reportCache: Record<string, string> = {}
 
-export type WsMessage = {
+export type ServiceWorkerMessage = {
   event: 'sendAutomaticReport' | 'setOutdated' | 'resetOutdated' | 'getGithubVersion' | 'getSettings' | 'saveSettings' | 'setColorScheme',
   settings?: Settings,
   gh?: string,
@@ -36,13 +37,11 @@ export type WsMessage = {
   colorScheme?: 'light' | 'dark'
 }
 
-const handleWsMessage = async (request: WsMessage, sendResponse: (response?: any) => void) => {
+const handleWsMessage = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
   switch (request.event) {
     case 'sendAutomaticReport': {
-      if (!request.report) return
-      if (reportCache[request.report.message]) return
-      const settings = await readSettings()
-      if (!settings.useTelemetry) return
+      // We only send 'sendAutomaticReport' if telemetry is enabled, no need to check here
+      if (!request.report || reportCache[request.report.message]) return
       reportCache[request.report.message] = request.report.message
       fetch('https://keifufu.dev/report', {
         method: 'POST',
@@ -105,7 +104,7 @@ const handleWsMessage = async (request: WsMessage, sendResponse: (response?: any
   }
 }
 
-chrome.runtime.onMessage.addListener((request: WsMessage, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request: ServiceWorkerMessage, sender, sendResponse) => {
   handleWsMessage(request, sendResponse)
 
   /* Return true to keep port open */

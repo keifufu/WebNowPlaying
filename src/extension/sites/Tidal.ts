@@ -1,5 +1,5 @@
+import { querySelector, querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
 import { RepeatMode, Site, StateMode } from '../content'
-import { querySelector, querySelectorEventReport, querySelectorReport } from '../utils'
 
 let lastKnownVolume = 100
 

@@ -16,6 +16,7 @@ export function OnMessageLegacy(self: WNPReduxWebSocket, message: string): keyof
         const [positionInSeconds, positionPercentageStr] = data.split(':')
         const positionPercentage = positionPercentageStr.split('SETPROGRESS ')[1]
         site.events.setPositionSeconds?.(parseInt(positionInSeconds))
+        // We replace(',', '.') because all of legacy versions didn't use InvariantCulture
         site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
         updateInfo = 'position'
         break
@@ -104,6 +105,7 @@ export function OnMessageRev1(self: WNPReduxWebSocket, message: string): keyof S
       case Events.SET_POSITION: {
         const [positionInSeconds, positionPercentage] = data.split(':')
         site.events.setPositionSeconds?.(parseInt(positionInSeconds))
+        // We still replace(',', '.') because v1.0.0 - v1.0.5 didn't use InvariantCulture
         site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
         updateInfo = 'position'
         break
