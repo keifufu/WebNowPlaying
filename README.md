@@ -31,6 +31,21 @@ Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/we
 Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/jfakgfcdgpghbbefmdfjkbdlibjgnbli)  
 Edge, Opera, etc. also use the Chrome Web Store
 
+### If you use an adblocker
+
+Some adblockers block requests to localhost, which breaks this plugin. To fix this, add the following to your adblock's filter list: 
+
+```
+@@||localhost^8974
+@@||localhost^8698
+```
+
+Here's where to find your filter list:
+ - Brave - brave://settings/shields/filters
+ - Ublock Origin
+     - Open the extension settings (different on each browser)
+     - Go to the 'My Filters' tab
+
 ## TODO
 - Section skipping on Youtube
 - Netflix support
