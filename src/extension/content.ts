@@ -133,7 +133,6 @@ export class WNPReduxWebSocket {
     }
   }
 
-  // Clean up old variables and retry connection
   private retry() {
     this.close()
     // exponential backoff reconnect with a max of 60 seconds
@@ -247,7 +246,6 @@ function updateAll(updateInfo: keyof SiteInfo | null, currentState: any = null) 
 
 (async () => {
   await ContentUtils.initSettings()
-  // Only initialize the websocket we match the host
   if (getCurrentSite() !== null) {
     BuiltInAdapters.forEach((adapter) => {
       if (!ContentUtils.getSettings().enabledBuiltInAdapters.includes(adapter.name)) return
