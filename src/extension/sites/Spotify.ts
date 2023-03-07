@@ -1,9 +1,9 @@
 import { getMediaSessionCover } from '../../utils/misc'
-import { querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
+import { querySelector, querySelectorEventReport, querySelectorReport } from '../../utils/selectors'
 import { RepeatMode, Site, StateMode } from '../content'
 
 const site: Site = {
-  ready: () => navigator.mediaSession.metadata !== null,
+  ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('(.player-controls__buttons button svg path)[3]', (el) => true, false),
   info: {
     player: () => 'Spotify',
     // Supports mediaSession.metadata, but not mediaSession.playbackState

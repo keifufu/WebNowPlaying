@@ -56,6 +56,6 @@ export const getVersionFromGithub = async (gh: string) => {
 }
 
 export const getExtensionVersion = () => {
-  if (typeof window.chrome?.runtime?.getManifest === 'function') return chrome.runtime.getManifest().version
+  if (typeof chrome !== 'undefined' && typeof chrome.runtime?.getManifest === 'function') return chrome.runtime.getManifest().version
   else return '0.0.0'
 }

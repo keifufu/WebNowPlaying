@@ -50,7 +50,7 @@ const ReportIssuesPage: Component = () => {
       </div>
       <textarea
         value={text()}
-        placeholder='Describe the issue here...'
+        placeholder='Describe the issue here...\nAdd your discord tag if you want to hear back from us.'
         disabled={submittingState() !== 'none' && submittingState() !== 'error'}
         onInput={onInput}
         class={clsx(

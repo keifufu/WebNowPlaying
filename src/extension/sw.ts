@@ -1,4 +1,4 @@
-import { getVersionFromGithub } from '../utils/misc'
+import { getExtensionVersion, getVersionFromGithub } from '../utils/misc'
 import { defaultSettings, Settings } from '../utils/settings'
 
 let saveTimeout: NodeJS.Timeout
@@ -47,7 +47,7 @@ const handleWsMessage = async (request: ServiceWorkerMessage, sendResponse: (res
         method: 'POST',
         body: JSON.stringify({
           type: 'automatic',
-          extVersion: chrome.runtime.getManifest().version,
+          extVersion: getExtensionVersion(),
           message: request.report.message
         }),
         headers: {
