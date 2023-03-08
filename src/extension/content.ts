@@ -226,10 +226,13 @@ window.addEventListener('beforeunload', () => {
   })
 })
 
-let timeout: NodeJS.Timeout
+let timeout: NodeJS.Timeout | null
 let current = 0
 function updateAll(updateInfo: keyof SiteInfo | null, currentState: any = null) {
-  if (timeout) clearTimeout(timeout)
+  if (timeout) {
+    clearTimeout(timeout)
+    current = 0
+  }
   if (current === 25) {
     current = 0
     return
@@ -238,8 +241,12 @@ function updateAll(updateInfo: keyof SiteInfo | null, currentState: any = null) 
     current += 1
     sockets.forEach((socket) => {
       socket.sendUpdate()
-      if (socket.cache[updateInfo] === currentState)
-        timeout = setTimeout(() => updateAll(updateInfo, currentState), 10)
+      if (socket.cache[updateInfo] === currentState) {
+        timeout = setTimeout(() => {
+          timeout = null
+          updateAll(updateInfo, currentState)
+        }, 10)
+      }
     })
   }
 }
