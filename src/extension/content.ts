@@ -15,6 +15,7 @@ import Twitch from './sites/Twitch'
 import Youtube from './sites/Youtube'
 import YoutubeEmbed from './sites/YoutubeEmbed'
 import YoutubeMusic from './sites/YoutubeMusic'
+import RadioAddict from './sites/RadioAddict'
 
 export enum StateMode { STOPPED = 'STOPPED', PLAYING = 'PLAYING', PAUSED = 'PAUSED' }
 export enum RepeatMode { NONE = 'NONE', ONE = 'ONE', ALL = 'ALL' }
@@ -83,6 +84,8 @@ export function getCurrentSite() {
     return Youtube
   else if (host === 'music.youtube.com' && !settings.disabledSites.includes('Youtube Music'))
     return YoutubeMusic
+  else if (host === 'www.radio-addict.com' && !settings.disabledSites.includes('Radio Addict'))
+    return RadioAddict
 
   if (settings.useGeneric) {
     if (settings.useGenericList) {
