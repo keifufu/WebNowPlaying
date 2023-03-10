@@ -57,7 +57,8 @@ export function getCurrentSite() {
   return null
 }
 
-const cache: Record<string, any> = {}
+let mediaInfoCache: Record<string, any> = {}
+export const clearMediaInfoCache = () => mediaInfoCache = {}
 export const getMediaInfo = () => {
   const site = getCurrentSite()
   const mediaInfo: Partial<MediaInfo> = {}
@@ -73,9 +74,9 @@ export const getMediaInfo = () => {
     // Trim strings
     else if (typeof value === 'string')
       value = value.trim()
-    if (value !== null && value !== undefined && cache[key] !== value) {
+    if (value !== null && value !== undefined && mediaInfoCache[key] !== value) {
       (mediaInfo[key] as any) = value
-      cache[key] = value
+      mediaInfoCache[key] = value
     }
   })
 

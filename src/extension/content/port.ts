@@ -1,6 +1,6 @@
 import { ContentUtils } from '../../utils/settings'
 import { SiteInfo } from '../types'
-import { getCurrentSite, getMediaInfo } from './utils'
+import { clearMediaInfoCache, getCurrentSite, getMediaInfo } from './utils'
 
 let port: chrome.runtime.Port
 export const initPort = async () => {
@@ -12,6 +12,7 @@ export const initPort = async () => {
 
 function connect(id: string) {
   if (!chrome.runtime.id) return
+  clearMediaInfoCache()
   port = chrome.runtime.connect({ name: id })
   port.onDisconnect.addListener(() => connect(id))
   port.onMessage.addListener(onMessage)
