@@ -3,7 +3,7 @@ import { Settings } from '../../utils/settings'
 import { readSettings } from './shared'
 
 export type ServiceWorkerMessage = {
-  event: 'keepAlive' | 'sendAutomaticReport' | 'resetOutdated' | 'getSettings' | 'saveSettings' | 'setColorScheme',
+  event: 'sendAutomaticReport' | 'resetOutdated' | 'getSettings' | 'saveSettings' | 'setColorScheme',
   settings?: Settings,
   report?: { message: string },
   colorScheme?: 'light' | 'dark'
@@ -11,8 +11,7 @@ export type ServiceWorkerMessage = {
 
 let saveTimeout: NodeJS.Timeout
 const reportCache: Record<string, string> = {}
-export const MessageHandler = async (request: ServiceWorkerMessage, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
-  if (request.event === 'keepAlive') return false
+export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
   switch (request.event) {
     case 'sendAutomaticReport': {
       // We only send 'sendAutomaticReport' if telemetry is enabled, no need to check here
@@ -60,5 +59,4 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sender: chro
     default:
       break
   }
-  return true
 }
