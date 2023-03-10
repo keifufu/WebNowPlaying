@@ -2,7 +2,7 @@ import { ServiceWorkerMessage } from '../extension/sw/messaging'
 import { ContentUtils, defaultSettings, Settings } from './settings'
 
 const _sendSwMessage = (message: ServiceWorkerMessage, defaultValue?: any): Promise<any> => new Promise((resolve) => {
-  if (!window?.chrome?.runtime?.id) {
+  if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
     resolve(defaultValue)
     return
   }
