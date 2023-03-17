@@ -18,9 +18,9 @@ const site: Site = {
     position: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video[src]', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video[src]', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => {
-      const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('#segmented-like-button button, #like-button button', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
+      const likeButtonPressed = querySelector<boolean, HTMLButtonElement>('#segmented-like-button button, #like-button button', (el) => el.getAttribute('aria-pressed') === 'true', false)
       if (likeButtonPressed) return 5
-      const dislikeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('#segmented-dislike-button button, #dislike-button button', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
+      const dislikeButtonPressed = querySelector<boolean, HTMLButtonElement>('#segmented-dislike-button button, #dislike-button button', (el) => el.getAttribute('aria-pressed') === 'true', false)
       if (dislikeButtonPressed) return 1
       return 0
     },
@@ -62,8 +62,8 @@ const site: Site = {
       if (!success) querySelectorEventReport<HTMLVideoElement>('.html5-main-video[src]', (el) => el.loop = !el.loop, 'toggleRepeat')
     },
     toggleShuffle: () => querySelectorEvent<HTMLButtonElement>('(#playlist-action-menu button)[1]', (el) => el.click()),
-    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('#segmented-like-button button, #like-button button', (el) => el.click(), 'toggleThumbsUp'),
-    toggleThumbsDown: () => querySelectorEventReport<HTMLButtonElement>('#segmented-dislike-button button, #dislike-button button', (el) => el.click(), 'toggleThumbsDown'),
+    toggleThumbsUp: () => querySelectorEvent<HTMLButtonElement>('#segmented-like-button button, #like-button button', (el) => el.click()),
+    toggleThumbsDown: () => querySelectorEvent<HTMLButtonElement>('#segmented-dislike-button button, #dislike-button button', (el) => el.click()),
     setRating: (rating: number) => ratingUtils.likeDislike(site, rating)
   }
 }
