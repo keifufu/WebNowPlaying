@@ -42,15 +42,15 @@ export type SiteInfo = {
   cover: () => string // Default '' (empty string)
   duration: () => string // Default '0:00'
   position: () => string // Default '0:00'
-  volume: (() => number) | null // Default 100
-  rating: (() => number) | null // Default 0
+  volume: () => number // Default 100
+  rating: () => number // Default 0
   repeat: () => RepeatMode // Default RepeatEnum.NONE
   shuffle: () => boolean // Default false
 }
 
 export type Site = {
   init?: () => void
-  ready: () => boolean,
+  ready: () => boolean
   info: SiteInfo
   events: {
     togglePlaying: (() => void) | null

@@ -5,8 +5,8 @@ export type CustomAdapter = {
   enabled: boolean
 }
 
-export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Navidrome' | 'Pandora' | 'Plex' | 'Soundcloud' | 'Spotify' | 'Tidal' | 'Twitch' | 'Youtube' | 'Youtube Embeds' | 'Youtube Music'
-export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Navidrome', 'Pandora', 'Plex', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'Youtube', 'Youtube Embeds', 'Youtube Music']
+export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Navidrome' | 'Pandora' | 'Plex' | 'Radio Addict' | 'Soundcloud' | 'Spotify' | 'Tidal' | 'Twitch' | 'Youtube' | 'Youtube Embeds' | 'Youtube Music'
+export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Navidrome', 'Pandora', 'Plex', 'Radio Addict', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'Youtube', 'Youtube Embeds', 'Youtube Music']
 
 // updateFrequencyMs was previously in use as a object to store the update frequency
 // for each adapter.

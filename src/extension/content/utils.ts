@@ -7,6 +7,7 @@ import Generic from './sites/Generic'
 import Navidrome from './sites/Navidrome'
 import Pandora from './sites/Pandora'
 import Plex from './sites/Plex'
+import RadioAddict from './sites/RadioAddict'
 import Soundcloud from './sites/Soundcloud'
 import Spotify from './sites/Spotify'
 import Tidal from './sites/Tidal'
@@ -35,6 +36,8 @@ export function getCurrentSite() {
     return Pandora
   else if (host === 'app.plex.tv' && !settings.disabledSites.includes('Plex'))
     return Plex
+  else if (host === 'www.radio-addict.com' && !settings.disabledSites.includes('Radio Addict'))
+    return RadioAddict
   else if (host === 'soundcloud.com' && !settings.disabledSites.includes('Soundcloud'))
     return Soundcloud
   else if (host === 'open.spotify.com' && !settings.disabledSites.includes('Spotify'))

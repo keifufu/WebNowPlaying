@@ -15,6 +15,7 @@ This information can be utilized by external adapters to manage the media, inclu
 - Navidrome
 - Pandora
 - Plex
+- Radio Addict
 - SoundCloud
 - Spotify
 - Tidal
