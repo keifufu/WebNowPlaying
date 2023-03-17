@@ -67,7 +67,10 @@ const site: Site = {
       }, 'setPositionSeconds')
     },
     setPositionPercentage: null,
-    setVolume: (volume: number) => querySelectorEventReport<HTMLVideoElement>('video', (el) => el.volume = volume / 100, 'setVolume'),
+    setVolume: (volume: number) => querySelectorEventReport<HTMLVideoElement>('video', (el) => {
+      el.muted = false
+      el.volume = volume / 100
+    }, 'setVolume'),
     toggleRepeat: null,
     toggleShuffle: null,
     toggleThumbsUp: null,
