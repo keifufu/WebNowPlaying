@@ -18,10 +18,20 @@ const Site: Component<SiteProps> = (props) => {
   }
 
   return (
-    // 48.8% for two columns
-    // 32% for three columns
-    <div class={`m-1 flex w-[48.8%] items-center rounded-md border border-solid ${borderColorClass()} p-[0.21rem] pl-2`}>
+    <div class={`m-[0.19rem] flex w-[32.7%] items-center rounded-md border border-solid ${borderColorClass()} p-[0.21rem] pl-2`}>
       <Checkbox text={props.name} bigText onChange={onChange} checked={props.enabled} />
+    </div>
+  )
+}
+
+const Placeholder = () => {
+  const borderColorClass = useBorderColorClass()
+
+  return (
+    <div class={`m-[0.19rem] flex w-[32.7%] items-center rounded-md border border-solid ${borderColorClass()} p-[0.21rem] pl-2`}>
+      <div class='-mt-0.5 opacity-0'>
+        Placeholder
+      </div>
     </div>
   )
 }
@@ -34,6 +44,12 @@ const SiteSettingsPage: Component = () => {
       <For each={SupportedSites}>
         {(site) => (
           <Site name={site} enabled={!settings().disabledSites.includes(site)} />
+        )}
+      </For>
+      {/* fill the extra spaces */}
+      <For each={[...Array(30 - SupportedSites.length)].map((_, i) => i)}>
+        {() => (
+          <Placeholder />
         )}
       </For>
     </div>
