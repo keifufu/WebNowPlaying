@@ -47,15 +47,14 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean }> = (props) => {
   const borderColorClass = useBorderColorClass()
 
   const checkVersion = () => {
-    setGithubError(true)
-    /* setIsLoading(true)
+    setIsLoading(true)
 
-    getVersionFromGithub(props.gh).then((v) => {
+    getVersionFromGithub(props.adapter.gh).then((v) => {
       if (v === 'Error') return setGithubError(true)
       setGithubVersion(v)
     })
 
-    const ws = new WebSocket(`ws://localhost:${props.port}`)
+    const ws = new WebSocket(`ws://localhost:${props.adapter.port}`)
     // Timeout that wil be executed if the websocket doesn't connect within 3.5s
     const connectionTimeout = setTimeout(() => {
       setVersion('Error')
@@ -79,7 +78,7 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean }> = (props) => {
       else if (e.data.startsWith('ADAPTER_VERSION ')) setVersion(e.data.split(' ')[1].split(';')[0])
       // It send an event that isn't version related, so it's probably WNP for Rainmeter < 0.5.0
       else setVersion('0.0.0')
-    } */
+    }
   }
 
   createEffect(() => {

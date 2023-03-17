@@ -37,8 +37,7 @@ export const getGithubVersion = (gh: string): Promise<string> => new Promise(asy
 })
 
 export const setOutdated = () => {
-  // TODO: enable this again once spicetify is updated
-  // chrome.action.setBadgeText({ text: '!' })
-  // chrome.action.setBadgeBackgroundColor({ color: [255, 0, 0, 255] })
-  // chrome.action.setTitle({ title: 'One of the adapters is outdated. Click to check.' })
+  chrome.action.setBadgeText({ text: '!' })
+  chrome.action.setBadgeBackgroundColor({ color: [255, 0, 0, 255] })
+  chrome.action.setTitle({ title: 'One of your adapters is outdated. Click to check.' })
 }
