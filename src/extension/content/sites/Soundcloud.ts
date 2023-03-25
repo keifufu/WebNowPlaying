@@ -15,7 +15,7 @@ const site: Site = {
     duration: () => querySelectorReport<string, HTMLElement>('(.playbackTimeline__duration > span)[1]', (el) => el.innerText, '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLElement>('(.playbackTimeline__timePassed > span)[1]', (el) => el.innerText, '0:00', 'position'),
     volume: () => {
-      const p = querySelectorReport<number, HTMLElement>('.volume__sliderProgress', (el) => parseInt(el.style.height), 1, 'volume')
+      const p = querySelectorReport<number, HTMLElement>('.volume__sliderProgress', (el) => el.getBoundingClientRect().height, 1, 'volume')
       const h = querySelectorReport<number, HTMLElement>('.volume__sliderBackground', (el) => el.getBoundingClientRect().height, 1, 'volume')
       return (p / h) * 100
     },
