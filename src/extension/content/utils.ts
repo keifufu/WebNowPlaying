@@ -7,6 +7,7 @@ import Bandcamp from './sites/Bandcamp'
 import Deezer from './sites/Deezer'
 import Generic from './sites/Generic'
 import Navidrome from './sites/Navidrome'
+import Netflix from './sites/Netflix'
 import Pandora from './sites/Pandora'
 import Plex from './sites/Plex'
 import RadioAddict from './sites/RadioAddict'
@@ -48,6 +49,8 @@ export const ContentUtils = {
   getYouTubeInfo: () => ContentUtils.sendMessage<YouTubeInfo>({ event: 'getYouTubeInfo' }),
   getYouTubeMusicVolume: () => ContentUtils.sendMessage<number>({ event: 'getYouTubeMusicVolume' }),
   setYouTubeMusicVolume: (volume: number) => ContentUtils.sendMessage({ event: 'setYouTubeMusicVolume', data: volume }),
+  seekNetflix: (time: number) => ContentUtils.sendMessage({ event: 'seekNetflix', data: time }),
+  getNetflixInfo: () => ContentUtils.sendMessage<MediaInfo>({ event: 'getNetflixInfo' })
 }
 
 function _getCurrentSite() {
@@ -55,8 +58,8 @@ function _getCurrentSite() {
   const settings = ContentUtils.getSettings()
 
   // prioritize matching youtube.com/embed before youtube.com
-  if (host === 'www.youtube.com' && window.location.pathname.startsWith('/embed') && !settings.disabledSites.includes('Youtube Embeds'))
-    return YoutubeEmbed
+  if (host === 'www.youtube.com' && window.location.pathname.startsWith('/embed') && !settings.disabledSites.includes('YouTube Embeds'))
+    return YouTubeEmbed
 
   if (host === 'music.apple.com' && !settings.disabledSites.includes('Apple Music'))
     return Applemusic
@@ -66,6 +69,8 @@ function _getCurrentSite() {
     return Deezer
   else if (document.querySelector('[content="Navidrome"]') !== null && !settings.disabledSites.includes('Navidrome'))
     return Navidrome
+  else if (host === 'www.netflix.com' && !settings.disabledSites.includes('Netflix'))
+    return Netflix
   else if (host === 'www.pandora.com' && !settings.disabledSites.includes('Pandora'))
     return Pandora
   else if (host === 'app.plex.tv' && !settings.disabledSites.includes('Plex'))

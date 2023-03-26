@@ -12,7 +12,8 @@ const site: Site = {
     state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
     title: () => querySelectorReport<string, HTMLElement>('h2[data-a-target="stream-title"]', (el) => el.innerText, '', 'title'),
     artist: () => querySelectorReport<string, HTMLElement>('h1.tw-title', (el) => el.innerText, '', 'artist'),
-    album: () => querySelectorReport<string, HTMLElement>('a[data-a-target="stream-game-link"] > span, [data-a-target="video-info-game-boxart-link"] p', (el) => el.innerText, '', 'album'),
+    // Seems there are scenarios where there is no 'album', so we don't report it
+    album: () => querySelector<string, HTMLElement>('a[data-a-target="stream-game-link"] > span, [data-a-target="video-info-game-boxart-link"] p', (el) => el.innerText, ''),
     cover: () => querySelectorReport<string, HTMLImageElement>(`img[alt="${site.info.artist()}" i]`, (el) => el.src.replace('70x70', '600x600'), '', 'cover'),
     duration: () => {
       if (querySelector<boolean, HTMLVideoElement>('video', (el) => el.duration === 1073741824, false)) {

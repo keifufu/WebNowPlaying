@@ -2,7 +2,6 @@
 import { capitalize, getMediaSessionCover, timeInSecondsToString } from '../../../utils/misc'
 import { RepeatMode, Site, StateMode } from '../../types'
 
-let isInitialized = false
 let updateInterval: NodeJS.Timeout
 let element: HTMLMediaElement
 let artistFromTitle = ''
@@ -13,8 +12,6 @@ const sanitizeTitle = (title: string) => title.replace(/[\u25A0\u2759\u275A\u25A
 
 const site: Site = {
   init: () => {
-    if (isInitialized) return
-    isInitialized = true
     console.log('Initializing generic site')
     // Setup events on all elements to get when updated (Also called in readyCheck)
     setupElementEvents()
@@ -75,7 +72,7 @@ const site: Site = {
       if (artistFromTitle !== '')
         return artistFromTitle
 
-      // Returns 'Youtube' for youtube.com, 'Spotify' for open.spotify.com, etc.
+      // Returns 'YouTube' for youtube.com, 'Spotify' for open.spotify.com, etc.
       return capitalize(document.location.hostname.split('.').slice(-2)[0])
     },
     album: () => {
