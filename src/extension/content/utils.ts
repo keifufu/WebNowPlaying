@@ -1,5 +1,7 @@
-import { ContentUtils } from '../../utils/settings'
-import { MediaInfo, Site, SiteInfo } from '../types'
+import { getRandomToken } from '../../utils/misc'
+import { defaultSettings } from '../../utils/settings'
+import { ServiceWorkerUtils } from '../../utils/sw'
+import { MediaInfo, Site, SiteInfo, YouTubeInfo } from '../types'
 import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
 import Deezer from './sites/Deezer'
@@ -12,11 +14,37 @@ import Soundcloud from './sites/Soundcloud'
 import Spotify from './sites/Spotify'
 import Tidal from './sites/Tidal'
 import Twitch from './sites/Twitch'
-import Youtube from './sites/Youtube'
-import YoutubeEmbed from './sites/YoutubeEmbed'
-import YoutubeMusic from './sites/YoutubeMusic'
+// This is for use in any file that ends up compiled into content.js
+// as instead of constantly requesting the settings from the service
+// worker, we just store it in a variable
+let _settings = defaultSettings
+export const ContentUtils = {
+  getSettings: () => _settings,
+  init: async () => {
+    _settings = await ServiceWorkerUtils.getSettings()
 
-export function getCurrentSite() {
+    if (document.querySelector('#wnp-injected') === null) {
+      const script = document.createElement('script')
+      script.id = 'wnp-injected'
+      script.src = chrome.runtime.getURL('injected.js')
+      document.documentElement.appendChild(script)
+    }
+  },
+  sendMessage: <T>({ event, data }: { event: string, data?: any }): Promise<T> => new Promise((resolve) => {
+    const id = getRandomToken()
+    const listener = (e: any) => {
+      if (e.data.type === 'wnp-response' && e.data.id === id) {
+        resolve(e.data.value)
+        window.removeEventListener('message', listener)
+      }
+    }
+    window.addEventListener('message', listener)
+    window.postMessage({ id, type: 'wnp-message', event, data }, '*')
+  }),
+  getYouTubeInfo: () => ContentUtils.sendMessage<YouTubeInfo>({ event: 'getYouTubeInfo' }),
+}
+
+function _getCurrentSite() {
   const host = window.location.hostname
   const settings = ContentUtils.getSettings()
 
@@ -61,6 +89,15 @@ export function getCurrentSite() {
   }
 
   return null
+}
+
+export const getCurrentSite = () => {
+  const site = _getCurrentSite()
+  if (site && !site.isInitialized) {
+    site.isInitialized = true
+    site.init?.()
+  }
+  return site
 }
 
 const mediaInfoCache = new Map<string, any>()

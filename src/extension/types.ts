@@ -49,6 +49,7 @@ export type SiteInfo = {
 }
 
 export type Site = {
+  isInitialized?: boolean,
   init?: () => void
   ready: () => boolean
   info: SiteInfo
@@ -65,4 +66,40 @@ export type Site = {
     toggleThumbsDown: (() => void) | null
     setRating: ((rating: number) => void) | null
   }
+}
+
+export type YouTubeVideoDetails = {
+  videoId?: string
+  title?: string
+  lengthSeconds?: string
+  keywords?: string[]
+  channelId?: string
+  isOwnerViewing?: boolean
+  shortDescription?: string
+  isCrawlable?: boolean
+  thumbnail?: {
+    thumbnails: {
+      url: string
+      height: number
+      width: number
+    }[]
+  }
+  allowRatings?: boolean
+  viewCount?: string
+  author?: string
+  isPrivate?: boolean
+  isUnpluggedCorpus?: boolean
+  isLiveContent?: boolean
+}
+
+// There are more but I only care about these right now
+export type YouTubePlaylistDetails = {
+  title: string
+  playlistId: string
+}
+
+export type YouTubeInfo = {
+  videoDetails: YouTubeVideoDetails | null
+  playlistDetails: YouTubePlaylistDetails | null
+  containerLocalName: string | null
 }

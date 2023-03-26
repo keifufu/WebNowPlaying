@@ -1,11 +1,10 @@
 import { getRandomToken } from '../../utils/misc'
-import { ContentUtils } from '../../utils/settings'
 import { SiteInfo } from '../types'
-import { getCurrentSite, getMediaInfo, setSendFullMediaInfo } from './utils'
+import { ContentUtils, getCurrentSite, getMediaInfo, setSendFullMediaInfo } from './utils'
 
 let port: chrome.runtime.Port
 export const initPort = async () => {
-  await ContentUtils.initSettings()
+  await ContentUtils.init()
   const id = getRandomToken(24)
   if (getCurrentSite() !== null)
     connect(id)

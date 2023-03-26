@@ -13,6 +13,18 @@ export const getMediaSessionCover = () => {
   return biggestImage.src
 }
 
+export const findBiggestImage = (images: { url: string, width: number, height: number }[]) => {
+  const [biggestImage] = images.sort((a, b) => {
+    const aSize = a.width * a.height
+    const bSize = b.width * b.height
+
+    return bSize - aSize
+  })
+
+  if (!biggestImage) return null
+  return biggestImage.url
+}
+
 // Converts every word in a string to start with a capital letter
 export const capitalize = (str: string) => str.toLowerCase().replace(/(?:^|\s)\S/g, (a) => a.toUpperCase())
 

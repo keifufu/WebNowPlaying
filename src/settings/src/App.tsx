@@ -5,6 +5,7 @@ import { getExtensionVersion } from '../../utils/misc'
 import { ServiceWorkerUtils } from '../../utils/sw'
 import Hyperlink from './components/Hyperlink'
 import RouterLink from './components/RouterLink'
+import Settings from './components/Settings'
 import { useBorderColorClass, useTheme } from './hooks/useTheme'
 import AdaptersPage from './routes/AdaptersPage'
 import ReportIssuesPage from './routes/ReportIssuesPage'
@@ -90,6 +91,7 @@ const App: Component = () => {
           <Hyperlink text='GitHub' link='https://github.com/keifufu/WebNowPlaying-Redux' /> | v{getExtensionVersion()}
         </div>
       </div>
+      <Settings />
     </div>
   )
 }

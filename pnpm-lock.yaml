@@ -17,6 +17,7 @@ specifiers:
   ncp: ^2.0.0
   postcss: ^8.4.21
   rimraf: ^3.0.2
+  solid-icons: ^1.0.4
   solid-js: ^1.6.10
   solid-use: ^0.6.2
   tailwindcss: ^3.2.7
@@ -30,6 +31,7 @@ specifiers:
 dependencies:
   '@solidjs/router': 0.7.0_solid-js@1.6.10
   clsx: 1.2.1
+  solid-icons: 1.0.4_solid-js@1.6.10
   solid-js: 1.6.10
   solid-use: 0.6.2_solid-js@1.6.10
 
@@ -3260,6 +3262,15 @@ packages:
     resolution: {integrity: sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==}
     engines: {node: '>=12'}
     dev: true
+
+  /solid-icons/1.0.4_solid-js@1.6.10:
+    resolution: {integrity: sha512-gJTp4in3+OYCs9WvDkSLt4Los2unR3Uoder8wjh15GsfP20xiNOLfPTJllXmn+fI8+k3x7bRYtLGIgWd9fUQug==}
+    engines: {node: '>= 16'}
+    peerDependencies:
+      solid-js: '*'
+    dependencies:
+      solid-js: 1.6.10
+    dev: false
 
   /solid-js/1.6.10:
     resolution: {integrity: sha512-Sf0e6PQCEFkFtbPq0L+93Ua81YQOefBEbvDJ0YXT92b6Lzw0k7UvzSd2l1BbYM+yzE3UmepU1tyMDc/3nIByjA==}

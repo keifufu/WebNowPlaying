@@ -1,12 +1,30 @@
-import { ServiceWorkerUtils } from './sw'
-
 export type CustomAdapter = {
   port: number
   enabled: boolean
 }
 
-export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Navidrome' | 'Pandora' | 'Plex' | 'Radio Addict' | 'Soundcloud' | 'Spotify' | 'Tidal' | 'Twitch' | 'Youtube' | 'Youtube Embeds' | 'Youtube Music'
-export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Navidrome', 'Pandora', 'Plex', 'Radio Addict', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'Youtube', 'Youtube Embeds', 'Youtube Music']
+export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Navidrome' | 'Netflix' | 'Pandora' | 'Plex' | 'Radio Addict' | 'Soundcloud' | 'Spotify' | 'Tidal' | 'Twitch' | 'YouTube' | 'YouTube Embeds' | 'YouTube Music'
+export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Navidrome', 'Netflix', 'Pandora', 'Plex', 'Radio Addict', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'YouTube', 'YouTube Embeds', 'YouTube Music']
+
+type TSiteSettings = Partial<{
+  [key in TSupportedSites]: {
+    name: string
+    description: string
+    key: string
+    type: 'checkbox'
+  }[]
+}>
+
+export const SiteSettings: TSiteSettings = {
+  YouTube: [
+    {
+      name: 'Skip through chapters',
+      description: 'If a video has chapters or a comment with chapter timestamps, skip to the next/previous chapter instead of the next/previous video when using the skip buttons.',
+      key: 'YouTubeSkipChapters',
+      type: 'checkbox'
+    }
+  ]
+}
 
 // updateFrequencyMs was previously in use as a object to store the update frequency
 // for each adapter.
@@ -20,7 +38,9 @@ export type Settings = {
   customAdapters: CustomAdapter[]
   enabledBuiltInAdapters: string[]
   disabledSites: TSupportedSites[]
-  useTelemetry: boolean
+  useTelemetry: boolean,
+  /* Site Settings */
+  YouTubeSkipChapters: boolean
 }
 
 export const defaultSettings: Settings = {
@@ -32,7 +52,9 @@ export const defaultSettings: Settings = {
   customAdapters: [],
   enabledBuiltInAdapters: ['Rainmeter Adapter'],
   disabledSites: [],
-  useTelemetry: false
+  useTelemetry: false,
+  /* Site Settings */
+  YouTubeSkipChapters: false
 }
 
 export type Adapter = {
@@ -73,14 +95,3 @@ export const BuiltInAdapters: Adapter[] = [
     ]
   }
 ]
-
-// This is for use in any file that ends up compiled into content.js
-// as instead of constantly requesting the settings from the service
-// worker, we just store it in a variable
-let _settings = defaultSettings
-export const ContentUtils = {
-  initSettings: async () => {
-    _settings = await ServiceWorkerUtils.getSettings()
-  },
-  getSettings: () => _settings
-}

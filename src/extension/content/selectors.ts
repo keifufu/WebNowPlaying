@@ -1,6 +1,6 @@
 import { ServiceWorkerUtils } from '../../utils/sw'
 
-const parseSelector = (_selector: string) => {
+export const parseSelector = (_selector: string) => {
   let selector = _selector
   let index = 0
   if (_selector.startsWith('(')) {

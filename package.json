@@ -9,6 +9,7 @@
   "dependencies": {
     "@solidjs/router": "^0.7.0",
     "clsx": "^1.2.1",
+    "solid-icons": "^1.0.4",
     "solid-js": "^1.6.10",
     "solid-use": "^0.6.2"
   },
