@@ -14,6 +14,10 @@ import Soundcloud from './sites/Soundcloud'
 import Spotify from './sites/Spotify'
 import Tidal from './sites/Tidal'
 import Twitch from './sites/Twitch'
+import YouTube from './sites/YouTube'
+import YouTubeEmbed from './sites/YouTubeEmbed'
+import YouTubeMusic from './sites/YouTubeMusic'
+
 // This is for use in any file that ends up compiled into content.js
 // as instead of constantly requesting the settings from the service
 // worker, we just store it in a variable
@@ -42,6 +46,8 @@ export const ContentUtils = {
     window.postMessage({ id, type: 'wnp-message', event, data }, '*')
   }),
   getYouTubeInfo: () => ContentUtils.sendMessage<YouTubeInfo>({ event: 'getYouTubeInfo' }),
+  getYouTubeMusicVolume: () => ContentUtils.sendMessage<number>({ event: 'getYouTubeMusicVolume' }),
+  setYouTubeMusicVolume: (volume: number) => ContentUtils.sendMessage({ event: 'setYouTubeMusicVolume', data: volume }),
 }
 
 function _getCurrentSite() {
@@ -74,10 +80,10 @@ function _getCurrentSite() {
     return Tidal
   else if (host === 'www.twitch.tv' && !settings.disabledSites.includes('Twitch'))
     return Twitch
-  else if (host === 'www.youtube.com' && !settings.disabledSites.includes('Youtube'))
-    return Youtube
-  else if (host === 'music.youtube.com' && !settings.disabledSites.includes('Youtube Music'))
-    return YoutubeMusic
+  else if (host === 'www.youtube.com' && !settings.disabledSites.includes('YouTube'))
+    return YouTube
+  else if (host === 'music.youtube.com' && !settings.disabledSites.includes('YouTube Music'))
+    return YouTubeMusic
 
   if (settings.useGeneric) {
     if (settings.useGenericList) {

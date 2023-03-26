@@ -13,6 +13,7 @@ This information can be utilized by external adapters to manage the media, inclu
 - Bandcamp
 - Deezer
 - Navidrome
+- Netflix
 - Pandora
 - Plex
 - Radio Addict
@@ -21,7 +22,7 @@ This information can be utilized by external adapters to manage the media, inclu
 - Tidal
 - Twitch
 - YouTube
-- Youtube Embeds
+- YouTube Embeds
 - YouTube Music
 - Any website with a video or audio element might work, you can enable them in the options (Click the extension icon)
 
@@ -40,8 +41,6 @@ Right click "WebNowPlaying Redux" > Manage Extension > Permissions > Access your
 View the wiki page [here](https://github.com/keifufu/WebNowPlaying-Redux/wiki/Troubleshooting)
 
 ## TODO
-- Section skipping on Youtube
-- Netflix support
 - Volume support for: Deezer, Pandora, Tidal
 
 ## Building from source

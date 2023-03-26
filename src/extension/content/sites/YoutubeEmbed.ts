@@ -12,7 +12,7 @@ const site: Site = {
     querySelector<boolean, HTMLElement>('.ytp-title-text', (el) => el.innerText.length > 0, false)
     && querySelector<boolean, HTMLVideoElement>('.html5-video-player', (el) => !el.classList.contains('unstarted-mode'), false),
   info: {
-    player: () => 'Youtube Embed',
+    player: () => 'YouTube Embed',
     state: () => {
       let state = querySelectorReport<StateMode, HTMLVideoElement>('.html5-main-video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state')
       // It is possible for the video to be "playing" but not started

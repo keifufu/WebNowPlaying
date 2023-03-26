@@ -16,6 +16,21 @@ window.addEventListener('message', (e: any) => {
           }
         }, '*')
         break
+      case 'getYouTubeMusicVolume':
+        window.postMessage({
+          id: e.data.id,
+          type: 'wnp-response',
+          value: (document.querySelector('ytmusic-player-bar') as any)?.playerApi_?.getVolume?.()
+        }, '*')
+        break
+      case 'setYouTubeMusicVolume':
+        (document.querySelector('ytmusic-player-bar') as any)?.playerApi_?.setVolume?.(e.data.data)
+        window.postMessage({
+          id: e.data.id,
+          type: 'wnp-response',
+          value: null
+        }, '*')
+        break
       default:
         window.postMessage({
           id: e.data.id,
