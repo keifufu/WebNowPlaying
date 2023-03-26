@@ -1,9 +1,10 @@
 import { getExtensionVersion } from '../../utils/misc'
 import { Settings } from '../../utils/settings'
+import { reloadSockets } from './port'
 import { readSettings } from './shared'
 
 export type ServiceWorkerMessage = {
-  event: 'sendAutomaticReport' | 'resetOutdated' | 'getSettings' | 'saveSettings' | 'setColorScheme',
+  event: 'sendAutomaticReport' | 'resetOutdated' | 'getSettings' | 'saveSettings' | 'setColorScheme' | 'reloadSockets',
   settings?: Settings,
   report?: { message: string },
   colorScheme?: 'light' | 'dark'
@@ -55,6 +56,9 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
           256: 'icons/icon-darkmode-256.png'
         }
       })
+      break
+    case 'reloadSockets':
+      await reloadSockets()
       break
     default:
       break

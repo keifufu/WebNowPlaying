@@ -40,3 +40,20 @@ html, body {
   max-height: 478px;
   height: 478px;
 }
+
+.lmao div, .lmao input:not([type="checkbox"]), .lmao textarea, .lmao button {
+  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
+  border-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red) 1;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  animation: wiggle-zoom 1s ease-in-out infinite;
+}
+
+@keyframes wiggle-zoom {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(0.1deg) scale(1.005); }
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(-0.1deg) scale(1.005); }
+  100% { transform: rotate(0deg) scale(1); }
+}

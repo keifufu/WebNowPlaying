@@ -7,9 +7,11 @@ export class WNPReduxWebSocket {
   ws: WebSocket | null = null
   adapter: Adapter | CustomAdapter
   cache = new Map<string, any>()
-  reconnectCount = 0
+  reconnectAttempts = 0
   communicationRevision: string | null = null
   connectionTimeout: NodeJS.Timeout | null = null
+  reconnectTimeout: NodeJS.Timeout | null = null
+  isClosed = false
   executeEvent: (communicationRevision: string, data: string) => void
 
   constructor(adapter: Adapter | CustomAdapter, executeEvent: (communicationRevision: string, data: string) => void) {
@@ -19,20 +21,21 @@ export class WNPReduxWebSocket {
   }
 
   private init() {
-    try {
-      this.ws = new WebSocket(`ws://localhost:${this.adapter.port}`)
-      this.ws.onopen = this.onOpen.bind(this)
-      this.ws.onclose = this.onClose.bind(this)
-      this.ws.onerror = this.onError.bind(this)
-      this.ws.onmessage = this.onMessage.bind(this)
-    } catch {
-      this.retry()
-    }
+    // try/catch does nothing. If the connection fails, it will call onError.
+    // The extension will only log errors to chrome://extensions if it's loaded unpacked.
+    // It won't show those errors to the user.
+    this.ws = new WebSocket(`ws://localhost:${this.adapter.port}`)
+    this.ws.onopen = this.onOpen.bind(this)
+    this.ws.onclose = this.onClose.bind(this)
+    this.ws.onerror = this.onError.bind(this)
+    this.ws.onmessage = this.onMessage.bind(this)
   }
 
-  public close() {
+  public close(cleanupOnly = false) {
+    if (!cleanupOnly) this.isClosed = true
     this.cache = new Map<string, any>()
     this.communicationRevision = null
+    if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout)
     if (this.connectionTimeout) clearTimeout(this.connectionTimeout)
     if (this.ws) {
       this.ws.onclose = null
@@ -41,12 +44,13 @@ export class WNPReduxWebSocket {
   }
 
   private retry() {
-    this.close()
-    // exponential backoff reconnect with a max of 60 seconds
-    setTimeout(() => {
+    if (this.isClosed) return
+    this.close(true)
+    // Reconnects once per second for 30 seconds, then with a exponential backoff of (2^reconnectAttempts) up to 60 seconds
+    this.reconnectTimeout = setTimeout(() => {
       this.init()
-      this.reconnectCount += 1
-    }, Math.min(1000 * (2 ** this.reconnectCount), 60000))
+      this.reconnectAttempts += 1
+    }, Math.min(1000 * (this.reconnectAttempts <= 30 ? 1 : (2 ** (this.reconnectAttempts - 30))), 60000))
   }
 
   public send(data: string) {
@@ -55,7 +59,7 @@ export class WNPReduxWebSocket {
   }
 
   private onOpen() {
-    this.reconnectCount = 0
+    this.reconnectAttempts = 0
     // If no communication revision is received within 1 second, assume it's WNP for Rainmeter < 0.5.0 (legacy)
     this.connectionTimeout = setTimeout(() => {
       if (this.communicationRevision === null) this.communicationRevision = 'legacy'

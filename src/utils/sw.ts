@@ -1,5 +1,6 @@
+import { ContentUtils } from '../extension/content/utils'
 import { ServiceWorkerMessage } from '../extension/sw/messaging'
-import { ContentUtils, defaultSettings, Settings } from './settings'
+import { defaultSettings, Settings } from './settings'
 
 const _sendSwMessage = (message: ServiceWorkerMessage, defaultValue?: any): Promise<any> => new Promise((resolve) => {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
@@ -23,5 +24,6 @@ export const ServiceWorkerUtils = {
   resetOutdated: () => _sendSwMessage({ event: 'resetOutdated' }),
   getSettings: () => _sendSwMessage({ event: 'getSettings' }, defaultSettings),
   saveSettings: (settings: Settings) => _sendSwMessage({ event: 'saveSettings', settings }),
-  setColorScheme: (colorScheme: 'light' | 'dark') => _sendSwMessage({ event: 'setColorScheme', colorScheme })
+  setColorScheme: (colorScheme: 'light' | 'dark') => _sendSwMessage({ event: 'setColorScheme', colorScheme }),
+  reloadSockets: () => _sendSwMessage({ event: 'reloadSockets' })
 }

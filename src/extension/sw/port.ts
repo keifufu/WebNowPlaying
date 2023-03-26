@@ -11,7 +11,7 @@ type PortMessage = {
 const disconnectTimeouts = new Map<string, NodeJS.Timeout>()
 const mediaInfoDictionary = new Map<string, MediaInfo>()
 const ports = new Map<string, chrome.runtime.Port>()
-const sockets: WNPReduxWebSocket[] = []
+let sockets: WNPReduxWebSocket[] = []
 let mediaInfoId: string | null = null
 
 const updateAll = () => {
@@ -87,8 +87,11 @@ function onMessage(message: PortMessage, port: Port) {
       const currentMediaInfo = mediaInfoDictionary.get(port.name) ?? defaultMediaInfo
       mediaInfoDictionary.set(port.name, { ...currentMediaInfo, ...message.mediaInfo })
 
-      // Don't check for (currentMediaInfo.title !== ''), it's not an oversight.
-      if (message.mediaInfo.position || message.mediaInfo.state || message.mediaInfo.title)
+      let shouldUpdate = false
+      for (const key in message.mediaInfo)
+        if (key !== 'position') shouldUpdate = true
+
+      if (shouldUpdate && (currentMediaInfo.title.length > 0 || (message.mediaInfo.title?.length || 0) > 0))
         updateMediaInfo()
 
       updateAll()
@@ -106,7 +109,15 @@ function deleteTimer(port: Port) {
 }
 
 export const initPort = async () => {
+  await reloadSockets()
+}
+
+let _interval: NodeJS.Timeout | null = null
+export const reloadSockets = async () => {
   const settings = await readSettings()
+  if (_interval) clearInterval(_interval)
+  sockets.forEach((socket) => socket.close())
+  sockets = []
   BuiltInAdapters.forEach((adapter) => {
     if (!settings.enabledBuiltInAdapters.includes(adapter.name)) return
     sockets.push(new WNPReduxWebSocket(adapter, executeEvent))
@@ -116,7 +127,7 @@ export const initPort = async () => {
     sockets.push(new WNPReduxWebSocket(adapter, executeEvent))
   })
 
-  setInterval(() => {
+  _interval = setInterval(() => {
     for (const port of ports.values())
       port.postMessage({ event: 'getMediaInfo' })
   }, settings.updateFrequencyMs2)

@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { Component, createEffect, createSignal, For, Show } from 'solid-js'
 import { getVersionFromGithub, isVersionOutdated } from '../../../utils/misc'
 import { Adapter as TAdapter, BuiltInAdapters } from '../../../utils/settings'
+import { ServiceWorkerUtils } from '../../../utils/sw'
 import Anchor from '../components/Anchor'
 import Checkbox from '../components/Checkbox'
 import Hyperlink from '../components/Hyperlink'
@@ -265,6 +266,9 @@ const AdaptersPage: Component = () => {
             value={settings().updateFrequencyMs2}
             placeholder='ms'
           />
+          <div class='ml-auto mt-1.5 mr-1'>
+            <Anchor text='Apply and Reload' highlight onClick={() => ServiceWorkerUtils.reloadSockets()} />
+          </div>
         </div>
       </div>
     </div>
