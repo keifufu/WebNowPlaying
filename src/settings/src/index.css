@@ -16,6 +16,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+.without-ring {
+  @apply focus:ring-0 focus:ring-offset-0 appearance-none outline-none;
+}
+
 /* Remove scrollbars (WebKit) */
 *::-webkit-scrollbar {
   display: none;

@@ -15,7 +15,7 @@ const Checkbox: Component<{ label?: string, children?: any, text?: string, bigTe
         onChange={props.onChange}
         disabled={props.disabled}
         class={clsx(
-          `form-checkbox mr-2 h-4 w-4 rounded ${borderColorClass()} bg-transparent transition-all duration-200 ease-in-out focus:ring-offset-0`,
+          `form-checkbox mr-2 h-4 w-4 rounded ${borderColorClass()} without-ring bg-transparent transition-all duration-200 ease-in-out`,
           [theme() === 'dark' && 'text-cyan-600'],
           [theme() === 'light' && 'text-cyan-700'],
           [theme() === 'konami' && 'text-cyan-500'],
@@ -37,7 +37,11 @@ const Checkbox: Component<{ label?: string, children?: any, text?: string, bigTe
         </label>
       </Show>
       <Show when={props.children}>
-        {props.children}
+        <div class={clsx(
+          [props.disabled && 'opacity-50'],
+        )}>
+          {props.children}
+        </div>
       </Show>
     </div>
   )
