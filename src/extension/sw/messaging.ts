@@ -1,4 +1,4 @@
-import { getExtensionVersion } from '../../utils/misc'
+import { getExtensionVersion, isDeveloperMode } from '../../utils/misc'
 import { Settings } from '../../utils/settings'
 import { reloadSockets } from './port'
 import { readSettings } from './shared'
@@ -16,7 +16,8 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
   switch (request.event) {
     case 'sendAutomaticReport': {
       // We only send 'sendAutomaticReport' if telemetry is enabled, no need to check here
-      if (!request.report || reportCache.get(request.report.message)) return
+      const isDev = await isDeveloperMode()
+      if (isDev || !request.report || reportCache.get(request.report.message)) return
       reportCache.set(request.report.message, true)
       fetch('https://keifufu.dev/report', {
         method: 'POST',

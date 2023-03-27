@@ -139,7 +139,7 @@ module.exports = {
       'warn'
     ],
     'no-promise-executor-return': [
-      'warn'
+      'off'
     ],
     'no-prototype-builtins': [
       'warn'

@@ -79,3 +79,13 @@ export const getRandomToken = (length = 24) => {
     result += characters.charAt(Math.floor(Math.random() * characters.length))
   return result
 }
+
+let _isDeveloperMode: boolean | null = null
+export const isDeveloperMode = (): Promise<boolean> => new Promise((resolve) => {
+  if (_isDeveloperMode !== null) return resolve(_isDeveloperMode)
+  if (typeof chrome === 'undefined') return resolve(true)
+  chrome.management.getSelf().then((e) => {
+    _isDeveloperMode = e.installType === 'development'
+    resolve(_isDeveloperMode)
+  })
+})

@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Component, createSignal, Show } from 'solid-js'
-import { getExtensionVersion } from '../../../utils/misc'
+import { getExtensionVersion, isDeveloperMode } from '../../../utils/misc'
 import Checkbox from '../components/Checkbox'
 import Hyperlink from '../components/Hyperlink'
 import { useSettings } from '../hooks/useSettings'
@@ -21,26 +21,33 @@ const ReportIssuesPage: Component = () => {
     setText((e.target as HTMLTextAreaElement).value)
   }
 
-  const sendReport = () => {
+  const sendReport = async () => {
     if (!text()) return
     setSubmittingState('loading')
-    const data = {
-      type: 'manual',
-      message: text(),
-      extVersion: getExtensionVersion()
-    }
-    fetch('https://keifufu.dev/report', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
+    const isDev = await isDeveloperMode()
+    if (isDev) {
+      setTimeout(() => {
+        setSubmittingState('error')
+      }, 1000)
+    } else {
+      const data = {
+        type: 'manual',
+        message: text(),
+        extVersion: getExtensionVersion()
       }
-    }).then((e) => {
-      if (e?.status === 200) setSubmittingState('sent')
-      else setSubmittingState('error')
-    }).catch(() => {
-      setSubmittingState('error')
-    })
+      fetch('https://keifufu.dev/report', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then((e) => {
+        if (e?.status === 200) setSubmittingState('sent')
+        else setSubmittingState('error')
+      }).catch(() => {
+        setSubmittingState('error')
+      })
+    }
   }
 
   return (
