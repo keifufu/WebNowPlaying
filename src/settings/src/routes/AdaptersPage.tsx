@@ -213,6 +213,7 @@ const AdaptersPage: Component = () => {
   const { settings, saveSettings } = useSettings()
   const borderColorClass = useBorderColorClass()
   const { theme } = useTheme()
+  const [reloadDisabled, setReloadDisabled] = createSignal(false)
 
   const onInputUpdateFrequency = (e: InputEvent) => {
     const updateFrequencyMs2 = parseInt((e.target as HTMLInputElement).value)
@@ -267,7 +268,15 @@ const AdaptersPage: Component = () => {
             placeholder='ms'
           />
           <div class='ml-auto mt-1.5 mr-1'>
-            <Anchor text='Apply and Reload' highlight onClick={() => ServiceWorkerUtils.reloadSockets()} />
+            <Anchor
+              text='Apply and Reload'
+              highlight
+              onClick={() => {
+                setReloadDisabled(true)
+                ServiceWorkerUtils.reloadSockets()
+              }}
+              disabled={reloadDisabled()}
+            />
           </div>
         </div>
       </div>
