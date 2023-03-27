@@ -95,7 +95,6 @@ function _getCurrentSite() {
       if (settings.isListBlocked && settings.genericList.includes(host)) return null
       if (!settings.isListBlocked && !settings.genericList.includes(host)) return null
     }
-    Generic.init?.()
     return Generic
   }
 
