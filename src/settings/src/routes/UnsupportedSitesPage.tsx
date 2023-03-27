@@ -25,7 +25,7 @@ const GenericSettingsPage: Component = () => {
   }
 
   return (
-    <div class='ml-1 flex h-full w-full flex-col'>
+    <div class='mx-1 flex h-full w-full flex-col'>
       <Checkbox text='Try to parse media from unsupported websites' checked={settings().useGeneric} onChange={onChangeUseGeneric} />
       <Checkbox label='www' checked={settings().useGenericList} onChange={onChangeUseGenericList} disabled={!settings().useGeneric}>
         <label

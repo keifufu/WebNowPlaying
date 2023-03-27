@@ -51,7 +51,7 @@ const ReportIssuesPage: Component = () => {
   }
 
   return (
-    <div class='ml-1 flex h-full w-full flex-col'>
+    <div class='mx-1 flex h-full w-full flex-col'>
       <div>
         Fill out the form below or open an issue on <Hyperlink highlight text='GitHub' link='https://github.com/keifufu/WebNowPlaying-Redux/issues' />.
       </div>
@@ -69,7 +69,7 @@ const ReportIssuesPage: Component = () => {
       <button
         disabled={!text() || (submittingState() !== 'none' && submittingState() !== 'error')}
         class={clsx(
-          `fixed top-[12.5rem] right-[1.6rem] rounded-md border border-solid ${borderColorClass()} bg-transparent p-2`,
+          `fixed top-[12.5rem] right-[2rem] rounded-md border border-solid ${borderColorClass()} bg-transparent p-2`,
           [(!text() || (submittingState() !== 'none' && submittingState() !== 'error')) && 'opacity-50']
         )}
         onClick={sendReport}
