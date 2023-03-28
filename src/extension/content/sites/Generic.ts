@@ -84,15 +84,20 @@ const site: Site = {
       return ''
     },
     cover: () => {
-      if ((navigator.mediaSession.metadata?.artwork?.length || 0) > 0)
-        return getMediaSessionCover()
+      const mediaSessionCover = getMediaSessionCover()
+      if (mediaSessionCover) return mediaSessionCover
 
-      if (element && element.getAttribute('poster'))
-        return element.getAttribute('poster') as string
+      const poster = element?.getAttribute('poster')
+      if (poster) {
+        if (poster.startsWith('http')) return poster
+        else return document.location.origin + poster
+      }
 
-      const ogImage = document.querySelector('meta[property="og:image"]')
-      if (ogImage !== null && ogImage.getAttribute('content'))
-        return ogImage.getAttribute('content') as string
+      const ogImageContent = document.querySelector('meta[property="og:image"]')?.getAttribute('content')
+      if (ogImageContent) {
+        if (ogImageContent.startsWith('http')) return ogImageContent
+        else return document.location.origin + ogImageContent
+      }
 
       return ''
     },
@@ -103,7 +108,7 @@ const site: Site = {
     // element.duration/element.currentTime.
     duration: () => timeInSecondsToString(element?.duration || 0),
     position: () => timeInSecondsToString(element?.currentTime || 0),
-    volume: () => (element?.muted ? 0 : (element?.volume || 1) * 100),
+    volume: () => (element?.muted ? 0 : (element?.volume ?? 1) * 100),
     rating: () => 0,
     repeat: () => (element?.loop ? RepeatMode.ONE : RepeatMode.NONE),
     shuffle: () => false
@@ -111,8 +116,7 @@ const site: Site = {
   events: {
     togglePlaying: () => {
       if (!element) return
-      if (element.paused) element.play()
-      else element.pause()
+      element.paused ? element.play() : element.pause()
     },
     next: () => {
       if (!element) return
@@ -129,8 +133,7 @@ const site: Site = {
     setPositionPercentage: null,
     setVolume: (volume: number) => {
       if (!element) return
-      if (element.muted) element.muted = false
-      if (volume === 0) element.muted = true
+      element.muted = false
       element.volume = volume / 100
     },
     toggleRepeat: () => {
