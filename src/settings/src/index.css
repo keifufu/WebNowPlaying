@@ -45,7 +45,7 @@ html, body {
   height: 478px;
 }
 
-.lmao div, .lmao input:not([type="checkbox"]), .lmao textarea, .lmao button {
+.lmao div, .lmao input:not([type="checkbox"]):not([type="radio"]), .lmao textarea, .lmao button {
   background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
   border-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red) 1;
   -webkit-background-clip: text;

@@ -54,7 +54,6 @@ const GenericSettingsPage: Component = () => {
                   onChange={(e) => saveSettings(() => ({ ...settings(), isListBlocked: (e.target as HTMLSelectElement).value === 'block' }))}
                   class={clsx(
                     `form-select mx-1 h-6 w-20 rounded-md border border-solid ${borderColorClass()} without-ring py-0 px-2 text-sm`,
-                    '',
                     [(!settings().useGeneric || !settings().useGenericList) && 'opacity-50'],
                     [(settings().useGeneric && settings().useGenericList) && 'cursor-pointer'],
                     [theme() === 'dark' && 'bg-[#2b2a33] text-white'],
