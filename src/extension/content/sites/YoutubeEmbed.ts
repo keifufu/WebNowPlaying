@@ -48,7 +48,7 @@ const site: Site = {
     },
     duration: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
-    volume: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video', (el) => (el.muted ? 0 : el.volume * 100), 0, 'volume'),
+    volume: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => 0,
     repeat: () => querySelectorReport<RepeatMode, HTMLVideoElement>('.html5-main-video', (el) => (el.loop ? RepeatMode.ONE : RepeatMode.NONE), RepeatMode.NONE, 'repeat'),
     shuffle: () => shuffleState
@@ -111,9 +111,8 @@ const site: Site = {
     setPositionPercentage: null,
     setVolume: (volume: number) => {
       querySelectorEventReport<HTMLVideoElement>('.html5-main-video', (el) => {
+        el.muted = false
         el.volume = volume / 100
-        if (volume === 0) el.muted = true
-        else el.muted = false
       }, 'setVolume')
     },
     toggleRepeat: () => querySelectorEventReport<HTMLVideoElement>('.html5-main-video', (el) => el.loop = !el.loop, 'toggleRepeat'),
