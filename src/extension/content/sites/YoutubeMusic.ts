@@ -3,12 +3,12 @@ import { RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 import { ContentUtils, ratingUtils } from '../utils'
 
-let lastVolume = 100
+let currentVolume = 100
 
 const site: Site = {
   init: () => {
     setInterval(async () => {
-      lastVolume = await ContentUtils.getYouTubeMusicVolume() ?? 100
+      currentVolume = await ContentUtils.getYouTubeMusicVolume() ?? 100
     }, ContentUtils.getSettings().updateFrequencyMs2 / 2)
   },
   ready: () =>
@@ -20,10 +20,10 @@ const site: Site = {
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
-    cover: () => getMediaSessionCover(),
+    cover: () => getMediaSessionCover().split('?')[0],
     duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[1], '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[0], '0:00', 'position'),
-    volume: () => lastVolume,
+    volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : currentVolume), currentVolume, 'volume'),
     rating: () => {
       const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('(.middle-controls-buttons yt-button-shape)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
       if (likeButtonPressed) return 5
@@ -67,8 +67,12 @@ const site: Site = {
       }, 'setPositionPercentage')
     },
     setVolume: (volume: number) => {
+      querySelectorEventReport<HTMLVideoElement>('video', (el) => {
+        // Can't just set el.muted to false for some reason
+        if (el.muted) querySelectorEventReport<HTMLButtonElement>('.volume', (el) => el.click(), 'setVolume')
+      }, 'setVolume')
       ContentUtils.setYouTubeMusicVolume(volume)
-      lastVolume = volume
+      currentVolume = volume
     },
     toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('.repeat', (el) => el.click(), 'toggleRepeat'),
     toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.shuffle', (el) => el.click(), 'toggleShuffle'),
