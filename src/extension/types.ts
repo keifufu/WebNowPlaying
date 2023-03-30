@@ -92,7 +92,6 @@ export type YouTubeVideoDetails = {
   isLiveContent?: boolean
 }
 
-// There are more but I only care about these right now
 export type YouTubePlaylistDetails = {
   title: string
   playlistId: string
@@ -102,4 +101,53 @@ export type YouTubeInfo = {
   videoDetails: YouTubeVideoDetails | null
   playlistDetails: YouTubePlaylistDetails | null
   containerLocalName: string | null
+}
+
+type NetflixImage = {
+  url: string
+  w: number
+  h: number
+}
+
+type NetflixEpisode = {
+  thumbs: NetflixImage[]
+  title: string
+  seq: number
+}
+
+type NetflixSeason = {
+  episodes: NetflixEpisode[]
+  title: string
+  longName: string
+  seq: number
+  shortName: string
+}
+
+type NetflixSeasonData = {
+  episode: NetflixEpisode
+  season: NetflixSeason
+  seasons: NetflixSeason[]
+  title: string,
+  type: 'movie' | 'show'
+}
+
+export type NetflixInfo = {
+  seasonData: NetflixSeasonData
+  navData: {
+    prevId?: string
+    currId?: string
+    nextId?: string
+  }
+  metadata: {
+    _metadata: {
+      video: {
+        artwork: NetflixImage[]
+        boxart: NetflixImage[]
+        storyart: NetflixImage[]
+        title: string,
+        type: 'movie' | 'show'
+      }
+    }
+  }
+  isPlayerReady: boolean
 }

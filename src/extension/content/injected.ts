@@ -1,4 +1,4 @@
-import { YouTubeVideoDetails } from '../types'
+import { NetflixInfo, YouTubeVideoDetails } from '../types'
 
 export { }
 
@@ -10,9 +10,9 @@ window.addEventListener('message', (e: any) => {
           id: e.data.id,
           type: 'wnp-response',
           value: {
-            videoDetails: getVideoDetails(),
-            playlistDetails: findKey(getYouTubeContainer()?.querySelector('#playlist'), 'data'),
-            containerLocalName: getYouTubeContainer()?.localName
+            videoDetails: YouTube.getVideoDetails(),
+            playlistDetails: findKey(YouTube.getContainer()?.querySelector('#playlist'), 'data'),
+            containerLocalName: YouTube.getContainer()?.localName
           }
         }, '*')
         break
@@ -32,7 +32,7 @@ window.addEventListener('message', (e: any) => {
         }, '*')
         break
       case 'seekNetflix':
-        getNetflixPlayer()?.seek?.(e.data.data * 1000)
+        Netflix.getPlayer()?.seek?.(e.data.data * 1000)
         window.postMessage({
           id: e.data.id,
           type: 'wnp-response',
@@ -43,7 +43,7 @@ window.addEventListener('message', (e: any) => {
         window.postMessage({
           id: e.data.id,
           type: 'wnp-response',
-          value: getNetflixInfo()
+          value: Netflix.getInfo()
         }, '*')
         break
       default:
@@ -71,117 +71,114 @@ function findKey(obj: any, key: string): any {
   return null
 }
 
-function getYouTubeContainer(): Element | null {
-  const previewPlayer = document.querySelector('ytd-video-preview')
-  if (findKey(previewPlayer, 'active')) return previewPlayer
-  const shortsPlayer = document.querySelector('ytd-shorts')
-  if (findKey(shortsPlayer, 'active')) return shortsPlayer
-  const miniPlayer = document.querySelector('ytd-miniplayer')
-  if (findKey(miniPlayer, 'active')) return miniPlayer
-  const flexyPlayer = document.querySelector('ytd-watch-flexy')
-  if (findKey(flexyPlayer, 'active')) return flexyPlayer
-  return null
-}
-
-function getVideoDetails(): YouTubeVideoDetails {
-  let details
-  const container = getYouTubeContainer()
-  if (!container) return {}
-  switch (container.localName) {
-    case 'ytd-video-preview':
-      details = findKey(container, 'videoPreviewFetchRequest.result_.videoDetails')
-      break
-    case 'ytd-miniplayer':
-      details = findKey(container, 'watchResponse.playerResponse.videoDetails')
-      break
-    case 'ytd-shorts':
-    case 'ytd-watch-flexy':
-      details = findKey(container, 'playerData.videoDetails')
-      break
-    default:
-      details = findKey(document.querySelector('ytd-app'), 'data.playerResponse.videoDetails')
-  }
-  return details ?? {}
-}
-
-function getNetflixContext() {
-  return (window as any)?.netflix?.appContext
-}
-
-function getNetflixAPI() {
-  return getNetflixContext().getState?.()?.playerApp?.getAPI?.()
-}
-
-function getSessionId() {
-  let sessionId = null
-  for (const id of getNetflixAPI()?.videoPlayer?.getAllPlayerSessionIds?.() ?? []) {
-    if (id.startsWith('watch-')) {
-      sessionId = id
-      break
-    }
-  }
-  return sessionId
-}
-
-function getNetflixPlayer() {
-  return getNetflixAPI()?.videoPlayer?.getVideoPlayerBySessionId?.(getSessionId())
-}
-
-function getNetflixMetadata(): any {
-  try {
-    return Object.values(
-      getNetflixContext()?.getPlayerApp?.()?.getState?.()?.videoPlayer?.videoMetadata
-    ).find((data: any) => '_video' in data)
-  } catch {
+const YouTube = {
+  getContainer: (): Element | null => {
+    const previewPlayer = document.querySelector('ytd-video-preview')
+    if (findKey(previewPlayer, 'active')) return previewPlayer
+    const shortsPlayer = document.querySelector('ytd-shorts')
+    if (findKey(shortsPlayer, 'active')) return shortsPlayer
+    const miniPlayer = document.querySelector('ytd-miniplayer')
+    if (findKey(miniPlayer, 'active')) return miniPlayer
+    const flexyPlayer = document.querySelector('ytd-watch-flexy')
+    if (findKey(flexyPlayer, 'active')) return flexyPlayer
     return null
-  }
-}
-
-function getSeasonData() {
-  const metadata = getNetflixMetadata()?._metadata?.video
-  if (metadata?.seasons) {
-    const getEpisode = (season: any) => [...season?.episodes].find((episode) => episode?.id === metadata?.currentEpisode)
-    const season = [...metadata?.seasons].find(getEpisode)
-    return {
-      type: metadata?.type,
-      title: metadata?.title,
-      episode: getEpisode(season),
-      season,
-      seasons: metadata?.seasons
+  },
+  getVideoDetails: (): YouTubeVideoDetails => {
+    let details
+    const container = YouTube.getContainer()
+    if (!container) return {}
+    switch (container.localName) {
+      case 'ytd-video-preview':
+        details = findKey(container, 'videoPreviewFetchRequest.result_.videoDetails')
+        break
+      case 'ytd-miniplayer':
+        details = findKey(container, 'watchResponse.playerResponse.videoDetails')
+        break
+      case 'ytd-shorts':
+      case 'ytd-watch-flexy':
+        details = findKey(container, 'playerData.videoDetails')
+        break
+      default:
+        details = findKey(document.querySelector('ytd-app'), 'data.playerResponse.videoDetails')
     }
+    return details ?? {}
   }
 }
 
-function getNavData() {
-  const data = getSeasonData()
-  if (data) {
-    const { episodes, seq } = data.season
-    const seasons = [...data.seasons]
-    const eIndex = [...episodes].findIndex(
-      (episode) => episode.id === data.episode.id
-    )
-    const currId = [...episodes][eIndex].id
-    let prevId; let nextId
-    if (eIndex > 0) {
-      prevId = [...episodes][eIndex - 1]?.id
-    } else if (seq > 1) {
-      const prevEpisodes = [...seasons[seq - 2].episodes]
-      prevId = prevEpisodes[prevEpisodes.length - 1]?.id
+const Netflix = {
+  getContext: () => (window as any)?.netflix?.appContext,
+  getAPI: () => Netflix.getContext().getState?.()?.playerApp?.getAPI?.(),
+  getSessionId: () => {
+    let sessionId = null
+    for (const id of Netflix.getAPI()?.videoPlayer?.getAllPlayerSessionIds?.() ?? []) {
+      if (id.startsWith('watch-')) {
+        sessionId = id
+        break
+      }
     }
-    if (eIndex === episodes.length - 1 && seq < seasons.length)
-      nextId = [...seasons[seq].episodes][0]?.id
-    else
-      nextId = [...episodes][eIndex + 1]?.id
+    return sessionId
+  },
+  getPlayer: () => Netflix.getAPI()?.videoPlayer?.getVideoPlayerBySessionId?.(Netflix.getSessionId()),
+  getMetadata: (): any => {
+    try {
+      return Object.values(
+        Netflix.getContext()?.getPlayerApp?.()?.getState?.()?.videoPlayer?.videoMetadata
+      ).find((data: any) => '_video' in data)
+    } catch {
+      return null
+    }
+  },
+  getSeasonData: (): any | null => {
+    const metadata = Netflix.getMetadata()?._metadata?.video
+    if (metadata?.seasons) {
+      const getEpisode = (season: any) => [...season?.episodes].find((episode) => episode?.id === metadata?.currentEpisode)
+      const season = [...metadata?.seasons].find(getEpisode)
+      return {
+        type: metadata?.type,
+        title: metadata?.title,
+        episode: getEpisode(season),
+        season,
+        seasons: metadata?.seasons
+      }
+    } else {
+      return {
+        type: metadata?.type,
+        title: metadata?.title,
+        episode: null,
+        season: null,
+        seasons: []
+      }
+    }
+  },
+  getNavData: () => {
+    const data = Netflix.getSeasonData()
+    if (data?.season) {
+      const { episodes, seq } = data.season
+      const seasons = [...data.seasons]
+      const eIndex = [...episodes].findIndex(
+        (episode) => episode.id === data.episode.id
+      )
+      const currId = [...episodes][eIndex].id
+      let prevId; let nextId
+      if (eIndex > 0) {
+        prevId = [...episodes][eIndex - 1]?.id
+      } else if (seq > 1) {
+        const prevEpisodes = [...seasons[seq - 2].episodes]
+        prevId = prevEpisodes[prevEpisodes.length - 1]?.id
+      }
+      if (eIndex === episodes.length - 1 && seq < seasons.length)
+        nextId = [...seasons[seq].episodes][0]?.id
+      else
+        nextId = [...episodes][eIndex + 1]?.id
 
-    return { prevId, currId, nextId }
-  }
-}
-
-function getNetflixInfo() {
-  return {
-    seasonData: getSeasonData(),
-    navData: getNavData(),
-    metadata: getNetflixMetadata(),
-    isPlayerReady: getNetflixPlayer()?.isReady?.() || false
-  }
+      return { prevId, currId, nextId }
+    }
+    return {}
+  },
+  getInfo: (): NetflixInfo => ({
+    seasonData: Netflix.getSeasonData(),
+    navData: Netflix.getNavData(),
+    metadata: Netflix.getMetadata(),
+    isPlayerReady: Netflix.getPlayer()?.isReady?.() || false
+  })
 }

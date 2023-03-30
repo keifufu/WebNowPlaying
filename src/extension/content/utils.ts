@@ -1,7 +1,7 @@
 import { getRandomToken } from '../../utils/misc'
 import { defaultSettings } from '../../utils/settings'
 import { ServiceWorkerUtils } from '../../utils/sw'
-import { MediaInfo, Site, SiteInfo, YouTubeInfo } from '../types'
+import { MediaInfo, NetflixInfo, Site, SiteInfo, StateMode, YouTubeInfo } from '../types'
 import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
 import Deezer from './sites/Deezer'
@@ -50,7 +50,7 @@ export const ContentUtils = {
   getYouTubeMusicVolume: () => ContentUtils.sendMessage<number>({ event: 'getYouTubeMusicVolume' }),
   setYouTubeMusicVolume: (volume: number) => ContentUtils.sendMessage({ event: 'setYouTubeMusicVolume', data: volume }),
   seekNetflix: (time: number) => ContentUtils.sendMessage({ event: 'seekNetflix', data: time }),
-  getNetflixInfo: () => ContentUtils.sendMessage<MediaInfo>({ event: 'getNetflixInfo' })
+  getNetflixInfo: () => ContentUtils.sendMessage<NetflixInfo>({ event: 'getNetflixInfo' })
 }
 
 function _getCurrentSite() {
@@ -130,12 +130,12 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
     else if (typeof value === 'string')
       value = value.trim()
     if (value !== null && value !== undefined && mediaInfoCache.get(key) !== value) {
-      (mediaInfo[key] as any) = value
-      if (key === 'state' || key === 'title' || key === 'volume') {
-        const timestamp = Date.now()
+      if (key === 'state' || key === 'title' || (key === 'volume' && (mediaInfoCache.get('state') || StateMode.STOPPED) === StateMode.PLAYING)) {
+        const timestamp = value.toString().length > 0 ? Date.now() : 0
         mediaInfo.timestamp = timestamp
         mediaInfoCache.set('timestamp', timestamp)
       }
+      (mediaInfo[key] as any) = value
       mediaInfoCache.set(key, value)
       mediaInfoChanged = true
     }
