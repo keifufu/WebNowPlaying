@@ -37,7 +37,7 @@ const updateMediaInfo = () => {
   let suitableMatch = false
 
   for (const [key, value] of sortedDictionary) {
-    if (value.state === StateMode.PLAYING && value.volume !== 0) {
+    if (value.state === StateMode.PLAYING && value.volume > 0) {
       mediaInfoId = key
       suitableMatch = true
       break
@@ -91,7 +91,7 @@ function onMessage(message: PortMessage, port: Port) {
       for (const key in message.mediaInfo)
         if (key !== 'position') shouldUpdate = true
 
-      if (shouldUpdate && (currentMediaInfo.title.length > 0 || (message.mediaInfo.title?.length || 0) > 0))
+      if (shouldUpdate && ((message.mediaInfo.title?.length ?? currentMediaInfo.title.length) > 0))
         updateMediaInfo()
 
       updateAll()
