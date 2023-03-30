@@ -35,13 +35,13 @@ const site: Site = {
     cover: () => {
       if (currentVideoDetails?.thumbnail?.thumbnails && currentYouTubeContainer) {
         const url = findBiggestImage(currentVideoDetails.thumbnail.thumbnails)
-        if (url) return url
+        if (url) return url.split('?')[0]
       }
       return ''
     },
     duration: () => queryYouTubeContainer<string, HTMLVideoElement>('.html5-main-video[src]', (el) => timeInSecondsToString(el.duration), '0:00'),
     position: () => queryYouTubeContainer<string, HTMLVideoElement>('.html5-main-video[src]', (el) => timeInSecondsToString(el.currentTime), '0:00'),
-    volume: () => queryYouTubeContainer<number, HTMLVideoElement>('.html5-main-video[src]', (el) => el.volume * 100, 100),
+    volume: () => queryYouTubeContainer<number, HTMLVideoElement>('.html5-main-video[src]', (el) => (el.muted ? 0 : el.volume * 100), 100),
     rating: () => {
       if (currentYouTubeContainer?.localName === 'ytd-shorts') {
         const container = currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement
@@ -84,7 +84,10 @@ const site: Site = {
     },
     setPositionSeconds: (positionInSeconds: number) => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => el.currentTime = positionInSeconds, null),
     setPositionPercentage: null,
-    setVolume: (volume: number) => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => el.volume = volume / 100, null),
+    setVolume: (volume: number) => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => {
+      el.muted = false
+      el.volume = volume / 100
+    }, null),
     toggleRepeat: () => {
       let success = false
       if (currentPlaylistDetails?.playlistId) {
