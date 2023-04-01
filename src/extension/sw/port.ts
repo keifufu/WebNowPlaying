@@ -84,14 +84,14 @@ chrome.runtime.onConnect.addListener((_port) => {
 function onMessage(message: PortMessage, port: Port) {
   switch (message.event) {
     case 'mediaInfo': {
-      const currentMediaInfo = mediaInfoDictionary.get(port.name) ?? defaultMediaInfo
-      mediaInfoDictionary.set(port.name, { ...currentMediaInfo, ...message.mediaInfo })
+      const currentMediaInfo = { ...mediaInfoDictionary.get(port.name) ?? defaultMediaInfo, ...message.mediaInfo }
+      mediaInfoDictionary.set(port.name, currentMediaInfo)
 
       let shouldUpdate = false
       for (const key in message.mediaInfo)
         if (key !== 'position') shouldUpdate = true
 
-      if (shouldUpdate && ((message.mediaInfo.title?.length ?? currentMediaInfo.title.length) > 0))
+      if (shouldUpdate && currentMediaInfo.title.length > 0)
         updateMediaInfo()
 
       updateAll()
