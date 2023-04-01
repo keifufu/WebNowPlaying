@@ -4,6 +4,8 @@ import { querySelector, querySelectorEventReport, querySelectorReport } from '..
 import { ContentUtils, ratingUtils } from '../utils'
 
 let currentVolume = 100
+let currentCoverUrl = ''
+let lastCoverVideoId = ''
 
 const site: Site = {
   init: () => {
@@ -20,7 +22,30 @@ const site: Site = {
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
-    cover: () => getMediaSessionCover().split('?')[0],
+    cover: () => {
+      const link = getMediaSessionCover().split('?')[0].replace('vi_webp', 'vi')
+      if (!link) return ''
+      const videoId = link.split('/vi/')?.[1]?.split('/')[0]
+
+      if (videoId && lastCoverVideoId !== videoId) {
+        const img = document.createElement('img')
+        img.setAttribute('src', `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`)
+        img.addEventListener('load', () => {
+          if (img.height > 90)
+            currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+          else
+            currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+          lastCoverVideoId = videoId
+        })
+        img.addEventListener('error', () => {
+          currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+          lastCoverVideoId = videoId
+        })
+      }
+
+      if (lastCoverVideoId !== videoId) return link
+      return currentCoverUrl
+    },
     duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[1], '0:00', 'duration'),
     position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[0], '0:00', 'position'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : currentVolume), currentVolume, 'volume'),
