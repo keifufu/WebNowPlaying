@@ -6,6 +6,7 @@ This information can be utilized by external adapters to manage the media, inclu
 ## Adapters
 - [WebNowPlaying-Redux-Rainmeter](https://github.com/keifufu/WebNowPlaying-Redux-Rainmeter) by [keifufu](https://github.com/keifufu), [tjhrulz](https://github.com/tjhrulz/)
 - [WebNowPlaying-Redux-Macro-Deck](https://github.com/jbcarreon123/WebNowPlaying-Redux-Macro-Deck) by [jbcarreon123](https://github.com/jbcarreon123)
+- [WebNowPlaying-Redux-OBS](https://github.com/keifufu/WebNowPlaying-Redux-OBS) by [keifufu](https://github.com/keifufu)
 - Want to create or submit your own adapter? Click [here](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/CreatingAdapters.md)!
 
 ## Supported websites

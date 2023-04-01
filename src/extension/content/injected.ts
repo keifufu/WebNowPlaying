@@ -1,7 +1,5 @@
 import { NetflixInfo, YouTubeVideoDetails } from '../types'
 
-export { }
-
 window.addEventListener('message', (e: any) => {
   if (e.data.type === 'wnp-message') {
     switch (e.data.event) {

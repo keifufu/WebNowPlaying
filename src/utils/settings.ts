@@ -93,5 +93,16 @@ export const BuiltInAdapters: Adapter[] = [
         link: 'https://github.com/jbcarreon123'
       }
     ]
+  },
+  {
+    name: 'OBS Adapter',
+    port: 6534,
+    gh: 'keifufu/WebNowPlaying-Redux-OBS',
+    authors: [
+      {
+        name: 'keifufu',
+        link: 'https://github.com/keifufu'
+      }
+    ]
   }
 ]
