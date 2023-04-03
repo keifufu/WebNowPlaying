@@ -11,7 +11,19 @@ const site: Site = {
     title: () => navigator.mediaSession.metadata?.title || querySelector<string, HTMLElement>('.pageTitle', (el) => el.innerText, ''),
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
-    cover: () => getMediaSessionCover(),
+    cover: () => {
+      const mediaSessionCover = getMediaSessionCover()
+      if (mediaSessionCover) return mediaSessionCover
+
+      // Not all videos have a poster, so there is still a chance no image is found
+      const poster = getPlayer()?.getAttribute('poster')
+      if (poster) {
+        if (poster.startsWith('http')) return poster
+        else return document.location.origin + poster
+      }
+
+      return ''
+    },
     duration: () => queryPlayer((player) => timeInSecondsToString(player.duration), '0:00'),
     position: () => queryPlayer((player) => timeInSecondsToString(player.currentTime), '0:00'),
     volume: () => queryPlayer((player) => {
