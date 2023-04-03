@@ -639,7 +639,7 @@ module.exports = {
       'warn'
     ],
     'no-continue': [
-      'warn'
+      'off'
     ],
     'no-inline-comments': [
       'off'
