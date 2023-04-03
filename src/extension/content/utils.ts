@@ -6,6 +6,7 @@ import Applemusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
 import Deezer from './sites/Deezer'
 import Generic from './sites/Generic'
+import Invidious from './sites/Invidious'
 import Navidrome from './sites/Navidrome'
 import Netflix from './sites/Netflix'
 import Pandora from './sites/Pandora'
@@ -89,6 +90,11 @@ function _getCurrentSite() {
     return YouTube
   else if (host === 'music.youtube.com' && !settings.disabledSites.includes('YouTube Music'))
     return YouTubeMusic
+
+  // Invidious last because we match the title, and even though it's unlike, any other website can
+  // have 'invidious' in the title
+  if (document.title.toLowerCase().includes('invidious') && !settings.disabledSites.includes('Invidious'))
+    return Invidious
 
   if (settings.useGeneric) {
     if (settings.useGenericList) {
