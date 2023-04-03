@@ -111,6 +111,7 @@ export type SocketInfo = {
   version: string,
   isConnected: boolean,
   isConnecting: boolean,
+  reconnectAttempts: number
   _isPlaceholder?: boolean
 }
 export type SocketInfoMap = Map<number, SocketInfo>
@@ -118,5 +119,6 @@ export const defaultSocketInfo = {
   version: '0.0.0',
   isConnected: false,
   isConnecting: false,
+  reconnectAttempts: 0,
   _isPlaceholder: true
 }

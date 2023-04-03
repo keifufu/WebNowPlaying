@@ -1,4 +1,4 @@
-import { Adapter, BuiltInAdapters, CustomAdapter, Settings, SocketInfoMap } from '../../utils/settings'
+import { Adapter, BuiltInAdapters, CustomAdapter, Settings, SocketInfoMap, defaultSocketInfo } from '../../utils/settings'
 import { MediaInfo, StateMode, defaultMediaInfo } from '../types'
 import { readSettings } from './shared'
 import { WNPReduxWebSocket } from './socket'
@@ -152,6 +152,7 @@ export const connectSocket = async (port: number) => {
   if (!adapter) adapter = _settings.customAdapters.find((a) => a.port === port)
   if (!adapter) return
 
+  if (sockets.has(port)) return
   sockets.set(adapter.port, new WNPReduxWebSocket(adapter, executeEvent))
 }
 
@@ -169,7 +170,8 @@ export const getSocketInfo = () => {
     info.set(key, {
       version: socket.version,
       isConnected: socket.isConnected,
-      isConnecting: socket.isConnecting
+      isConnecting: socket.isConnecting,
+      reconnectAttempts: socket.reconnectAttempts
     })
   }
 
@@ -177,18 +179,16 @@ export const getSocketInfo = () => {
   for (const adapter of BuiltInAdapters) {
     if (info.has(adapter.port)) continue
     info.set(adapter.port, {
-      version: '0.0.0',
-      isConnected: false,
-      isConnecting: false
+      ...defaultSocketInfo,
+      _isPlaceholder: false
     })
   }
 
-  for (const adapter of _settings.customAdapters) {
+  for (const adapter of _settings?.customAdapters) {
     if (info.has(adapter.port)) continue
     info.set(adapter.port, {
-      version: '0.0.0',
-      isConnected: false,
-      isConnecting: false
+      ...defaultSocketInfo,
+      _isPlaceholder: false
     })
   }
 

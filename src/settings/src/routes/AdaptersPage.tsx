@@ -74,8 +74,10 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfo
   const onChange = () => {
     saveSettings(() => ({ ...settings(), enabledBuiltInAdapters: settings().enabledBuiltInAdapters.includes(props.adapter.name) ? settings().enabledBuiltInAdapters.filter((a) => a !== props.adapter.name) : [...settings().enabledBuiltInAdapters, props.adapter.name] }), true)
     clearTimeout(_timeout)
+    // Important: measure whether or not to disconnect outside of the timeout
+    const disconnect = props.info.isConnected || props.info.isConnecting
     _timeout = setTimeout(() => {
-      if (props.info.isConnected || props.info.isConnecting) ServiceWorkerUtils.disconnectSocket(props.adapter.port)
+      if (disconnect) ServiceWorkerUtils.disconnectSocket(props.adapter.port)
       else ServiceWorkerUtils.connectSocket(props.adapter.port)
     }, 250)
   }
@@ -87,13 +89,17 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfo
         <Hyperlink text={props.adapter.name} link={`https://github.com/${props.adapter.gh}`} />
         <AdapterAuthors adapter={props.adapter} />
         <Show when={props.enabled}>
-          <Anchor
-            class='ml-auto'
-            text={(props.info.isConnected || props.info.isConnecting) ? 'Disconnect' : 'Connect'}
-            highlight
-            disabled={btnDisabled() || props.info._isPlaceholder}
-            onClick={toggleConnection}
-          />
+          <div class='ml-auto'>
+            <Show when={props.info.isConnected && githubVersion() === 'Error'}>
+              <div class={`ml-2 ${red()}`}>Couldn't check for updates</div>
+            </Show>
+            <Show when={props.info.isConnected && githubVersion() !== 'Error' && githubVersion() !== '...' && isVersionOutdated(props.info.version, githubVersion()) && props.info.version !== '0.0.0'}>
+              <Hyperlink text='Update available' link={`https://github.com/${props.adapter.gh}/releases/latest`} class={`ml-2 ${yellow()}`} />
+            </Show>
+            <Show when={props.info.version !== '0.0.0' && !isVersionOutdated(props.info.version, githubVersion())}>
+              <div class={`ml-2 ${green()}`}>Up to date</div>
+            </Show>
+          </div>
         </Show>
       </div>
       <div class={clsx(
@@ -111,19 +117,15 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfo
               [!props.info.isConnected && red()],
               [props.info.isConnecting && yellow()]
             )}>
-              {props.info.isConnected ? 'Connected' : props.info.isConnecting ? 'Connecting..' : 'Not connected'}
+              {props.info.isConnected ? 'Connected' : props.info.isConnecting ? `Connecting.. (Attempt #${props.info.reconnectAttempts + 1})` : 'Not connected'}
             </div>
-            <div class='ml-auto'>
-              <Show when={githubVersion() === 'Error'}>
-                <div class={`ml-2 ${red()}`}>Couldn't check for updates</div>
-              </Show>
-              <Show when={props.info.isConnected && githubVersion() !== 'Error' && githubVersion() !== '...' && isVersionOutdated(props.info.version, githubVersion()) && props.info.version !== '0.0.0'}>
-                <Hyperlink text='Update available' link={`https://github.com/${props.adapter.gh}/releases/latest`} class='ml-2 text-yellow-400' />
-              </Show>
-              <Show when={props.info.version !== '0.0.0' && !isVersionOutdated(props.info.version, githubVersion())}>
-                <div class={`ml-2 ${green()}`}>Up to date</div>
-              </Show>
-            </div>
+            <Anchor
+              class='ml-auto'
+              text={(props.info.isConnected || props.info.isConnecting) ? 'Disconnect' : 'Connect'}
+              highlight
+              disabled={btnDisabled() || props.info._isPlaceholder}
+              onClick={toggleConnection}
+            />
           </div>
         </Show>
       </div>
@@ -171,17 +173,24 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, info: SocketInf
     }
   }
 
+  let __timeout: NodeJS.Timeout
   const onInput = (e: InputEvent) => {
-    if (settings().customAdapters.some((a) => a.port === parseInt((e.target as HTMLInputElement).value))) return
-    saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, port: parseInt((e.target as HTMLInputElement).value || '0') } : a)) }))
+    const port = parseInt((e.target as HTMLInputElement).value || '0')
+    if (settings().customAdapters.some((a) => a.port === port)) return
+    ServiceWorkerUtils.disconnectSocket(props.port)
+    saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, port } : a)) }), true)
+    clearTimeout(__timeout)
+    if (port !== 0) __timeout = setTimeout(() => ServiceWorkerUtils.connectSocket(port), 250)
   }
 
   let _timeout: NodeJS.Timeout
   const onChange = () => {
     saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, enabled: !props.enabled } : a)) }), true)
     clearTimeout(_timeout)
+    // Important: measure whether or not to disconnect outside of the timeout
+    const disconnect = props.info.isConnected || props.info.isConnecting
     _timeout = setTimeout(() => {
-      if (props.info.isConnected || props.info.isConnecting) ServiceWorkerUtils.disconnectSocket(props.port)
+      if (disconnect) ServiceWorkerUtils.disconnectSocket(props.port)
       else ServiceWorkerUtils.connectSocket(props.port)
     }, 250)
   }
@@ -226,7 +235,7 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, info: SocketInf
               [!props.info.isConnected && red()],
               [props.info.isConnecting && yellow()]
             )}>
-              {props.info.isConnected ? 'Connected' : props.info.isConnecting ? 'Connecting..' : 'Not connected'}
+              {props.info.isConnected ? 'Connected' : props.info.isConnecting ? `Connecting.. (Attempt #${props.info.reconnectAttempts + 1})` : 'Not connected'}
             </div>
             <Anchor
               class='ml-auto'

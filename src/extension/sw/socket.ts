@@ -11,6 +11,7 @@ export class WNPReduxWebSocket {
   version = '0.0.0'
   communicationRevision: string | null = null
   connectionTimeout: NodeJS.Timeout | null = null
+  versionConnectionTimeout: NodeJS.Timeout | null = null
   reconnectTimeout: NodeJS.Timeout | null = null
   isClosed = false
   executeEvent: (communicationRevision: string, data: string) => void
@@ -31,6 +32,17 @@ export class WNPReduxWebSocket {
     this.ws.onclose = this.onClose.bind(this)
     this.ws.onerror = this.onError.bind(this)
     this.ws.onmessage = this.onMessage.bind(this)
+
+    // Force connection to not take longer than 5 seconds
+    if (this.connectionTimeout) clearTimeout(this.connectionTimeout)
+    this.connectionTimeout = setTimeout(() => {
+      if (this.ws) {
+        this.ws.onclose = null
+        this.ws.onerror = null
+        this.ws.close()
+      }
+      this.retry()
+    }, 5000)
   }
 
   get isConnected() {
@@ -51,6 +63,7 @@ export class WNPReduxWebSocket {
     this.communicationRevision = null
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout)
     if (this.connectionTimeout) clearTimeout(this.connectionTimeout)
+    if (this.versionConnectionTimeout) clearTimeout(this.versionConnectionTimeout)
     if (this.ws) {
       this.ws.onclose = null
       this.ws.close()
@@ -73,9 +86,10 @@ export class WNPReduxWebSocket {
   }
 
   private onOpen() {
+    if (this.connectionTimeout) clearTimeout(this.connectionTimeout)
     this.reconnectAttempts = 0
     // If no communication revision is received within 1 second, assume it's WNP for Rainmeter < 0.5.0 (legacy)
-    this.connectionTimeout = setTimeout(() => {
+    this.versionConnectionTimeout = setTimeout(() => {
       if (this.communicationRevision === null) {
         this.communicationRevision = 'legacy'
         this.version = '0.5.0'
