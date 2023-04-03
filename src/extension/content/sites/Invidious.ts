@@ -7,8 +7,8 @@ const site: Site = {
   info: {
     player: () => 'Invidious',
     state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.STOPPED, 'state'),
-    // a[href*="watch"] is for embeds (/embed/)
-    title: () => querySelectorReport<string, HTMLElement>('#contents > div > h1, a[href*="watch"]', (el) => el.innerText, '', 'title'),
+    // a[rel="noopener"] is for embeds (/embed/)
+    title: () => querySelectorReport<string, HTMLElement>('#contents > div > h1, a[rel="noopener"]', (el) => el.innerText, '', 'title'),
     artist: () => querySelectorReport<string, HTMLElement>('#channel-name', (el) => el.innerText, '', 'artist'),
     album: () => querySelector<string, HTMLAnchorElement>('#playlist a', (el) => el.innerText, ''),
     cover: () => querySelectorReport<string, HTMLVideoElement>('video', (el) => el.poster, '', 'cover'),
@@ -21,8 +21,12 @@ const site: Site = {
   },
   events: {
     togglePlaying: () => querySelectorEventReport<HTMLVideoElement>('video', (el) => (el.paused ? el.play() : el.pause()), 'togglePlaying'),
-    next: null,
-    previous: null,
+    next: () => querySelectorEventReport<HTMLButtonElement>('.thumbnail', (el) => el.click(), 'next'),
+    previous: () => {
+      // go back in history if the previous url is from the same domain
+      if (document.referrer.includes(window.location.host))
+        window.history.back()
+    },
     setPositionSeconds: (seconds) => querySelectorEventReport<HTMLVideoElement>('video', (el) => (el.currentTime = seconds), 'setPositionSeconds'),
     setPositionPercentage: null,
     setVolume: (volume) => querySelectorEventReport<HTMLVideoElement>('video', (el) => {
