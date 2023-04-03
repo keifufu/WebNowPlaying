@@ -46,8 +46,8 @@ const site: Site = {
       if (lastCoverVideoId !== videoId) return link
       return currentCoverUrl
     },
-    duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[1], '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[0], '0:00', 'position'),
+    duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[1] ?? '0:00', '0:00', 'duration'),
+    position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[0] ?? '0:00', '0:00', 'position'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : currentVolume), currentVolume, 'volume'),
     rating: () => {
       const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('(.middle-controls-buttons yt-button-shape)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
