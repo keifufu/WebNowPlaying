@@ -5,7 +5,7 @@ export const readSettings = (): Promise<Settings> => new Promise((resolve) => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   if (typeof browser === 'undefined') {
-    chrome.storage.sync.get({
+    chrome.storage.local.get({
       ...defaultSettings
     }, (items) => {
       resolve(items as Settings)
@@ -14,7 +14,7 @@ export const readSettings = (): Promise<Settings> => new Promise((resolve) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     // eslint-disable-next-line no-undef
-    browser.storage.sync.get({
+    browser.storage.local.get({
       ...defaultSettings
     }).then((items: Settings) => {
       resolve(items)

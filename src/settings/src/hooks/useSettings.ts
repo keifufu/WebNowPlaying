@@ -2,9 +2,6 @@ import { createSignal } from 'solid-js'
 import { defaultSettings, Settings } from '../../../utils/settings'
 import { ServiceWorkerUtils } from '../../../utils/sw'
 
-// For anyone reading this, I'm sorry. this is a mess.
-// But it works and doesn't save unnecessarily.
-// which is important since there are rate-limits to chrome.storage.sync
 let saveTimeout: NodeJS.Timeout
 const [settings, _setSettings] = createSignal<Settings>(defaultSettings);
 (async () => {

@@ -12,7 +12,6 @@ export type ServiceWorkerMessage = {
   gh?: string
 }
 
-let saveTimeout: NodeJS.Timeout
 const reportCache = new Map<string, boolean>()
 const ghCache = new Map<string, string>()
 export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
@@ -44,11 +43,8 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
       break
     case 'saveSettings':
       if (!request.settings) return
-      clearTimeout(saveTimeout)
-      saveTimeout = setTimeout(() => {
-        chrome.storage.sync.set({ ...request.settings })
-        updateSettings()
-      }, 500)
+      chrome.storage.local.set({ ...request.settings })
+      updateSettings()
       break
     case 'setColorScheme':
       if (!request.colorScheme) return
