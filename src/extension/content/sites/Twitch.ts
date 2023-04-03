@@ -1,6 +1,6 @@
 import { timeInSecondsToString } from '../../../utils/misc'
 import { RepeatMode, Site, StateMode } from '../../types'
-import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
+import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../selectors'
 
 const site: Site = {
   ready: () =>
@@ -68,10 +68,13 @@ const site: Site = {
       }, 'setPositionSeconds')
     },
     setPositionPercentage: null,
-    setVolume: (volume: number) => querySelectorEventReport<HTMLVideoElement>('video', (el) => {
-      el.muted = false
-      el.volume = volume / 100
-    }, 'setVolume'),
+    setVolume: (volume: number) => {
+      querySelectorEvent<HTMLElement>('[id^="player-volume-slider"]', (el) => {
+        const slider = el as HTMLInputElement
+        slider.value = (volume / 100).toString()
+        slider.dispatchEvent(new Event('input', { bubbles: true }))
+      })
+    },
     toggleRepeat: null,
     toggleShuffle: null,
     toggleThumbsUp: null,
