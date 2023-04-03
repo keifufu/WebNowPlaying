@@ -3,8 +3,8 @@ export type CustomAdapter = {
   enabled: boolean
 }
 
-export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Invidious' | 'Navidrome' | 'Netflix' | 'Pandora' | 'Plex' | 'Radio Addict' | 'Soundcloud' | 'Spotify' | 'Tidal' | 'Twitch' | 'YouTube' | 'YouTube Embeds' | 'YouTube Music'
-export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Invidious', 'Navidrome', 'Netflix', 'Pandora', 'Plex', 'Radio Addict', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'YouTube', 'YouTube Embeds', 'YouTube Music']
+export type TSupportedSites = 'Apple Music' | 'Bandcamp' | 'Deezer' | 'Invidious' | 'Jellyfin' | 'Navidrome' | 'Netflix' | 'Pandora' | 'Plex' | 'Radio Addict' | 'Soundcloud' | 'Spotify' | 'Tidal' | 'Twitch' | 'YouTube' | 'YouTube Embeds' | 'YouTube Music'
+export const SupportedSites: TSupportedSites[] = ['Apple Music', 'Bandcamp', 'Deezer', 'Invidious', 'Jellyfin', 'Navidrome', 'Netflix', 'Pandora', 'Plex', 'Radio Addict', 'Soundcloud', 'Spotify', 'Tidal', 'Twitch', 'YouTube', 'YouTube Embeds', 'YouTube Music']
 
 type TSiteSettings = Partial<{
   [key in TSupportedSites]: {

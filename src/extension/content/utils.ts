@@ -7,6 +7,7 @@ import Bandcamp from './sites/Bandcamp'
 import Deezer from './sites/Deezer'
 import Generic from './sites/Generic'
 import Invidious from './sites/Invidious'
+import Jellyfin from './sites/Jellyfin'
 import Navidrome from './sites/Navidrome'
 import Netflix from './sites/Netflix'
 import Pandora from './sites/Pandora'
@@ -70,6 +71,8 @@ function _getCurrentSite() {
     return Deezer
   else if (document.querySelector('link[title="Invidious"]') && !settings.disabledSites.includes('Invidious'))
     return Invidious
+  else if (document.querySelector('[content="Jellyfin"]') !== null && !settings.disabledSites.includes('Jellyfin'))
+    return Jellyfin
   else if (document.querySelector('[content="Navidrome"]') !== null && !settings.disabledSites.includes('Navidrome'))
     return Navidrome
   else if (host === 'www.netflix.com' && !settings.disabledSites.includes('Netflix'))

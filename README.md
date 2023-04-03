@@ -14,6 +14,7 @@ This information can be utilized by external adapters to manage the media, inclu
 - Bandcamp
 - Deezer
 - Invidious
+- Jellyfin
 - Navidrome
 - Netflix
 - Pandora
