@@ -52,6 +52,7 @@ export const ContentUtils = {
     window.postMessage({ id, type: 'wnp-message', event, data }, '*')
   }),
   getYouTubeInfo: () => ContentUtils.sendMessage<YouTubeInfo>({ event: 'getYouTubeInfo' }),
+  setYouTubeVolume: (volume: number) => ContentUtils.sendMessage({ event: 'setYouTubeVolume', data: volume }),
   getYouTubeMusicVolume: () => ContentUtils.sendMessage<number>({ event: 'getYouTubeMusicVolume' }),
   setYouTubeMusicVolume: (volume: number) => ContentUtils.sendMessage({ event: 'setYouTubeMusicVolume', data: volume }),
   seekNetflix: (time: number) => ContentUtils.sendMessage({ event: 'seekNetflix', data: time }),

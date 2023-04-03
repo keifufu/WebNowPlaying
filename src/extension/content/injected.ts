@@ -14,6 +14,14 @@ window.addEventListener('message', (e: any) => {
           }
         }, '*')
         break
+      case 'setYouTubeVolume':
+        (YouTube.getContainer() as any)?.player?.setVolume?.(e.data.data)
+        window.postMessage({
+          id: e.data.id,
+          type: 'wnp-response',
+          value: null
+        }, '*')
+        break
       case 'getYouTubeMusicVolume':
         window.postMessage({
           id: e.data.id,

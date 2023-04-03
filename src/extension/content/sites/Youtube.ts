@@ -84,10 +84,7 @@ const site: Site = {
     },
     setPositionSeconds: (positionInSeconds: number) => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => el.currentTime = positionInSeconds, null),
     setPositionPercentage: null,
-    setVolume: (volume: number) => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => {
-      el.muted = false
-      el.volume = volume / 100
-    }, null),
+    setVolume: (volume: number) => ContentUtils.setYouTubeVolume(volume),
     toggleRepeat: () => {
       let success = false
       if (currentPlaylistDetails?.playlistId) {
