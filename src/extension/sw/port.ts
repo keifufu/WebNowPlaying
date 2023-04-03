@@ -1,5 +1,5 @@
-import { BuiltInAdapters } from '../../utils/settings'
-import { defaultMediaInfo, MediaInfo, StateMode } from '../types'
+import { Adapter, BuiltInAdapters, CustomAdapter, Settings, SocketInfoMap } from '../../utils/settings'
+import { MediaInfo, StateMode, defaultMediaInfo } from '../types'
 import { readSettings } from './shared'
 import { WNPReduxWebSocket } from './socket'
 
@@ -11,14 +11,14 @@ type PortMessage = {
 const disconnectTimeouts = new Map<string, NodeJS.Timeout>()
 const mediaInfoDictionary = new Map<string, MediaInfo>()
 const ports = new Map<string, chrome.runtime.Port>()
-let sockets: WNPReduxWebSocket[] = []
+const sockets = new Map<number, WNPReduxWebSocket>()
 let mediaInfoId: string | null = null
 
 const updateAll = () => {
-  sockets.forEach((socket) => {
+  for (const socket of sockets.values()) {
     const mediaInfo = mediaInfoDictionary.get(mediaInfoId || '') || defaultMediaInfo
     socket.sendUpdate(mediaInfo)
-  })
+  }
 }
 
 const executeEvent = (communicationRevision: string, mediaEventData: string) => {
@@ -112,23 +112,81 @@ export const initPort = async () => {
   await reloadSockets()
 }
 
+let _settings: Settings
+// We want to update settings after they change, we don't want to read them every time (in getSocketInfo particularly)
+export const updateSettings = async () => {
+  _settings = await readSettings()
+}
 let _interval: NodeJS.Timeout | null = null
 export const reloadSockets = async () => {
-  const settings = await readSettings()
+  _settings = await readSettings()
   if (_interval) clearInterval(_interval)
-  sockets.forEach((socket) => socket.close())
-  sockets = []
-  BuiltInAdapters.forEach((adapter) => {
-    if (!settings.enabledBuiltInAdapters.includes(adapter.name)) return
-    sockets.push(new WNPReduxWebSocket(adapter, executeEvent))
-  })
-  settings.customAdapters.forEach((adapter) => {
-    if (!adapter.enabled || adapter.port === 0) return
-    sockets.push(new WNPReduxWebSocket(adapter, executeEvent))
-  })
+  // Close all sockets
+  for (const [key, socket] of sockets.entries()) {
+    socket.close()
+    sockets.delete(key)
+  }
+  // Open all sockets
+  for (const adapter of BuiltInAdapters) {
+    if (_settings.enabledBuiltInAdapters.includes(adapter.name))
+      sockets.set(adapter.port, new WNPReduxWebSocket(adapter, executeEvent))
+  }
+  for (const adapter of _settings.customAdapters) {
+    if (adapter.enabled && adapter.port !== 0)
+      sockets.set(adapter.port, new WNPReduxWebSocket(adapter, executeEvent))
+  }
 
   _interval = setInterval(() => {
     for (const port of ports.values())
       port.postMessage({ event: 'getMediaInfo' })
-  }, settings.updateFrequencyMs2)
+  }, _settings.updateFrequencyMs2)
+}
+
+export const connectSocket = async (port: number) => {
+  _settings = await readSettings()
+  let adapter: Adapter | CustomAdapter | undefined = BuiltInAdapters.find((a) => a.port === port)
+  if (!adapter) adapter = _settings.customAdapters.find((a) => a.port === port)
+  if (!adapter) return
+
+  sockets.set(adapter.port, new WNPReduxWebSocket(adapter, executeEvent))
+}
+
+export const disconnectSocket = (port: number) => {
+  const socket = sockets.get(port)
+  if (!socket) return
+  socket.close()
+  sockets.delete(port)
+}
+
+export const getSocketInfo = () => {
+  const info: SocketInfoMap = new Map()
+
+  for (const [key, socket] of sockets.entries()) {
+    info.set(key, {
+      version: socket.version,
+      isConnected: socket.isConnected,
+      isConnecting: socket.isConnecting
+    })
+  }
+
+  // Fill in info for not connected sockets
+  for (const adapter of BuiltInAdapters) {
+    if (info.has(adapter.port)) continue
+    info.set(adapter.port, {
+      version: '0.0.0',
+      isConnected: false,
+      isConnecting: false
+    })
+  }
+
+  for (const adapter of _settings.customAdapters) {
+    if (info.has(adapter.port)) continue
+    info.set(adapter.port, {
+      version: '0.0.0',
+      isConnected: false,
+      isConnecting: false
+    })
+  }
+
+  return info
 }

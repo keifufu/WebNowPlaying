@@ -2,9 +2,9 @@ import { ContentUtils } from '../extension/content/utils'
 import { ServiceWorkerMessage } from '../extension/sw/messaging'
 import { defaultSettings, Settings } from './settings'
 
-const _sendSwMessage = (message: ServiceWorkerMessage, defaultValue?: any): Promise<any> => new Promise((resolve) => {
+const _sendSwMessage = <T>(message: ServiceWorkerMessage, defaultValue?: T): Promise<T> => new Promise((resolve) => {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-    resolve(defaultValue)
+    resolve(defaultValue as any)
     return
   }
 
@@ -22,8 +22,12 @@ export const ServiceWorkerUtils = {
     _sendSwMessage({ event: 'sendAutomaticReport', report })
   },
   resetOutdated: () => _sendSwMessage({ event: 'resetOutdated' }),
-  getSettings: () => _sendSwMessage({ event: 'getSettings' }, defaultSettings),
+  getSettings: () => _sendSwMessage<Settings>({ event: 'getSettings' }, defaultSettings),
   saveSettings: (settings: Settings) => _sendSwMessage({ event: 'saveSettings', settings }),
   setColorScheme: (colorScheme: 'light' | 'dark') => _sendSwMessage({ event: 'setColorScheme', colorScheme }),
-  reloadSockets: () => _sendSwMessage({ event: 'reloadSockets' })
+  reloadSockets: () => _sendSwMessage({ event: 'reloadSockets' }),
+  getSocketInfo: () => _sendSwMessage<string>({ event: 'getSocketInfo' }),
+  connectSocket: (port: number) => _sendSwMessage({ event: 'connectSocket', port }),
+  disconnectSocket: (port: number) => _sendSwMessage({ event: 'disconnectSocket', port }),
+  getGithubVersion: (gh: string) => _sendSwMessage<string>({ event: 'getGithubVersion', gh }, 'Error')
 }

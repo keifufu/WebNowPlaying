@@ -29,11 +29,14 @@ export const ContentUtils = {
   init: async () => {
     _settings = await ServiceWorkerUtils.getSettings()
 
-    if (document.querySelector('#wnp-injected') === null) {
-      const script = document.createElement('script')
-      script.id = 'wnp-injected'
-      script.src = chrome.runtime.getURL('injected.js')
-      document.documentElement.appendChild(script)
+    const site = getCurrentSite()
+    if (site !== null) {
+      if (document.querySelector('#wnp-injected') === null) {
+        const script = document.createElement('script')
+        script.id = 'wnp-injected'
+        script.src = chrome.runtime.getURL('injected.js')
+        document.documentElement.appendChild(script)
+      }
     }
   },
   sendMessage: <T>({ event, data }: { event: string, data?: any }): Promise<T> => new Promise((resolve) => {
@@ -58,9 +61,6 @@ function _getCurrentSite() {
   const host = window.location.hostname
   const settings = ContentUtils.getSettings()
 
-  // prioritize matching youtube.com/embed before youtube.com
-  if (host === 'www.youtube.com' && window.location.pathname.startsWith('/embed') && !settings.disabledSites.includes('YouTube Embeds'))
-    return YouTubeEmbed
 
   if (host === 'music.apple.com' && !settings.disabledSites.includes('Apple Music'))
     return Applemusic
@@ -68,6 +68,8 @@ function _getCurrentSite() {
     return Bandcamp
   else if (host === 'www.deezer.com' && !settings.disabledSites.includes('Deezer'))
     return Deezer
+  else if (document.querySelector('link[title="Invidious"]') && !settings.disabledSites.includes('Invidious'))
+    return Invidious
   else if (document.querySelector('[content="Navidrome"]') !== null && !settings.disabledSites.includes('Navidrome'))
     return Navidrome
   else if (host === 'www.netflix.com' && !settings.disabledSites.includes('Netflix'))
@@ -86,15 +88,13 @@ function _getCurrentSite() {
     return Tidal
   else if (host === 'www.twitch.tv' && !settings.disabledSites.includes('Twitch'))
     return Twitch
+  // prioritize matching youtube.com/embed before youtube.com
+  if (host === 'www.youtube.com' && window.location.pathname.startsWith('/embed') && !settings.disabledSites.includes('YouTube Embeds'))
+    return YouTubeEmbed
   else if (host === 'www.youtube.com' && !settings.disabledSites.includes('YouTube'))
     return YouTube
   else if (host === 'music.youtube.com' && !settings.disabledSites.includes('YouTube Music'))
     return YouTubeMusic
-
-  // Invidious last because we match the title, and even though it's unlike, any other website can
-  // have 'invidious' in the title
-  if (document.title.toLowerCase().includes('invidious') && !settings.disabledSites.includes('Invidious'))
-    return Invidious
 
   if (settings.useGeneric) {
     if (settings.useGenericList) {
@@ -127,7 +127,7 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
   if (!site || !site.ready()) return null
 
   const values: (keyof SiteInfo)[] = ['player', 'state', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
-  values.forEach((key) => {
+  for (const key of values) {
     let value = site.info[key]?.()
     // For numbers, round it to an integer
     if (typeof value === 'number')
@@ -145,7 +145,7 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
       mediaInfoCache.set(key, value)
       mediaInfoChanged = true
     }
-  })
+  }
 
   if (sendFullMediaInfo) {
     sendFullMediaInfo = false

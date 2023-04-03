@@ -1,17 +1,20 @@
-import { getExtensionVersion, isDeveloperMode } from '../../utils/misc'
+import { getExtensionVersion, getVersionFromGithub, isDeveloperMode } from '../../utils/misc'
 import { Settings } from '../../utils/settings'
-import { reloadSockets } from './port'
+import { connectSocket, disconnectSocket, getSocketInfo, reloadSockets, updateSettings } from './port'
 import { readSettings } from './shared'
 
 export type ServiceWorkerMessage = {
-  event: 'sendAutomaticReport' | 'resetOutdated' | 'getSettings' | 'saveSettings' | 'setColorScheme' | 'reloadSockets',
+  event: 'sendAutomaticReport' | 'resetOutdated' | 'getSettings' | 'saveSettings' | 'setColorScheme' | 'reloadSockets' | 'getSocketInfo' | 'connectSocket' | 'disconnectSocket' | 'getGithubVersion',
   settings?: Settings,
   report?: { message: string },
-  colorScheme?: 'light' | 'dark'
+  colorScheme?: 'light' | 'dark',
+  port?: number
+  gh?: string
 }
 
 let saveTimeout: NodeJS.Timeout
 const reportCache = new Map<string, boolean>()
+const ghCache = new Map<string, string>()
 export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
   switch (request.event) {
     case 'sendAutomaticReport': {
@@ -44,6 +47,7 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
       clearTimeout(saveTimeout)
       saveTimeout = setTimeout(() => {
         chrome.storage.sync.set({ ...request.settings })
+        updateSettings()
       }, 500)
       break
     case 'setColorScheme':
@@ -61,6 +65,28 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
     case 'reloadSockets':
       await reloadSockets()
       break
+    case 'getSocketInfo': {
+      sendResponse(JSON.stringify(Array.from(getSocketInfo().entries())))
+      break
+    }
+    case 'connectSocket':
+      await connectSocket(request.port ?? 0)
+      break
+    case 'disconnectSocket':
+      disconnectSocket(request.port ?? 0)
+      break
+    case 'getGithubVersion': {
+      if (ghCache.has(request.gh ?? ''))
+        return sendResponse(ghCache.get(request.gh ?? ''))
+
+      const version = await getVersionFromGithub(request.gh ?? '')
+      if (version) {
+        ghCache.set(request.gh ?? '', version)
+        sendResponse(version)
+      }
+      sendResponse('Error')
+      break
+    }
     default:
       break
   }

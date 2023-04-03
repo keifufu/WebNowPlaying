@@ -8,6 +8,7 @@ export class WNPReduxWebSocket {
   adapter: Adapter | CustomAdapter
   cache = new Map<string, any>()
   reconnectAttempts = 0
+  version = '0.0.0'
   communicationRevision: string | null = null
   connectionTimeout: NodeJS.Timeout | null = null
   reconnectTimeout: NodeJS.Timeout | null = null
@@ -21,6 +22,7 @@ export class WNPReduxWebSocket {
   }
 
   private init() {
+    if (this.isClosed) return
     // try/catch does nothing. If the connection fails, it will call onError.
     // The extension will only log errors to chrome://extensions if it's loaded unpacked.
     // It won't show those errors to the user.
@@ -31,8 +33,20 @@ export class WNPReduxWebSocket {
     this.ws.onmessage = this.onMessage.bind(this)
   }
 
-  public close(cleanupOnly = false) {
-    if (!cleanupOnly) this.isClosed = true
+  get isConnected() {
+    return this.ws?.readyState === WebSocket.OPEN
+  }
+
+  get isConnecting() {
+    return !this.isClosed && this.ws?.readyState !== WebSocket.OPEN
+  }
+
+  public close() {
+    this.isClosed = true
+    this.cleanup()
+  }
+
+  private cleanup() {
     this.cache = new Map<string, any>()
     this.communicationRevision = null
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout)
@@ -45,7 +59,7 @@ export class WNPReduxWebSocket {
 
   private retry() {
     if (this.isClosed) return
-    this.close(true)
+    this.cleanup()
     // Reconnects once per second for 30 seconds, then with a exponential backoff of (2^reconnectAttempts) up to 60 seconds
     this.reconnectTimeout = setTimeout(() => {
       this.init()
@@ -62,7 +76,10 @@ export class WNPReduxWebSocket {
     this.reconnectAttempts = 0
     // If no communication revision is received within 1 second, assume it's WNP for Rainmeter < 0.5.0 (legacy)
     this.connectionTimeout = setTimeout(() => {
-      if (this.communicationRevision === null) this.communicationRevision = 'legacy'
+      if (this.communicationRevision === null) {
+        this.communicationRevision = 'legacy'
+        this.version = '0.5.0'
+      }
     }, 1000)
   }
 
@@ -90,12 +107,14 @@ export class WNPReduxWebSocket {
       if (event.data.startsWith('Version:')) {
         // 'Version:' WNP for Rainmeter 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
+        this.version = '0.5.0'
         setOutdated()
       } else if (event.data.startsWith('ADAPTER_VERSION ')) {
         // Any WNPRedux adapter will send 'ADAPTER_VERSION <version>;WNPRLIB_REVISION <revision>' after connecting
         this.communicationRevision = event.data.split(';')[1].split(' ')[1]
         // Check if the adapter is outdated
         const adapterVersion = event.data.split(' ')[1].split(';')[0]
+        this.version = adapterVersion
         if ((this.adapter as Adapter).gh) {
           const githubVersion = await getGithubVersion((this.adapter as Adapter).gh)
           if (githubVersion === 'Error') return
@@ -104,6 +123,7 @@ export class WNPReduxWebSocket {
       } else {
         // The first message wasn't version related, so it's probably WNP for Rainmeter < 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
+        this.version = '0.5.0'
         setOutdated()
       }
     }

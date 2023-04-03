@@ -106,3 +106,17 @@ export const BuiltInAdapters: Adapter[] = [
     ]
   }
 ]
+
+export type SocketInfo = {
+  version: string,
+  isConnected: boolean,
+  isConnecting: boolean,
+  _isPlaceholder?: boolean
+}
+export type SocketInfoMap = Map<number, SocketInfo>
+export const defaultSocketInfo = {
+  version: '0.0.0',
+  isConnected: false,
+  isConnecting: false,
+  _isPlaceholder: true
+}
