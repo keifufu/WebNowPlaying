@@ -72,10 +72,10 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfo
 
   let _timeout: NodeJS.Timeout
   const onChange = () => {
+    // Important: measure whether or not to disconnect outside of the timeout
+    const disconnect = props.enabled
     saveSettings(() => ({ ...settings(), enabledBuiltInAdapters: settings().enabledBuiltInAdapters.includes(props.adapter.name) ? settings().enabledBuiltInAdapters.filter((a) => a !== props.adapter.name) : [...settings().enabledBuiltInAdapters, props.adapter.name] }), true)
     clearTimeout(_timeout)
-    // Important: measure whether or not to disconnect outside of the timeout
-    const disconnect = props.info.isConnected || props.info.isConnecting
     _timeout = setTimeout(() => {
       if (disconnect) ServiceWorkerUtils.disconnectSocket(props.adapter.port)
       else ServiceWorkerUtils.connectSocket(props.adapter.port)
@@ -185,10 +185,10 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, info: SocketInf
 
   let _timeout: NodeJS.Timeout
   const onChange = () => {
+    // Important: measure whether or not to disconnect outside of the timeout
+    const disconnect = props.enabled
     saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, enabled: !props.enabled } : a)) }), true)
     clearTimeout(_timeout)
-    // Important: measure whether or not to disconnect outside of the timeout
-    const disconnect = props.info.isConnected || props.info.isConnecting
     _timeout = setTimeout(() => {
       if (disconnect) ServiceWorkerUtils.disconnectSocket(props.port)
       else ServiceWorkerUtils.connectSocket(props.port)
