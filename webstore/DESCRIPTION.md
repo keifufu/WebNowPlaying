@@ -5,6 +5,7 @@ This information can be utilized by external adapters to manage the media, inclu
 Adapters:
 - WebNowPlaying-Redux-Rainmeter
 - WebNowPlaying-Redux-Macro-Deck
+- WebNowPlaying-Redux-OBS
 - Read the full list on GitHub: https://github.com/keifufu/WebNowPlaying-Redux
 
 Supports sites like: YouTube, Spotify, Soundcloud, any many others.
