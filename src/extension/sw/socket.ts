@@ -61,6 +61,7 @@ export class WNPReduxWebSocket {
   private cleanup() {
     this.cache = new Map<string, any>()
     this.communicationRevision = null
+    this.version = '0.0.0'
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout)
     if (this.connectionTimeout) clearTimeout(this.connectionTimeout)
     if (this.versionConnectionTimeout) clearTimeout(this.versionConnectionTimeout)
