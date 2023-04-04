@@ -137,12 +137,12 @@ export const reloadSockets = async () => {
   }
 
   _interval = setInterval(() => {
-    for (const port of ports.values()) {
+    for (const port of ports.values())
       port.postMessage({ event: 'getMediaInfo' })
-      // Running updateAll in an interval shouldn't hurt, as it will only send an update if the mediaInfo has changed.
-      // We do this because otherwise newly connected sockets don't send any info until something changed.
-      updateAll()
-    }
+
+    // Running updateAll in an interval shouldn't hurt, as it will only send an update if the mediaInfo has changed.
+    // We do this because otherwise newly connected sockets don't send any info until something changed.
+    updateAll()
   }, _settings.updateFrequencyMs2)
 }
 
