@@ -177,6 +177,7 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, info: SocketInf
   const onInput = (e: InputEvent) => {
     const port = parseInt((e.target as HTMLInputElement).value || '0')
     if (settings().customAdapters.some((a) => a.port === port)) return
+    if (BuiltInAdapters.some((a) => a.port === port)) return
     ServiceWorkerUtils.disconnectSocket(props.port)
     saveSettings(() => ({ ...settings(), customAdapters: settings().customAdapters.map((a) => (a.port === props.port ? { ...a, port } : a)) }), true)
     clearTimeout(__timeout)
