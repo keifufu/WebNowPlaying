@@ -88,12 +88,12 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfo
         <Checkbox onChange={onChange} checked={props.enabled} />
         <Hyperlink text={props.adapter.name} link={`https://github.com/${props.adapter.gh}`} />
         <AdapterAuthors adapter={props.adapter} />
-        <Show when={props.enabled}>
+        <Show when={props.enabled && props.info.isConnected}>
           <div class='ml-auto'>
-            <Show when={props.info.isConnected && githubVersion() === 'Error'}>
+            <Show when={githubVersion() === 'Error'}>
               <div class={`ml-2 ${red()}`}>Couldn't check for updates</div>
             </Show>
-            <Show when={props.info.isConnected && githubVersion() !== 'Error' && githubVersion() !== '...' && isVersionOutdated(props.info.version, githubVersion()) && props.info.version !== '0.0.0'}>
+            <Show when={githubVersion() !== 'Error' && githubVersion() !== '...' && isVersionOutdated(props.info.version, githubVersion()) && props.info.version !== '0.0.0'}>
               <Hyperlink text='Update available' link={`https://github.com/${props.adapter.gh}/releases/latest`} class={`ml-2 ${yellow()}`} />
             </Show>
             <Show when={props.info.version !== '0.0.0' && !isVersionOutdated(props.info.version, githubVersion())}>
