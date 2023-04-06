@@ -96,7 +96,7 @@ const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfo
             <Show when={githubVersion() !== 'Error' && githubVersion() !== '...' && isVersionOutdated(props.info.version, githubVersion()) && props.info.version !== '0.0.0'}>
               <Hyperlink text='Update available' link={`https://github.com/${props.adapter.gh}/releases/latest`} class={`ml-2 ${yellow()}`} />
             </Show>
-            <Show when={props.info.version !== '0.0.0' && !isVersionOutdated(props.info.version, githubVersion())}>
+            <Show when={props.info.version !== '0.0.0' && githubVersion() !== 'Error' && !isVersionOutdated(props.info.version, githubVersion())}>
               <div class={`ml-2 ${green()}`}>Up to date</div>
             </Show>
           </div>
@@ -176,6 +176,13 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, info: SocketInf
   let __timeout: NodeJS.Timeout
   const onInput = (e: InputEvent) => {
     const port = parseInt((e.target as HTMLInputElement).value || '0')
+    // Checks if the port is valid
+    try {
+      // eslint-disable-next-line no-new
+      new URL(`ws://localhost:${port}`)
+    } catch {
+      return
+    }
     if (settings().customAdapters.some((a) => a.port === port)) return
     if (BuiltInAdapters.some((a) => a.port === port)) return
     ServiceWorkerUtils.disconnectSocket(props.port)
