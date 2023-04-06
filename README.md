@@ -9,6 +9,9 @@ This information can be utilized by external adapters to manage the media, inclu
 - [WebNowPlaying-Redux-OBS](https://github.com/keifufu/WebNowPlaying-Redux-OBS) by [keifufu](https://github.com/keifufu)
 - Want to create or submit your own adapter? Click [here](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/CreatingAdapters.md)!
 
+## Spotify Desktop
+Supported via [WebNowPlaying-Redux-Spicetify](https://github.com/keifufu/WebNowPlaying-Redux-Spicetify)
+
 ## Supported websites
 - Apple Music
 - Bandcamp
