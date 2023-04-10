@@ -5,6 +5,7 @@ import { ratingUtils } from '../utils'
 
 // Note: this site is missing proper volume support, we can only toggle mute on and off for now.
 const site: Site = {
+  match: () => window.location.hostname === 'www.radio-addict.com',
   ready: () => navigator.mediaSession.metadata !== null,
   info: {
     player: () => 'Radio Addict',

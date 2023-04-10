@@ -19,7 +19,7 @@ const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E)
     if (!el) {
       if (type) {
         ServiceWorkerUtils.sendAutomaticReport({
-          message: `[${document.location.hostname}] _querySelector could not find element for ${type}`
+          message: `[${window.location.hostname}] _querySelector could not find element for ${type}`
         })
       }
       return defaultValue
@@ -31,7 +31,7 @@ const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E)
     if (!result && result !== 0 && result !== false) {
       if (type) {
         ServiceWorkerUtils.sendAutomaticReport({
-          message: `[${document.location.hostname}] _querySelector could not get result from exec for ${type}`
+          message: `[${window.location.hostname}] _querySelector could not get result from exec for ${type}`
         })
       }
       return defaultValue
@@ -58,7 +58,7 @@ export const _querySelectorEvent = <E extends Element>(selectorOrGetter: string 
     if (!el) {
       if (type) {
         ServiceWorkerUtils.sendAutomaticReport({
-          message: `[${document.location.hostname}] _querySelectorEvent could not find element for ${type}`
+          message: `[${window.location.hostname}] _querySelectorEvent could not find element for ${type}`
         })
       }
       return false

@@ -3,6 +3,7 @@ import { RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 
 const site: Site = {
+  match: () => window.location.hostname.endsWith('bandcamp.com') || document.querySelector('[content="@bandcamp"]') !== null,
   ready: () => querySelector<boolean, HTMLAudioElement>('audio', (el) => !!el.src, false),
   info: {
     player: () => 'Bandcamp',
@@ -16,7 +17,7 @@ const site: Site = {
       if (albumTitle.length > 0) return albumTitle
       return querySelector<string, HTMLElement>('.trackTitle', (el) => el.innerText, '')
     },
-    artist: () => querySelectorReport<string, HTMLElement>('.artist span, .albumTitle span', (el) => el.innerText, capitalize(document.location.host.split('.')[0]), 'artist'),
+    artist: () => querySelectorReport<string, HTMLElement>('.artist span, .albumTitle span', (el) => el.innerText, capitalize(window.location.host.split('.')[0]), 'artist'),
     album: () => {
       // Note: I was going to use the queue-icon to indicate whether we are listening to a album, but it seems it's always there once it's loaded
       // So instead we only return the album if it's not equal to the title

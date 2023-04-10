@@ -1,3 +1,5 @@
+import { TSupportedSites } from '../utils/settings'
+
 export enum StateMode { STOPPED = 'STOPPED', PLAYING = 'PLAYING', PAUSED = 'PAUSED' }
 export enum RepeatMode { NONE = 'NONE', ONE = 'ONE', ALL = 'ALL' }
 
@@ -34,7 +36,7 @@ export const defaultMediaInfo: MediaInfo = {
 }
 
 export type SiteInfo = {
-  player: () => string // Default '' (empty string)
+  player: () => TSupportedSites, // Default '' (empty string)
   state: () => StateMode // Default StateEnum.STOPPED
   title: () => string // Default '' (empty string)
   artist: () => string // Default '' (empty string)
@@ -51,6 +53,7 @@ export type SiteInfo = {
 export type Site = {
   isInitialized?: boolean,
   init?: () => void
+  match: () => boolean,
   ready: () => boolean
   info: SiteInfo
   events: {

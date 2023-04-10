@@ -6,6 +6,7 @@ import { ContentUtils } from '../utils'
 let currentNetflixInfo: NetflixInfo | null = null
 
 const site: Site = {
+  match: () => window.location.hostname === 'www.netflix.com',
   init() {
     setInterval(async () => {
       const netflixInfo = await ContentUtils.getNetflixInfo()
@@ -66,7 +67,7 @@ const site: Site = {
     next: () => {
       const data = currentNetflixInfo?.navData
       if (data?.nextId && data?.currId) {
-        document.location.href = document.location.href.replace(
+        window.location.href = window.location.href.replace(
           data.currId,
           data.nextId
         )
@@ -75,7 +76,7 @@ const site: Site = {
     previous: () => {
       const data = currentNetflixInfo?.navData
       if (data?.prevId && data?.currId) {
-        document.location.href = document.location.href.replace(
+        window.location.href = window.location.href.replace(
           data.currId,
           data.prevId
         )

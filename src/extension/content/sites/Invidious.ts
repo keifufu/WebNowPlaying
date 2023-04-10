@@ -3,6 +3,7 @@ import { RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 
 const site: Site = {
+  match: () => document.querySelector('link[title="Invidious"]') !== null,
   ready: () => querySelector<boolean, HTMLVideoElement>('video', () => true, false),
   info: {
     player: () => 'Invidious',

@@ -5,6 +5,7 @@ import { querySelector, querySelectorEventReport, querySelectorReport } from '..
 // Repeat and shuffle on Apple Music don't update instantly, we click the button but it takes a few ms for info.repeat() to return the correct value
 
 const site: Site = {
+  match: () => window.location.hostname === 'music.apple.com',
   ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLAudioElement>('audio', (el) => el !== null, false),
   info: {
     player: () => 'Apple Music',

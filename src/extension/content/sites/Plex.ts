@@ -3,6 +3,7 @@ import { RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../selectors'
 
 const site: Site = {
+  match: () => !!(window as any).plex,
   ready: () => querySelector<boolean, HTMLVideoElement>('video', (el) => el !== null && el.duration > 0, false),
   info: {
     player: () => 'Plex',

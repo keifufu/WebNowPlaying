@@ -4,6 +4,7 @@ import { querySelector, querySelectorEvent, querySelectorEventReport, querySelec
 import { ratingUtils } from '../utils'
 
 const site: Site = {
+  match: () => window.location.hostname === 'www.pandora.com',
   ready: () =>
     querySelector<boolean, HTMLElement>('.Tuner__Audio__TrackDetail__title', (el) => el.innerText.length > 0, false)
     && querySelector<boolean, HTMLElement>('(.VolumeDurationControl__Duration span)[2]', (el) => el.innerText.length > 0, false),

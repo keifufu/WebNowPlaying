@@ -8,11 +8,12 @@ let currentCoverUrl = ''
 let lastCoverVideoId = ''
 
 const site: Site = {
+  match: () => window.location.hostname === 'www.youtube.com' && window.location.pathname.startsWith('/embed'),
   ready: () =>
     querySelector<boolean, HTMLElement>('.ytp-title-text', (el) => el.innerText.length > 0, false)
     && querySelector<boolean, HTMLVideoElement>('.html5-video-player', (el) => !el.classList.contains('unstarted-mode'), false),
   info: {
-    player: () => 'YouTube Embed',
+    player: () => 'YouTube Embeds',
     state: () => {
       let state = querySelectorReport<StateMode, HTMLVideoElement>('.html5-main-video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state')
       // It is possible for the video to be "playing" but not started

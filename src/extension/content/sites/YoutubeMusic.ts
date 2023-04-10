@@ -8,6 +8,7 @@ let currentCoverUrl = ''
 let lastCoverVideoId = ''
 
 const site: Site = {
+  match: () => window.location.hostname === 'music.youtube.com',
   init: () => {
     setInterval(async () => {
       currentVolume = await ContentUtils.getYouTubeMusicVolume() ?? 100

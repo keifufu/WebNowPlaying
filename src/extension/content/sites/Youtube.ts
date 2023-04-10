@@ -8,6 +8,7 @@ let currentVideoDetails: YouTubeVideoDetails | null = null
 let currentPlaylistDetails: YouTubePlaylistDetails | null = null
 
 const site: Site = {
+  match: () => window.location.hostname === 'www.youtube.com' && !window.location.pathname.startsWith('/embed'),
   init: () => {
     setInterval(async () => {
       const info = await ContentUtils.getYouTubeInfo()

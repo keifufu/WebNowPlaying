@@ -5,6 +5,7 @@ import { ratingUtils } from '../utils'
 let lastKnownVolume = 100
 
 const site: Site = {
+  match: () => window.location.hostname === 'listen.tidal.com',
   ready: () => querySelector<boolean, HTMLButtonElement>('#footerPlayer', (el) => el !== null, false),
   info: {
     player: () => 'Tidal',

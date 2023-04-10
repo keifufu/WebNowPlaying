@@ -2,7 +2,7 @@ import { getRandomToken } from '../../utils/misc'
 import { defaultSettings } from '../../utils/settings'
 import { ServiceWorkerUtils } from '../../utils/sw'
 import { MediaInfo, NetflixInfo, Site, SiteInfo, StateMode, YouTubeInfo } from '../types'
-import Applemusic from './sites/AppleMusic'
+import AppleMusic from './sites/AppleMusic'
 import Bandcamp from './sites/Bandcamp'
 import Deezer from './sites/Deezer'
 import Generic from './sites/Generic'
@@ -59,65 +59,30 @@ export const ContentUtils = {
   getNetflixInfo: () => ContentUtils.sendMessage<NetflixInfo>({ event: 'getNetflixInfo' })
 }
 
-function _getCurrentSite() {
-  const host = window.location.hostname
+export const getCurrentSite = (): Site | null => {
+  const sites = [AppleMusic, Bandcamp, Deezer, Invidious, Jellyfin, Navidrome, Netflix, Pandora, Plex, RadioAddict, Soundcloud, Spotify, Tidal, Twitch, YouTube, YouTubeEmbed, YouTubeMusic]
   const settings = ContentUtils.getSettings()
 
-
-  if (host === 'music.apple.com' && !settings.disabledSites.includes('Apple Music'))
-    return Applemusic
-  else if ((host.endsWith('bandcamp.com') || document.querySelector('[content="@bandcamp"]') !== null) && !settings.disabledSites.includes('Bandcamp'))
-    return Bandcamp
-  else if (host === 'www.deezer.com' && !settings.disabledSites.includes('Deezer'))
-    return Deezer
-  else if (document.querySelector('link[title="Invidious"]') && !settings.disabledSites.includes('Invidious'))
-    return Invidious
-  else if (document.querySelector('[content="Jellyfin"]') !== null && !settings.disabledSites.includes('Jellyfin'))
-    return Jellyfin
-  else if (document.querySelector('[content="Navidrome"]') !== null && !settings.disabledSites.includes('Navidrome'))
-    return Navidrome
-  else if (host === 'www.netflix.com' && !settings.disabledSites.includes('Netflix'))
-    return Netflix
-  else if (host === 'www.pandora.com' && !settings.disabledSites.includes('Pandora'))
-    return Pandora
-  else if (host === 'app.plex.tv' && !settings.disabledSites.includes('Plex'))
-    return Plex
-  else if (host === 'www.radio-addict.com' && !settings.disabledSites.includes('Radio Addict'))
-    return RadioAddict
-  else if (host === 'soundcloud.com' && !settings.disabledSites.includes('Soundcloud'))
-    return Soundcloud
-  else if (host === 'open.spotify.com' && !settings.disabledSites.includes('Spotify'))
-    return Spotify
-  else if (host === 'listen.tidal.com' && !settings.disabledSites.includes('Tidal'))
-    return Tidal
-  else if (host === 'www.twitch.tv' && !settings.disabledSites.includes('Twitch'))
-    return Twitch
-  // prioritize matching youtube.com/embed before youtube.com
-  if (host === 'www.youtube.com' && window.location.pathname.startsWith('/embed') && !settings.disabledSites.includes('YouTube Embeds'))
-    return YouTubeEmbed
-  else if (host === 'www.youtube.com' && !settings.disabledSites.includes('YouTube'))
-    return YouTube
-  else if (host === 'music.youtube.com' && !settings.disabledSites.includes('YouTube Music'))
-    return YouTubeMusic
-
-  if (settings.useGeneric) {
-    if (settings.useGenericList) {
-      if (settings.isListBlocked && settings.genericList.includes(host)) return null
-      if (!settings.isListBlocked && !settings.genericList.includes(host)) return null
+  let match = false
+  let currentSite = null
+  for (const site of sites) {
+    if (site.match()) {
+      match = true
+      if (!settings.disabledSites.includes(site.info.player()))
+        currentSite = site
     }
-    return Generic
   }
 
-  return null
-}
+  // Only apply generic if no supported site matched, ignoring disabled sites.
+  // This is so that generic won't load on YouTube when the user disabled YouTube in the settings.
+  if (!match && Generic.match()) currentSite = Generic
 
-export const getCurrentSite = () => {
-  const site = _getCurrentSite()
-  if (site && !site.isInitialized) {
-    site.isInitialized = true
-    site.init?.()
+  if (currentSite && !currentSite.isInitialized) {
+    currentSite.isInitialized = true
+    currentSite.init?.()
   }
-  return site
+
+  return currentSite
 }
 
 const mediaInfoCache = new Map<string, any>()

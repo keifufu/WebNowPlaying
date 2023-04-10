@@ -4,6 +4,7 @@ import { querySelector, querySelectorEventReport, querySelectorReport } from '..
 import { ratingUtils } from '../utils'
 
 const site: Site = {
+  match: () => document.querySelector('[content="Navidrome"]') !== null,
   ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLAudioElement>('audio', (el) => true, false),
   info: {
     player: () => 'Navidrome',

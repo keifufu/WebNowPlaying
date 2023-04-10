@@ -4,6 +4,7 @@ import { querySelector, querySelectorEventReport, querySelectorReport } from '..
 import { ratingUtils } from '../utils'
 
 const site: Site = {
+  match: () => window.location.hostname === 'open.spotify.com',
   ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('(.player-controls__buttons button svg path)[3]', (el) => true, false),
   info: {
     player: () => 'Spotify',

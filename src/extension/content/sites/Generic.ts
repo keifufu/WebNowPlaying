@@ -1,6 +1,7 @@
 /* eslint-disable no-loop-func */
 import { capitalize, getMediaSessionCover, timeInSecondsToString } from '../../../utils/misc'
 import { RepeatMode, Site, StateMode } from '../../types'
+import { ContentUtils } from '../utils'
 
 let updateInterval: NodeJS.Timeout
 let element: HTMLMediaElement
@@ -11,8 +12,19 @@ let artistFromTitle = ''
 const sanitizeTitle = (title: string) => title.replace(/[\u25A0\u2759\u275A\u25AE\u25AE\u25B6\u25BA\u25B7\u2758\u25FC]/g, '').trim().replace(/\s+/g, ' ')
 
 const site: Site = {
+  match: () => {
+    const settings = ContentUtils.getSettings()
+    if (settings.useGeneric) {
+      if (settings.useGenericList) {
+        if (settings.isListBlocked && settings.genericList.includes(location.hostname)) return false
+        if (!settings.isListBlocked && !settings.genericList.includes(location.hostname)) return false
+      }
+      return true
+    }
+    return false
+  },
   init: () => {
-    console.log('Initializing generic site')
+    console.log(`Initializing generic site: ${location.hostname}`)
     // Setup events on all elements to get when updated (Also called in readyCheck)
     setupElementEvents()
     // This will update which element is selected to display
@@ -26,7 +38,7 @@ const site: Site = {
     return (element !== undefined && element !== null && element.duration > 0) || navigator.mediaSession.metadata !== null
   },
   info: {
-    player: () => capitalize(window.location.hostname.split('.').slice(-2).join('.')),
+    player: () => capitalize(window.location.hostname.split('.').slice(-2).join('.')) as any,
     state: () => {
       if (navigator.mediaSession.playbackState === 'playing') return StateMode.PLAYING
       else if (navigator.mediaSession.playbackState === 'paused') return StateMode.PAUSED
@@ -73,7 +85,7 @@ const site: Site = {
         return artistFromTitle
 
       // Returns 'YouTube' for youtube.com, 'Spotify' for open.spotify.com, etc.
-      return capitalize(document.location.hostname.split('.').slice(-2)[0])
+      return capitalize(window.location.hostname.split('.').slice(-2)[0])
     },
     album: () => {
       if (navigator.mediaSession.metadata?.album)
@@ -90,13 +102,13 @@ const site: Site = {
       const poster = element?.getAttribute('poster')
       if (poster) {
         if (poster.startsWith('http')) return poster
-        else return document.location.origin + poster
+        else return window.location.origin + poster
       }
 
       const ogImageContent = document.querySelector('meta[property="og:image"]')?.getAttribute('content')
       if (ogImageContent) {
         if (ogImageContent.startsWith('http')) return ogImageContent
-        else return document.location.origin + ogImageContent
+        else return window.location.origin + ogImageContent
       }
 
       return ''

@@ -6,8 +6,8 @@ import { ratingUtils } from '../utils'
 // Not reporting duration, position and rating as it seems they disappear once deezer annoys you with its ads
 
 const site: Site = {
-  ready: () =>
-    navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('.track-link', (el) => true, false),
+  match: () => window.location.hostname === 'www.deezer.com',
+  ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('.track-link', (el) => true, false),
   info: {
     player: () => 'Deezer',
     state: () => querySelectorReport<StateMode, HTMLElement>('(.player-controls svg)[1]', (el) => (el.getAttribute('data-testid') === 'PauseIcon' ? StateMode.PLAYING : StateMode.PAUSED), StateMode.PAUSED, 'state'),

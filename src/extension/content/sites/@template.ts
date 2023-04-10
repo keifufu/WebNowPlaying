@@ -1,9 +1,10 @@
 import { RepeatMode, Site, StateMode } from '../../types'
 
 const site: Site = {
+  match: () => false,
   ready: () => false,
   info: {
-    player: () => '', // The name of the player
+    player: () => '' as any, // The name of the player
     state: () => StateMode.STOPPED,
     title: () => '', // The title of the current song
     artist: () => '', // The artist of the current song

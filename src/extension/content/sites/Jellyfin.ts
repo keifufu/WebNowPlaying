@@ -4,6 +4,7 @@ import { querySelector, querySelectorEvent } from '../selectors'
 import { ratingUtils } from '../utils'
 
 const site: Site = {
+  match: () => document.querySelector('[content="Jellyfin"]') !== null,
   ready: () => getPlayer() !== null,
   info: {
     player: () => 'Jellyfin',
@@ -19,7 +20,7 @@ const site: Site = {
       const poster = getPlayer()?.getAttribute('poster')
       if (poster) {
         if (poster.startsWith('http')) return poster
-        else return document.location.origin + poster
+        else return window.location.origin + poster
       }
 
       return ''

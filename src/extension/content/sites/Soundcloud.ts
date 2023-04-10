@@ -4,6 +4,7 @@ import { querySelector, querySelectorEvent, querySelectorEventReport, querySelec
 import { ratingUtils } from '../utils'
 
 const site: Site = {
+  match: () => window.location.hostname === 'soundcloud.com',
   ready: () => navigator.mediaSession.metadata !== null,
   info: {
     player: () => 'Soundcloud',

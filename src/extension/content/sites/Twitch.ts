@@ -3,6 +3,7 @@ import { RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../selectors'
 
 const site: Site = {
+  match: () => window.location.hostname === 'www.twitch.tv',
   ready: () =>
     querySelector<boolean, HTMLElement>('.video-player__default-player', (el) => true, false)
     && querySelector<boolean, HTMLVideoElement>('video', (el) => true, false)
