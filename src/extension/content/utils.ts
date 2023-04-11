@@ -1,4 +1,4 @@
-import { getRandomToken } from '../../utils/misc'
+import { randomToken } from '../../utils/misc'
 import { defaultSettings } from '../../utils/settings'
 import { ServiceWorkerUtils } from '../../utils/sw'
 import { MediaInfo, NetflixInfo, Site, SiteInfo, StateMode, YouTubeInfo } from '../types'
@@ -41,7 +41,7 @@ export const ContentUtils = {
     }
   },
   sendMessage: <T>({ event, data }: { event: string, data?: any }): Promise<T> => new Promise((resolve) => {
-    const id = getRandomToken()
+    const id = randomToken()
     const listener = (e: any) => {
       if (e.data.type === 'wnp-response' && e.data.id === id) {
         resolve(e.data.value)

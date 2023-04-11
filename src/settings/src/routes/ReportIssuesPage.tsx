@@ -7,15 +7,11 @@ import { useSettings } from '../hooks/useSettings'
 import { useBorderColorClass, useTheme } from '../hooks/useTheme'
 
 const ReportIssuesPage: Component = () => {
-  const { settings, saveSettings } = useSettings()
+  const { settings, toggleUseTelemetry } = useSettings()
   const [text, setText] = createSignal('')
   const [submittingState, setSubmittingState] = createSignal<'none' | 'loading' | 'sent' | 'error'>('none')
   const { theme } = useTheme()
   const borderColorClass = useBorderColorClass()
-
-  const onChange = () => {
-    saveSettings(() => ({ ...settings(), useTelemetry: !settings().useTelemetry }), true)
-  }
 
   const onInput = (e: InputEvent) => {
     setText((e.target as HTMLTextAreaElement).value)
@@ -88,7 +84,7 @@ const ReportIssuesPage: Component = () => {
         </Show>
       </button>
       <div class={`-mx-3 my-2 w-[111%] border-t border-solid ${borderColorClass()}`} />
-      <Checkbox text='Automatically report when sites appear broken' checked={settings().useTelemetry} onChange={onChange} />
+      <Checkbox text='Automatically report when sites appear broken' checked={settings().useTelemetry} onChange={toggleUseTelemetry} />
       <div class={clsx(
         'mt-2 text-sm',
         [theme() !== 'konami' && 'text-gray-500'],

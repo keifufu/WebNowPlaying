@@ -18,9 +18,9 @@ export const Settings: Component = () => {
   const borderColorClass = useBorderColorClass()
   const { theme } = useTheme()
   const siteSettings = () => SiteSettings[site() as TSupportedSites]
-  const { settings, saveSettings } = useSettings()
+  const { settings, _saveSettingsInternal } = useSettings()
   const getValue = (key: string) => settings()[key as keyof typeof Settings]
-  const saveValue = (key: string, value: any) => saveSettings(() => ({ ...settings(), [key]: value } as any), true)
+  const saveValue = (key: string, value: any) => _saveSettingsInternal({ ...settings(), [key]: value })
 
   return (
     <div class={clsx(

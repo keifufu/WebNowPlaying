@@ -1,4 +1,5 @@
 export type CustomAdapter = {
+  id: string
   port: number
   enabled: boolean
 }
@@ -26,11 +27,8 @@ export const SiteSettings: TSiteSettings = {
   ]
 }
 
-// updateFrequencyMs was previously in use as a object to store the update frequency
-// for each adapter.
-// We could either have migration code or just rename it to updateFrequencyMs2.
 export type Settings = {
-  updateFrequencyMs2: number
+  updateFrequencyMs: number
   useGeneric: boolean
   useGenericList: boolean
   isListBlocked: boolean
@@ -44,7 +42,7 @@ export type Settings = {
 }
 
 export const defaultSettings: Settings = {
-  updateFrequencyMs2: 250,
+  updateFrequencyMs: 250,
   useGeneric: false,
   useGenericList: false,
   isListBlocked: false,

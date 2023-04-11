@@ -12,7 +12,7 @@ const site: Site = {
   init: () => {
     setInterval(async () => {
       currentVolume = await ContentUtils.getYouTubeMusicVolume() ?? 100
-    }, ContentUtils.getSettings().updateFrequencyMs2 / 2)
+    }, ContentUtils.getSettings().updateFrequencyMs / 2)
   },
   ready: () =>
     navigator.mediaSession.metadata !== null

@@ -11,7 +11,7 @@ const site: Site = {
     setInterval(async () => {
       const netflixInfo = await ContentUtils.getNetflixInfo()
       if (netflixInfo) currentNetflixInfo = netflixInfo
-    }, ContentUtils.getSettings().updateFrequencyMs2 / 2)
+    }, ContentUtils.getSettings().updateFrequencyMs / 2)
   },
   ready: () => (currentNetflixInfo?.isPlayerReady ?? false) && querySelector<boolean, HTMLVideoElement>('video', (el) => true, false) && querySelector<boolean, HTMLVideoElement>('video', (el) => el.duration > 0, false),
   info: {

@@ -1,7 +1,7 @@
 import { getExtensionVersion, getVersionFromGithub, isDeveloperMode } from '../../utils/misc'
 import { Settings } from '../../utils/settings'
 import { connectSocket, disconnectSocket, getSocketInfo, reloadSockets, updateSettings } from './port'
-import { readSettings } from './shared'
+import { readSettings, saveSettings } from './shared'
 
 export type ServiceWorkerMessage = {
   event: 'sendAutomaticReport' | 'resetOutdated' | 'getSettings' | 'saveSettings' | 'setColorScheme' | 'reloadSockets' | 'getSocketInfo' | 'connectSocket' | 'disconnectSocket' | 'getGithubVersion',
@@ -43,7 +43,7 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
       break
     case 'saveSettings':
       if (!request.settings) return
-      chrome.storage.local.set({ ...request.settings })
+      saveSettings(request.settings)
       updateSettings()
       break
     case 'setColorScheme':

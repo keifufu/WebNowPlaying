@@ -76,7 +76,7 @@ export const getExtensionVersion = () => {
   else return '0.0.0'
 }
 
-export const getRandomToken = (length = 24) => {
+export const randomToken = (length = 24) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let result = ''
   for (let i = 0; i < length; i++)

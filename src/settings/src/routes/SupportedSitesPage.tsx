@@ -13,16 +13,12 @@ type SiteProps = {
 }
 
 const Site: Component<SiteProps> = (props) => {
-  const { settings, saveSettings } = useSettings()
+  const { toggleSite } = useSettings()
   const borderColorClass = useBorderColorClass()
-
-  const onChange = () => {
-    saveSettings(() => ({ ...settings(), disabledSites: settings().disabledSites.includes(props.name) ? settings().disabledSites.filter((a) => a !== props.name) : [...settings().disabledSites, props.name] }), true)
-  }
 
   return (
     <div class={`m-[0.19rem] flex w-[32.7%] items-center rounded-md border border-solid ${borderColorClass()} p-[0.21rem] pl-2`}>
-      <Checkbox text={props.name} bigText onChange={onChange} checked={props.enabled} />
+      <Checkbox text={props.name} bigText onChange={() => toggleSite(props.name)} checked={props.enabled} />
       <Show when={props.settings}>
         <div class='ml-auto flex items-center'>
           <IoSettingsSharp class='h-4 w-4 cursor-pointer transition-all duration-100 hover:opacity-50' onClick={() => openSiteSettings(props.name)} />

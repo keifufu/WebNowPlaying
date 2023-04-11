@@ -143,7 +143,7 @@ export const reloadSockets = async () => {
     // Running updateAll in an interval shouldn't hurt, as it will only send an update if the mediaInfo has changed.
     // We do this because otherwise newly connected sockets don't send any info until something changed.
     updateAll()
-  }, _settings.updateFrequencyMs2)
+  }, _settings.updateFrequencyMs)
 }
 
 export const connectSocket = async (port: number) => {

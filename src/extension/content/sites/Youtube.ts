@@ -15,7 +15,7 @@ const site: Site = {
       currentYouTubeContainer = document.querySelector(info.containerLocalName as string)
       currentVideoDetails = info.videoDetails
       currentPlaylistDetails = info.playlistDetails
-    }, ContentUtils.getSettings().updateFrequencyMs2 / 2)
+    }, ContentUtils.getSettings().updateFrequencyMs / 2)
   },
   ready: () => true,
   info: {
