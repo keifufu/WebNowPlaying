@@ -206,7 +206,7 @@ const CustomAdapter: Component<{ enabled: boolean, port: number, info: SocketInf
   return (
     <div class={`mb-2 flex w-full flex-col items-center rounded-md border border-solid ${borderColorClass()} p-2`}>
       <div class='flex w-full items-center'>
-        <Checkbox text='Custom Adapter' bigText onChange={onChange} checked={props.enabled} />
+        <Checkbox label={props.port.toString()} text='Custom Adapter' bigText onChange={onChange} checked={props.enabled} />
         <input
           onInput={onInput}
           placeholder='Port'

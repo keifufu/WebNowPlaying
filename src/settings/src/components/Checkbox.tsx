@@ -9,7 +9,7 @@ const Checkbox: Component<{ label?: string, children?: any, text?: string, bigTe
   return (
     <div class='flex items-center'>
       <input
-        id={props.text || props.label}
+        id={props.label || props.text}
         type='checkbox'
         checked={props.checked}
         onChange={props.onChange}
@@ -25,7 +25,7 @@ const Checkbox: Component<{ label?: string, children?: any, text?: string, bigTe
       />
       <Show when={props.text}>
         <label
-          for={props.text}
+          for={props.label || props.text}
           class={clsx(
             '-mt-0.5',
             [!props.bigText && 'text-[0.9rem]'],
