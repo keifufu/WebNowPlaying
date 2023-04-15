@@ -13,8 +13,10 @@ const site: Site = {
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
     cover: () => {
-      const itemId = getPlayer()?.src.split('/Videos/')[1].split('/')[0].split('?')[0]
-      if (itemId) return `${window.location.origin}/Items/${itemId}/Images/Primary`
+      if (getPlayer()?.src?.includes('/Videos/')) {
+        const itemId = getPlayer()?.src?.split('/Videos/')[1].split('/')[0].split('?')[0]
+        if (itemId) return `${window.location.origin}/Items/${itemId}/Images/Primary`
+      }
 
       const mediaSessionCover = getMediaSessionCover()
       if (mediaSessionCover) return mediaSessionCover
