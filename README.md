@@ -3,6 +3,14 @@ A browser extension that provides information and controls for media playing in 
 It detects information about the media being played, such as the title, artist, album, and more.  
 This information can be utilized by external adapters to manage the media, including actions like pausing, skipping, adjusting the volume, and more.
 
+## Installing
+Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux)  
+Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/jfakgfcdgpghbbefmdfjkbdlibjgnbli)  
+Edge, Opera, etc. also use the Chrome Web Store
+
+**Note:** Due to a bug in firefox, you will have to manually grant it permissions.  
+Right click "WebNowPlaying Redux" > Manage Extension > Permissions > Access your data for all websites
+
 ## Adapters
 - [WebNowPlaying-Redux-Rainmeter](https://github.com/keifufu/WebNowPlaying-Redux-Rainmeter) by [keifufu](https://github.com/keifufu), [tjhrulz](https://github.com/tjhrulz/)
 - [WebNowPlaying-Redux-Macro-Deck](https://github.com/jbcarreon123/WebNowPlaying-Redux-Macro-Deck) by [jbcarreon123](https://github.com/jbcarreon123)
@@ -34,14 +42,6 @@ Supported via [WebNowPlaying-Redux-Spicetify](https://github.com/keifufu/WebNowP
 
 I will consider adding other websites where there is demand.  
 Please keep in mind that I can't easily develop for paid services.
-
-## Installing
-Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux)  
-Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/jfakgfcdgpghbbefmdfjkbdlibjgnbli)  
-Edge, Opera, etc. also use the Chrome Web Store
-
-**Note:** Due to a bug in firefox, you will have to manually grant it permissions.  
-Right click "WebNowPlaying Redux" > Manage Extension > Permissions > Access your data for all websites
 
 ## Troubleshooting
 View the wiki page [here](https://github.com/keifufu/WebNowPlaying-Redux/wiki/Troubleshooting)
