@@ -8,5 +8,5 @@ Adapters:
 - WebNowPlaying-Redux-OBS
 - Read the full list on GitHub: https://github.com/keifufu/WebNowPlaying-Redux
 
-Supports sites like: YouTube, Spotify, Soundcloud, any many others.
+Supports sites like: YouTube, Spotify, Soundcloud, and many others.
 Read the full list on GitHub: https://github.com/keifufu/WebNowPlaying-Redux
