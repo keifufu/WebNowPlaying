@@ -104,6 +104,9 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
     // Trim strings
     else if (typeof value === 'string')
       value = value.trim()
+    // Title sanitation
+    if (key === 'title')
+      value = sanitizeTitle(value as string, site.info.artist())
     if (value !== null && value !== undefined && mediaInfoCache.get(key) !== value) {
       if (key === 'state' || key === 'title' || (key === 'volume' && (mediaInfoCache.get('state') || StateMode.STOPPED) === StateMode.PLAYING)) {
         const timestamp = value.toString().length > 0 ? Date.now() : 0
@@ -138,4 +141,10 @@ export const ratingUtils = {
     else if (rating < 3 && site.info.rating?.() !== 1)
       site.events.toggleThumbsDown?.()
   }
+}
+
+function sanitizeTitle(title: string, artist: string) {
+  if (typeof title !== 'string' || typeof artist !== 'string') return ''
+  // TODO: maybe one day
+  return title
 }
