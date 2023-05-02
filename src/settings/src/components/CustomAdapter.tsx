@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Component, createEffect, createSignal, Show } from 'solid-js'
-import { BuiltInAdapters, SocketInfo, CustomAdapter as TCustomAdapter } from '../../../utils/settings'
+import { BuiltInAdapters, SocketInfoState, CustomAdapter as TCustomAdapter } from '../../../utils/settings'
 import { ServiceWorkerUtils } from '../../../utils/sw'
 import Anchor from '../components/Anchor'
 import Checkbox from '../components/Checkbox'
@@ -8,7 +8,7 @@ import { useSettings } from '../hooks/useSettings'
 import { useBorderColorClass, useTheme } from '../hooks/useTheme'
 import StrictInput from './StrictInput'
 
-const CustomAdapter: Component<{ adapter: TCustomAdapter, info: SocketInfo }> = (props) => {
+const CustomAdapter: Component<{ adapter: TCustomAdapter, info: SocketInfoState }> = (props) => {
   const [confirmDelete, setConfirmDelete] = createSignal(false)
   const { settings, toggleAdapter, removeCustomAdapter, updateCustomAdapter } = useSettings()
   const borderColorClass = useBorderColorClass()

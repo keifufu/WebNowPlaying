@@ -1,13 +1,14 @@
-import { getMediaSessionCover } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode } from '../../types'
+import { convertTimeToSeconds, getMediaSessionCover } from '../../../utils/misc'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 import { ratingUtils } from '../utils'
 
 const site: Site = {
   match: () => window.location.hostname === 'open.spotify.com',
   ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('(.player-controls__buttons button svg path)[3]', (el) => true, false),
+  ratingSystem: RatingSystem.LIKE,
   info: {
-    player: () => 'Spotify',
+    playerName: () => 'Spotify',
     // Supports mediaSession.metadata, but not mediaSession.playbackState
     state: () => querySelectorReport<StateMode, HTMLButtonElement>('(.player-controls__buttons button svg path)[3]', (el) => {
       const path = el.getAttribute('d')
@@ -18,23 +19,26 @@ const site: Site = {
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
-    cover: () => getMediaSessionCover(),
-    duration: () => querySelectorReport<string, HTMLElement>('(.playback-bar > div)[2]', (el) => el.innerText, '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLElement>('.playback-bar > div', (el) => el.innerText, '0:00', 'position'),
+    coverUrl: () => getMediaSessionCover(),
+    durationSeconds: () => querySelectorReport<number, HTMLElement>('(.playback-bar > div)[2]', (el) => convertTimeToSeconds(el.innerText), 0, 'durationSeconds'),
+    positionSeconds: () => querySelectorReport<number, HTMLElement>('.playback-bar > div', (el) => convertTimeToSeconds(el.innerText), 0, 'positionSeconds'),
     volume: () => querySelectorReport<number, HTMLElement>('.volume-bar__slider-container > div > div', (el) => parseFloat(el.style.getPropertyValue('--progress-bar-transform').replace('%', '')), 100, 'volume'),
     rating: () => querySelectorReport<number, HTMLButtonElement>('(.Root__now-playing-bar button)[1]', (el) => (el.getAttribute('aria-checked') === 'true' ? 5 : 0), 0, 'rating'),
-    repeat: () => querySelectorReport<RepeatMode, HTMLButtonElement>('(.player-controls__buttons button)[4]', (el) => {
+    repeatMode: () => querySelectorReport<RepeatMode, HTMLButtonElement>('(.player-controls__buttons button)[4]', (el) => {
       const state = el.getAttribute('aria-checked')
       if (state === 'true') return RepeatMode.ALL
       if (state === 'mixed') return RepeatMode.ONE
       return RepeatMode.NONE
-    }, RepeatMode.NONE, 'repeat'),
-    shuffle: () => querySelectorReport<boolean, HTMLButtonElement>('.player-controls__buttons button', (el) => el.getAttribute('aria-checked') === 'true', false, 'shuffle')
+    }, RepeatMode.NONE, 'repeatMode'),
+    shuffleActive: () => querySelectorReport<boolean, HTMLButtonElement>('.player-controls__buttons button', (el) => el.getAttribute('aria-checked') === 'true', false, 'shuffleActive')
   },
   events: {
-    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[2]', (el) => el.click(), 'togglePlaying'),
-    next: () => querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[3]', (el) => el.click(), 'next'),
-    previous: () => querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[1]', (el) => el.click(), 'previous'),
+    setState: (state) => {
+      if (site.info.state() === state) return
+      querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[2]', (el) => el.click(), 'setState')
+    },
+    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[1]', (el) => el.click(), 'skipPrevious'),
+    skipNext: () => querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[3]', (el) => el.click(), 'skipNext'),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
       querySelectorEventReport<HTMLElement>('.playback-bar > div > div', (el) => {
@@ -78,11 +82,15 @@ const site: Site = {
         }))
       }, 'setVolume')
     },
-    toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[4]', (el) => el.click(), 'toggleRepeat'),
-    toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.player-controls__buttons button', (el) => el.click(), 'toggleShuffle'),
-    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('(.Root__now-playing-bar button)[1]', (el) => el.click(), 'toggleThumbsUp'),
-    toggleThumbsDown: null,
-    setRating: (rating: number) => ratingUtils.like(site, rating)
+    toggleRepeatMode: () => querySelectorEventReport<HTMLButtonElement>('(.player-controls__buttons button)[4]', (el) => el.click(), 'toggleRepeatMode'),
+    toggleShuffleActive: () => querySelectorEventReport<HTMLButtonElement>('.player-controls__buttons button', (el) => el.click(), 'toggleShuffleActive'),
+    setRating: (rating: number) => {
+      ratingUtils.like(rating, site, {
+        toggleLike: () => {
+          querySelectorEventReport<HTMLButtonElement>('(.Root__now-playing-bar button)[1]', (el) => el.click(), 'setRating')
+        }
+      })
+    }
   }
 }
 

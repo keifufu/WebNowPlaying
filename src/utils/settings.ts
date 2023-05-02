@@ -27,8 +27,9 @@ export const SiteSettings: TSiteSettings = {
   ]
 }
 
+export const DEFAULT_UPDATE_FREQUENCY = 250
+
 export type Settings = {
-  updateFrequencyMs: number
   useGeneric: boolean
   useGenericList: boolean
   isListBlocked: boolean
@@ -37,12 +38,12 @@ export type Settings = {
   enabledBuiltInAdapters: string[]
   disabledSites: TSupportedSites[]
   useTelemetry: boolean,
+  useNativeAPIs: boolean,
   /* Site Settings */
   YouTubeSkipChapters: boolean
 }
 
 export const defaultSettings: Settings = {
-  updateFrequencyMs: 250,
   useGeneric: false,
   useGenericList: false,
   isListBlocked: false,
@@ -51,6 +52,7 @@ export const defaultSettings: Settings = {
   enabledBuiltInAdapters: ['Rainmeter Adapter'],
   disabledSites: [],
   useTelemetry: false,
+  useNativeAPIs: true,
   /* Site Settings */
   YouTubeSkipChapters: false
 }
@@ -105,15 +107,18 @@ export const BuiltInAdapters: Adapter[] = [
   }
 ]
 
-export type SocketInfo = {
+export type SocketInfoState = {
   version: string,
   isConnected: boolean,
   isConnecting: boolean,
   reconnectAttempts: number
   _isPlaceholder?: boolean
 }
-export type SocketInfoMap = Map<number, SocketInfo>
-export const defaultSocketInfo = {
+export type SocketInfo = {
+  forceEnableNativeAPIs: boolean
+  states: Map<number, SocketInfoState>
+}
+export const defaultSocketInfoState = {
   version: '0.0.0',
   isConnected: false,
   isConnecting: false,

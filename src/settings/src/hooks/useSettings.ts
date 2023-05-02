@@ -13,10 +13,16 @@ const saveSettings = (settings: Settings) => {
 export const useSettings = () => ({
   settings,
   _saveSettingsInternal: saveSettings,
-  setUpdateFrequencyMs: (updateFrequencyMs: number) => {
+  /* setUpdateFrequencyMs: (updateFrequencyMs: number) => {
     saveSettings({
       ...settings(),
       updateFrequencyMs: updateFrequencyMs
+    })
+  }, */
+  setUseNativeAPIs: (useNativeAPIs: boolean) => {
+    saveSettings({
+      ...settings(),
+      useNativeAPIs
     })
   },
   toggleAdapter: (port: number) => {

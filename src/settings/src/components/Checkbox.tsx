@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { Component, Show } from 'solid-js'
 import { useBorderColorClass, useTheme } from '../hooks/useTheme'
 
-const Checkbox: Component<{ label?: string, children?: any, text?: string, bigText?: boolean, checked: boolean, disabled?: boolean, onChange: () => void }> = (props) => {
+const Checkbox: Component<{ noMt?: boolean, label?: string, children?: any, text?: string, bigText?: boolean, checked: boolean, disabled?: boolean, onChange: () => void }> = (props) => {
   const { theme } = useTheme()
   const borderColorClass = useBorderColorClass()
 
@@ -27,7 +27,7 @@ const Checkbox: Component<{ label?: string, children?: any, text?: string, bigTe
         <label
           for={props.label || props.text}
           class={clsx(
-            '-mt-0.5',
+            [!props.noMt && '-mt-0.5'],
             [!props.bigText && 'text-[0.9rem]'],
             [props.disabled && 'opacity-50'],
             [!props.disabled && 'cursor-pointer']

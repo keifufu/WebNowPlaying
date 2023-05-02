@@ -1,4 +1,4 @@
-import { Adapter, BuiltInAdapters, CustomAdapter, Settings, SocketInfoMap, defaultSocketInfo } from '../../utils/settings'
+import { Adapter, BuiltInAdapters, CustomAdapter, DEFAULT_UPDATE_FREQUENCY, Settings, SocketInfo, defaultSocketInfoState } from '../../utils/settings'
 import { MediaInfo, StateMode, defaultMediaInfo } from '../types'
 import { readSettings } from './shared'
 import { WNPReduxWebSocket } from './socket'
@@ -116,6 +116,7 @@ let _settings: Settings
 // We want to update settings after they change, we don't want to read them every time (in getSocketInfo particularly)
 export const updateSettings = async () => {
   _settings = await readSettings()
+  sockets.forEach((socket) => socket.sendSettings(_settings))
 }
 let _interval: NodeJS.Timeout | null = null
 export const reloadSockets = async () => {
@@ -143,7 +144,7 @@ export const reloadSockets = async () => {
     // Running updateAll in an interval shouldn't hurt, as it will only send an update if the mediaInfo has changed.
     // We do this because otherwise newly connected sockets don't send any info until something changed.
     updateAll()
-  }, _settings.updateFrequencyMs)
+  }, DEFAULT_UPDATE_FREQUENCY)
 }
 
 export const connectSocket = async (port: number) => {
@@ -163,11 +164,16 @@ export const disconnectSocket = (port: number) => {
   sockets.delete(port)
 }
 
+let forceEnableNativeAPIs = false
+export const setForceEnableNativeApis = (value: boolean) => forceEnableNativeAPIs = value
 export const getSocketInfo = () => {
-  const info: SocketInfoMap = new Map()
+  const info: SocketInfo = {
+    forceEnableNativeAPIs,
+    states: new Map()
+  }
 
   for (const [key, socket] of sockets.entries()) {
-    info.set(key, {
+    info.states.set(key, {
       version: socket.version,
       isConnected: socket.isConnected,
       isConnecting: socket.isConnecting,
@@ -177,17 +183,17 @@ export const getSocketInfo = () => {
 
   // Fill in info for not connected sockets
   for (const adapter of BuiltInAdapters) {
-    if (info.has(adapter.port)) continue
-    info.set(adapter.port, {
-      ...defaultSocketInfo,
+    if (info.states.has(adapter.port)) continue
+    info.states.set(adapter.port, {
+      ...defaultSocketInfoState,
       _isPlaceholder: false
     })
   }
 
   for (const adapter of _settings?.customAdapters) {
-    if (info.has(adapter.port)) continue
-    info.set(adapter.port, {
-      ...defaultSocketInfo,
+    if (info.states.has(adapter.port)) continue
+    info.states.set(adapter.port, {
+      ...defaultSocketInfoState,
       _isPlaceholder: false
     })
   }

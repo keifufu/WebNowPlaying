@@ -71,6 +71,20 @@ export const getVersionFromGithub = async (gh: string) => {
   }
 }
 
+export const convertTimeToSeconds = (time: string) => {
+  const durArr = time.split(':')
+
+  // Duration will always have seconds and minutes, but hours are optional
+  try {
+    const durSec = parseInt(durArr[durArr.length - 1])
+    const durMin = parseInt(durArr[durArr.length - 2]) * 60
+    const durHour = durArr.length > 2 ? parseInt(durArr[0]) * 60 * 60 : 0
+    return durHour + durMin + durSec
+  } catch {
+    return 0
+  }
+}
+
 export const getExtensionVersion = () => {
   if (typeof chrome !== 'undefined' && typeof chrome.runtime?.getManifest === 'function') return chrome.runtime.getManifest().version
   else return '0.0.0'

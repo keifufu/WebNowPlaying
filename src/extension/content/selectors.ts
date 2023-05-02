@@ -10,7 +10,7 @@ export const parseSelector = (_selector: string) => {
   return { selector, index }
 }
 
-type InfoType = 'state' | 'title' | 'artist' | 'album' | 'cover' | 'duration' | 'position' | 'volume' | 'rating' | 'repeat' | 'shuffle'
+type InfoType = 'state' | 'title' | 'artist' | 'album' | 'coverUrl' | 'durationSeconds' | 'positionSeconds' | 'volume' | 'rating' | 'repeatMode' | 'shuffleActive'
 // Selector is either a normal selector, or: '(selector)[index]' for querySelectorAll
 const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E) => T | null, defaultValue: T, type?: InfoType): T => {
   try {
@@ -45,7 +45,7 @@ const _querySelector = <T, E extends Element>(selectorStr: string, exec: (el: E)
 export const querySelector = <T, E extends Element>(selector: string, exec: (el: E) => T | null, defaultValue: T): T => _querySelector(selector, exec, defaultValue)
 export const querySelectorReport = <T, E extends Element>(selector: string, exec: (el: E) => T | null, defaultValue: T, type: InfoType): T => _querySelector(selector, exec, defaultValue, type)
 
-type EventType = 'togglePlaying' | 'next' | 'previous' | 'setPositionSeconds' | 'setPositionPercentage' | 'setVolume' | 'toggleRepeat' | 'toggleShuffle' | 'toggleThumbsUp' | 'toggleThumbsDown' | 'setRating'
+type EventType = 'setState' | 'skipPrevious' | 'skipNext' | 'setPositionSeconds' | 'setPositionPercentage' | 'setVolume' | 'toggleRepeatMode' | 'toggleShuffleActive' | 'setRating'
 export const _querySelectorEvent = <E extends Element>(selectorOrGetter: string | (() => E), action: (el: E) => any, type?: EventType): boolean => {
   try {
     let el

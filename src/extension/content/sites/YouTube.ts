@@ -1,6 +1,7 @@
-import { findBiggestImage, timeInSecondsToString } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode, YouTubePlaylistDetails, YouTubeVideoDetails } from '../../types'
-import { parseSelector, querySelector } from '../selectors'
+import { findBiggestImage } from '../../../utils/misc'
+import { DEFAULT_UPDATE_FREQUENCY } from '../../../utils/settings'
+import { RatingSystem, RepeatMode, Site, StateMode, YouTubePlaylistDetails, YouTubeVideoDetails } from '../../types'
+import { parseSelector } from '../selectors'
 import { ContentUtils, ratingUtils } from '../utils'
 
 let currentYouTubeContainer: Element | null = null
@@ -15,11 +16,12 @@ const site: Site = {
       currentYouTubeContainer = document.querySelector(info.containerLocalName as string)
       currentVideoDetails = info.videoDetails
       currentPlaylistDetails = info.playlistDetails
-    }, ContentUtils.getSettings().updateFrequencyMs / 2)
+    }, DEFAULT_UPDATE_FREQUENCY / 2)
   },
   ready: () => true,
+  ratingSystem: RatingSystem.LIKE_DISLIKE,
   info: {
-    player: () => 'YouTube',
+    playerName: () => 'YouTube',
     state: () => queryYouTubeContainer<StateMode, HTMLVideoElement>('.html5-main-video[src]', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED),
     title: () => {
       if (currentVideoDetails?.title && currentYouTubeContainer) return currentVideoDetails.title
@@ -33,32 +35,38 @@ const site: Site = {
       if (currentPlaylistDetails?.title?.length && currentYouTubeContainer) return currentPlaylistDetails.title
       return ''
     },
-    cover: () => {
+    coverUrl: () => {
       if (currentVideoDetails?.thumbnail?.thumbnails && currentYouTubeContainer) {
         const url = findBiggestImage(currentVideoDetails.thumbnail.thumbnails)
         if (url) return url.split('?')[0]
       }
       return ''
     },
-    duration: () => queryYouTubeContainer<string, HTMLVideoElement>('.html5-main-video[src]', (el) => timeInSecondsToString(el.duration), '0:00'),
-    position: () => queryYouTubeContainer<string, HTMLVideoElement>('.html5-main-video[src]', (el) => timeInSecondsToString(el.currentTime), '0:00'),
+    durationSeconds: () => queryYouTubeContainer<number, HTMLVideoElement>('.html5-main-video[src]', (el) => el.duration, 0),
+    positionSeconds: () => queryYouTubeContainer<number, HTMLVideoElement>('.html5-main-video[src]', (el) => el.currentTime, 0),
     volume: () => queryYouTubeContainer<number, HTMLVideoElement>('.html5-main-video[src]', (el) => (el.muted ? 0 : el.volume * 100), 100),
     rating: () => {
-      if (currentYouTubeContainer?.localName === 'ytd-shorts') {
-        const container = currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement
-        const likeButton = container?.querySelector('#segmented-like-button button, #like-button button')
-        if (likeButton?.getAttribute('aria-pressed') === 'true') return 5
-        const dislikeButton = container?.querySelector('#segmented-dislike-button button, #dislike-button button')
-        if (dislikeButton?.getAttribute('aria-pressed') === 'true') return 1
-      } else {
-        const likeButtonPressed = querySelector<boolean, HTMLButtonElement>('#segmented-like-button button, #like-button button', (el) => el.getAttribute('aria-pressed') === 'true', false)
-        if (likeButtonPressed) return 5
-        const dislikeButtonPressed = querySelector<boolean, HTMLButtonElement>('#segmented-dislike-button button, #dislike-button button', (el) => el.getAttribute('aria-pressed') === 'true', false)
-        if (dislikeButtonPressed) return 1
+      let likeButton: HTMLButtonElement | null = null
+      const getLikeButton = (container: Element | null | undefined) => {
+        if (!container) return
+        likeButton = container.querySelector('#segmented-like-button button, #like-button button')
       }
+      getLikeButton(currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement)
+      if (!likeButton) getLikeButton(currentYouTubeContainer)
+      if (likeButton && (likeButton as HTMLButtonElement).getAttribute('aria-pressed') === 'true') return 5
+
+      let dislikeButton: HTMLButtonElement | null = null
+      const getDislikeButton = (container: Element | null | undefined) => {
+        if (!container) return
+        dislikeButton = container.querySelector('#segmented-dislike-button button, #dislike-button button')
+      }
+      getDislikeButton(currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement)
+      if (!dislikeButton) getDislikeButton(currentYouTubeContainer)
+      if (dislikeButton && (dislikeButton as HTMLButtonElement).getAttribute('aria-pressed') === 'true') return 1
+
       return 0
     },
-    repeat: () => {
+    repeatMode: () => {
       // If the playlist loop is set to video, it sets the video to loop
       if (queryYouTubeContainer<boolean, HTMLVideoElement>('.html5-main-video[src]', (el) => el.loop, false)) return RepeatMode.ONE
       const playlistRepeatButtonSvgPath = queryYouTubeContainer<string, HTMLElement>('#playlist-action-menu path', (el) => el.getAttribute('d'), '')
@@ -66,16 +74,11 @@ const site: Site = {
       if (playlistRepeatButtonSvgPath === svgPathLoopPlaylist) return RepeatMode.ALL
       return RepeatMode.NONE
     },
-    shuffle: () => queryYouTubeContainer<boolean, HTMLButtonElement>('(#playlist-action-menu button)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false)
+    shuffleActive: () => queryYouTubeContainer<boolean, HTMLButtonElement>('(#playlist-action-menu button)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false)
   },
   events: {
-    togglePlaying: () => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => (el.paused ? el.play() : el.pause()), null),
-    next: () => {
-      const chapters = findNearestChapters()
-      if (chapters?.next) return site.events.setPositionSeconds?.(chapters.next)
-      queryYouTubeContainer<any, HTMLButtonElement>('.ytp-next-button, #navigation-button-down button', (el) => el.click(), null)
-    },
-    previous: () => {
+    setState: (state) => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => (state === StateMode.PLAYING ? el.play() : el.pause()), null),
+    skipPrevious: () => {
       const chapters = findNearestChapters()
       if (chapters?.previous) return site.events.setPositionSeconds?.(chapters.previous)
       queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => {
@@ -83,10 +86,15 @@ const site: Site = {
         else queryYouTubeContainer<any, HTMLButtonElement>('.ytp-prev-button, #navigation-button-up button', (el) => el.click(), null)
       }, null)
     },
+    skipNext: () => {
+      const chapters = findNearestChapters()
+      if (chapters?.next) return site.events.setPositionSeconds?.(chapters.next)
+      queryYouTubeContainer<any, HTMLButtonElement>('.ytp-next-button, #navigation-button-down button', (el) => el.click(), null)
+    },
     setPositionSeconds: (positionInSeconds: number) => queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => el.currentTime = positionInSeconds, null),
     setPositionPercentage: null,
     setVolume: (volume: number) => ContentUtils.setYouTubeVolume(volume),
-    toggleRepeat: () => {
+    toggleRepeatMode: () => {
       let success = false
       if (currentPlaylistDetails?.playlistId) {
         success = queryYouTubeContainer<boolean, HTMLButtonElement>('#playlist-action-menu button', (el) => {
@@ -96,28 +104,31 @@ const site: Site = {
       }
       if (!success) queryYouTubeContainer<any, HTMLVideoElement>('.html5-main-video[src]', (el) => el.loop = !el.loop, null)
     },
-    toggleShuffle: () => queryYouTubeContainer<any, HTMLButtonElement>('(#playlist-action-menu button)[1]', (el) => el.click(), null),
-    toggleThumbsUp: () => {
-      let likeButton: HTMLButtonElement | null = null
-      if (currentYouTubeContainer?.localName === 'ytd-shorts') {
-        const container = currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement
-        likeButton = container?.querySelector('#segmented-like-button button, #like-button button') as HTMLButtonElement
-      } else {
-        likeButton = document.querySelector('#segmented-like-button button, #like-button button')
-      }
-      if (likeButton) (likeButton as HTMLButtonElement).click?.()
-    },
-    toggleThumbsDown: () => {
-      let dislikeButton: HTMLButtonElement | null = null
-      const getDislikeButton = (container: Element | null | undefined) => {
-        if (!container) return
-        dislikeButton = container.querySelector('#segmented-dislike-button button, #dislike-button button')
-      }
-      getDislikeButton(currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement)
-      if (!dislikeButton) getDislikeButton(currentYouTubeContainer)
-      if (dislikeButton) (dislikeButton as HTMLButtonElement).click?.()
-    },
-    setRating: (rating: number) => ratingUtils.likeDislike(site, rating)
+    toggleShuffleActive: () => queryYouTubeContainer<any, HTMLButtonElement>('(#playlist-action-menu button)[1]', (el) => el.click(), null),
+    setRating: (rating: number) => {
+      ratingUtils.likeDislike(rating, site, {
+        toggleLike: () => {
+          let likeButton: HTMLButtonElement | null = null
+          const getLikeButton = (container: Element | null | undefined) => {
+            if (!container) return
+            likeButton = container.querySelector('#segmented-like-button button, #like-button button')
+          }
+          getLikeButton(currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement)
+          if (!likeButton) getLikeButton(currentYouTubeContainer)
+          if (likeButton) (likeButton as HTMLButtonElement).click?.()
+        },
+        toggleDislike: () => {
+          let dislikeButton: HTMLButtonElement | null = null
+          const getDislikeButton = (container: Element | null | undefined) => {
+            if (!container) return
+            dislikeButton = container.querySelector('#segmented-dislike-button button, #dislike-button button')
+          }
+          getDislikeButton(currentYouTubeContainer?.querySelector('ytd-player')?.parentElement?.parentElement)
+          if (!dislikeButton) getDislikeButton(currentYouTubeContainer)
+          if (dislikeButton) (dislikeButton as HTMLButtonElement).click?.()
+        }
+      })
+    }
   }
 }
 

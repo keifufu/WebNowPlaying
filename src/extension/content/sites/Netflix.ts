@@ -1,5 +1,5 @@
-import { timeInSecondsToString } from '../../../utils/misc'
-import { NetflixInfo, RepeatMode, Site, StateMode } from '../../types'
+import { DEFAULT_UPDATE_FREQUENCY } from '../../../utils/settings'
+import { NetflixInfo, RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 import { ContentUtils } from '../utils'
 
@@ -11,11 +11,12 @@ const site: Site = {
     setInterval(async () => {
       const netflixInfo = await ContentUtils.getNetflixInfo()
       if (netflixInfo) currentNetflixInfo = netflixInfo
-    }, ContentUtils.getSettings().updateFrequencyMs / 2)
+    }, DEFAULT_UPDATE_FREQUENCY / 2)
   },
   ready: () => (currentNetflixInfo?.isPlayerReady ?? false) && querySelector<boolean, HTMLVideoElement>('video', (el) => true, false) && querySelector<boolean, HTMLVideoElement>('video', (el) => el.duration > 0, false),
+  ratingSystem: RatingSystem.NONE,
   info: {
-    player: () => 'Netflix',
+    playerName: () => 'Netflix',
     state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
     title: () => {
       const data = currentNetflixInfo?.seasonData
@@ -43,7 +44,7 @@ const site: Site = {
         return String(data.season.longName)
       return 'Netflix'
     },
-    cover: () => {
+    coverUrl: () => {
       if (currentNetflixInfo?.metadata._metadata.video) {
         const { artwork, boxart, storyart } = currentNetflixInfo?.metadata._metadata.video
         let art
@@ -55,30 +56,30 @@ const site: Site = {
       }
       return ''
     },
-    duration: () => querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLVideoElement>('video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
+    durationSeconds: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => el.duration, 0, 'durationSeconds'),
+    positionSeconds: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => el.currentTime, 0, 'positionSeconds'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => 0,
-    repeat: () => RepeatMode.NONE,
-    shuffle: () => false
+    repeatMode: () => RepeatMode.NONE,
+    shuffleActive: () => false
   },
   events: {
-    togglePlaying: () => querySelectorEventReport<HTMLVideoElement>('video', (el) => (el.paused ? el.play() : el.pause()), 'togglePlaying'),
-    next: () => {
-      const data = currentNetflixInfo?.navData
-      if (data?.nextId && data?.currId) {
-        window.location.href = window.location.href.replace(
-          data.currId,
-          data.nextId
-        )
-      }
-    },
-    previous: () => {
+    setState: (state) => querySelectorEventReport<HTMLVideoElement>('video', (el) => (state === StateMode.PLAYING ? el.play() : el.pause()), 'setState'),
+    skipPrevious: () => {
       const data = currentNetflixInfo?.navData
       if (data?.prevId && data?.currId) {
         window.location.href = window.location.href.replace(
           data.currId,
           data.prevId
+        )
+      }
+    },
+    skipNext: () => {
+      const data = currentNetflixInfo?.navData
+      if (data?.nextId && data?.currId) {
+        window.location.href = window.location.href.replace(
+          data.currId,
+          data.nextId
         )
       }
     },
@@ -88,10 +89,8 @@ const site: Site = {
       el.muted = false
       el.volume = volume / 100
     }, 'setVolume'),
-    toggleRepeat: null,
-    toggleShuffle: null,
-    toggleThumbsUp: null,
-    toggleThumbsDown: null,
+    toggleRepeatMode: null,
+    toggleShuffleActive: null,
     setRating: null
   }
 }

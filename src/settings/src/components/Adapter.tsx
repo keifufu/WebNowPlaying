@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js'
 import { isVersionOutdated } from '../../../utils/misc'
-import { SocketInfo, Adapter as TAdapter } from '../../../utils/settings'
+import { SocketInfoState, Adapter as TAdapter } from '../../../utils/settings'
 import { ServiceWorkerUtils } from '../../../utils/sw'
 import Anchor from '../components/Anchor'
 import Checkbox from '../components/Checkbox'
@@ -36,7 +36,7 @@ const AdapterAuthors: Component<{ adapter: TAdapter }> = (props) => {
   )
 }
 
-const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfo }> = (props) => {
+const Adapter: Component<{ adapter: TAdapter, enabled: boolean, info: SocketInfoState }> = (props) => {
   const { toggleAdapter } = useSettings()
   const [githubVersion, setGithubVersion] = createSignal('...')
   const borderColorClass = useBorderColorClass()

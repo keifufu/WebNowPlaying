@@ -1,6 +1,6 @@
 /* eslint-disable no-loop-func */
-import { capitalize, getMediaSessionCover, timeInSecondsToString } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode } from '../../types'
+import { capitalize, getMediaSessionCover } from '../../../utils/misc'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { ContentUtils } from '../utils'
 
 let updateInterval: NodeJS.Timeout
@@ -37,8 +37,9 @@ const site: Site = {
     setupElementEvents()
     return (element !== undefined && element !== null && element.duration > 0) || navigator.mediaSession.metadata !== null
   },
+  ratingSystem: RatingSystem.NONE,
   info: {
-    player: () => capitalize(window.location.hostname.split('.').slice(-2).join('.')) as any,
+    playerName: () => capitalize(window.location.hostname.split('.').slice(-2).join('.')) as any,
     state: () => {
       if (navigator.mediaSession.playbackState === 'playing') return StateMode.PLAYING
       else if (navigator.mediaSession.playbackState === 'paused') return StateMode.PAUSED
@@ -95,7 +96,7 @@ const site: Site = {
       // The original generic script returned the same as artist above (the site's name)
       return ''
     },
-    cover: () => {
+    coverUrl: () => {
       const mediaSessionCover = getMediaSessionCover()
       if (mediaSessionCover) return mediaSessionCover
 
@@ -118,25 +119,25 @@ const site: Site = {
     // and the duration keeps increasing? Either way, it doesn't seem
     // to be an issue with timeInSecondsToString, and not with
     // element.duration/element.currentTime.
-    duration: () => timeInSecondsToString(element?.duration || 0),
-    position: () => timeInSecondsToString(element?.currentTime || 0),
+    durationSeconds: () => element?.duration || 0,
+    positionSeconds: () => element?.currentTime || 0,
     volume: () => (element?.muted ? 0 : (element?.volume ?? 1) * 100),
     rating: () => 0,
-    repeat: () => (element?.loop ? RepeatMode.ONE : RepeatMode.NONE),
-    shuffle: () => false
+    repeatMode: () => (element?.loop ? RepeatMode.ONE : RepeatMode.NONE),
+    shuffleActive: () => false
   },
   events: {
-    togglePlaying: () => {
+    setState: (state) => {
       if (!element) return
-      element.paused ? element.play() : element.pause()
+      state === StateMode.PLAYING ? element.play() : element.pause()
     },
-    next: () => {
-      if (!element) return
-      element.currentTime = element.duration
-    },
-    previous: () => {
+    skipPrevious: () => {
       if (!element) return
       element.currentTime = 0
+    },
+    skipNext: () => {
+      if (!element) return
+      element.currentTime = element.duration
     },
     setPositionSeconds: (positionInSeconds: number) => {
       if (!element) return
@@ -148,13 +149,11 @@ const site: Site = {
       element.muted = false
       element.volume = volume / 100
     },
-    toggleRepeat: () => {
+    toggleRepeatMode: () => {
       if (!element) return
       element.loop = !element.loop
     },
-    toggleShuffle: null,
-    toggleThumbsUp: null,
-    toggleThumbsDown: null,
+    toggleShuffleActive: null,
     setRating: null
   }
 }

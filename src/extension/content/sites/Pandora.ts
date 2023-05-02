@@ -1,5 +1,5 @@
-import { capitalize } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode } from '../../types'
+import { capitalize, convertTimeToSeconds } from '../../../utils/misc'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../selectors'
 import { ratingUtils } from '../utils'
 
@@ -8,8 +8,9 @@ const site: Site = {
   ready: () =>
     querySelector<boolean, HTMLElement>('.Tuner__Audio__TrackDetail__title', (el) => el.innerText.length > 0, false)
     && querySelector<boolean, HTMLElement>('(.VolumeDurationControl__Duration span)[2]', (el) => el.innerText.length > 0, false),
+  ratingSystem: RatingSystem.LIKE_DISLIKE,
   info: {
-    player: () => 'Pandora',
+    playerName: () => 'Pandora',
     state: () => {
       // If pandora asked if you are still listening it is paused
       if (querySelector<boolean, HTMLElement>('.StillListeningBody', (el) => true, false)) return StateMode.STOPPED
@@ -24,13 +25,13 @@ const site: Site = {
       if (albumURL) return capitalize(albumURL.split('/')[1].replaceAll('-', ' '))
       return ''
     },
-    cover: () => {
+    coverUrl: () => {
       const cover = querySelector<string, HTMLImageElement>('.nowPlayingTopInfo__artContainer__art img', (el) => el.src, '')
       if (cover) return cover
-      return querySelectorReport<string, HTMLImageElement>('.ImageLoader img, .nowPlayingTopInfo__artContainer img', (el) => `${el.src.split('/').slice(0, -1).join('/')}/500W_500H.jpg`, '', 'cover')
+      return querySelectorReport<string, HTMLImageElement>('.ImageLoader img, .nowPlayingTopInfo__artContainer img', (el) => `${el.src.split('/').slice(0, -1).join('/')}/500W_500H.jpg`, '', 'coverUrl')
     },
-    duration: () => querySelectorReport<string, HTMLElement>('(.VolumeDurationControl__Duration span)[2]', (el) => el.innerText, '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLElement>('.VolumeDurationControl__Duration span', (el) => el.innerText, '0:00', 'position'),
+    durationSeconds: () => querySelectorReport<number, HTMLElement>('(.VolumeDurationControl__Duration span)[2]', (el) => convertTimeToSeconds(el.innerText), 0, 'durationSeconds'),
+    positionSeconds: () => querySelectorReport<number, HTMLElement>('.VolumeDurationControl__Duration span', (el) => convertTimeToSeconds(el.innerText), 0, 'positionSeconds'),
     volume: () => 100,
     rating: () => {
       const thumbsUp = querySelectorReport<boolean, HTMLButtonElement>('.ThumbUpButton', (el) => el.getAttribute('aria-checked') === 'true', false, 'rating')
@@ -40,19 +41,22 @@ const site: Site = {
       return 0
     },
     // Not reporting because some views on Pandora don't have a repeat button
-    repeat: () => querySelector<RepeatMode, HTMLButtonElement>('.RepeatButton', (el) => {
+    repeatMode: () => querySelector<RepeatMode, HTMLButtonElement>('.RepeatButton', (el) => {
       const state = el.getAttribute('aria-checked')
       if (state === 'true') return RepeatMode.ALL
       if (state === 'mixed') return RepeatMode.ONE
       return RepeatMode.NONE
     }, RepeatMode.NONE),
     // Not reporting because some views on Pandora don't have a shuffle button
-    shuffle: () => querySelector<boolean, HTMLButtonElement>('.ShuffleButton', (el) => el.getAttribute('aria-checked') === 'true', false)
+    shuffleActive: () => querySelector<boolean, HTMLButtonElement>('.ShuffleButton', (el) => el.getAttribute('aria-checked') === 'true', false)
   },
   events: {
-    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('.PlayButton', (el) => el.click(), 'togglePlaying'),
-    next: () => querySelectorEventReport<HTMLButtonElement>('.SkipButton, .Tuner__Control__SkipForward__Button', (el) => el.click(), 'next'),
-    previous: () => querySelectorEventReport<HTMLButtonElement>('.ReplayButton, .Tuner__Control__SkipBack__Button', (el) => el.click(), 'previous'),
+    setState: (state) => {
+      if (site.info.state() === state) return
+      querySelectorEventReport<HTMLButtonElement>('.PlayButton', (el) => el.click(), 'setState')
+    },
+    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>('.ReplayButton, .Tuner__Control__SkipBack__Button', (el) => el.click(), 'skipPrevious'),
+    skipNext: () => querySelectorEventReport<HTMLButtonElement>('.SkipButton, .Tuner__Control__SkipForward__Button', (el) => el.click(), 'skipNext'),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
       querySelectorEventReport<HTMLElement>('.TunerProgress__HitBox', (el) => {
@@ -76,11 +80,18 @@ const site: Site = {
       }, 'setPositionPercentage')
     },
     setVolume: null,
-    toggleRepeat: () => querySelectorEvent<HTMLButtonElement>('.RepeatButton', (el) => el.click()),
-    toggleShuffle: () => querySelectorEvent<HTMLButtonElement>('.ShuffleButton', (el) => el.click()),
-    toggleThumbsUp: () => querySelectorEvent<HTMLButtonElement>('.ThumbUpButton', (el) => el.click()),
-    toggleThumbsDown: () => querySelectorEvent<HTMLButtonElement>('.ThumbDownButton', (el) => el.click()),
-    setRating: (rating: number) => ratingUtils.likeDislike(site, rating)
+    toggleRepeatMode: () => querySelectorEvent<HTMLButtonElement>('.RepeatButton', (el) => el.click()),
+    toggleShuffleActive: () => querySelectorEvent<HTMLButtonElement>('.ShuffleButton', (el) => el.click()),
+    setRating: (rating: number) => {
+      ratingUtils.likeDislike(rating, site, {
+        toggleLike: () => {
+          querySelectorEvent<HTMLButtonElement>('.ThumbUpButton', (el) => el.click())
+        },
+        toggleDislike: () => {
+          querySelectorEvent<HTMLButtonElement>('.ThumbDownButton', (el) => el.click())
+        }
+      })
+    }
   }
 }
 

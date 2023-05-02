@@ -1,6 +1,8 @@
 # Creating your own adapter
-For C#, please read the documentation of [WNPRedux-Adapter-Library](https://github.com/keifufu/WNPRedux-Adapter-Library)  
-For Python, read the documentation of [PyWNP](https://github.com/keifufu/PyWNP)  
+Please choose between one of the following libraries:
+- [Windows only] [WNPRedux-Adapter-Library](https://github.com/keifufu/WNPRedux-Adapter-Library)  
+- [Cross-Platform] [PyWNP](https://github.com/keifufu/PyWNP)  
+
 While this only allows for writing your adapter in C# or Python, **please refrain from re-implementing this library or its communication yourself**.  
 I don't want users possibly affected by incompatibilities between WebNowPlaying-Redux and unofficial adapters.
 

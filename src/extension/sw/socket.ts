@@ -1,7 +1,8 @@
-import { isVersionOutdated } from '../../utils/misc'
-import { Adapter, CustomAdapter } from '../../utils/settings'
+import { isVersionOutdated, timeInSecondsToString } from '../../utils/misc'
+import { Adapter, CustomAdapter, Settings } from '../../utils/settings'
 import { MediaInfo, RepeatMode, StateMode } from '../types'
-import { getGithubVersion, setOutdated } from './shared'
+import { setForceEnableNativeApis } from './port'
+import { getGithubVersion, readSettings, setOutdated } from './shared'
 
 export class WNPReduxWebSocket {
   ws: WebSocket | null = null
@@ -107,6 +108,11 @@ export class WNPReduxWebSocket {
   }
 
   private async onMessage(event: MessageEvent<string>) {
+    if (event.data.startsWith('FORCE_ENABLE_NATIVE_APIS')) {
+      setForceEnableNativeApis(event.data.split(' ')[1].toLowerCase() === 'true')
+      return
+    }
+
     if (this.communicationRevision) {
       switch (this.communicationRevision) {
         case 'legacy':
@@ -114,6 +120,9 @@ export class WNPReduxWebSocket {
           break
         case '1':
           this.executeEvent('1', event.data)
+          break
+        case '2':
+          this.executeEvent('2', event.data)
           break
         default: break
       }
@@ -135,6 +144,8 @@ export class WNPReduxWebSocket {
           if (githubVersion === 'Error') return
           if (isVersionOutdated(adapterVersion, githubVersion)) setOutdated()
         }
+
+        this.sendSettings()
       } else {
         // The first message wasn't version related, so it's probably WNP for Rainmeter < 0.5.0 (legacy)
         this.communicationRevision = 'legacy'
@@ -142,6 +153,16 @@ export class WNPReduxWebSocket {
         setOutdated()
       }
     }
+  }
+
+  public async sendSettings(_settings?: Settings) {
+    // settings are only passed on update, not when this is called from onMessage
+    let settings = _settings
+    if (!settings) settings = await readSettings()
+
+    // Send USE_NATIVE_APIS for adapters that aren't rev1
+    if (this.communicationRevision !== '1')
+      this.send(`USE_NATIVE_APIS ${settings.useNativeAPIs}`)
   }
 
   public sendUpdate(mediaInfo: MediaInfo) {
@@ -153,31 +174,34 @@ export class WNPReduxWebSocket {
       case '1':
         SendMediaInfoRev1(this, mediaInfo)
         break
+      case '2':
+        SendMediaInfoRev2(this, mediaInfo)
+        break
       default: break
     }
   }
 }
 
-function SendMediaInfoRev1(self: WNPReduxWebSocket, mediaInfo: MediaInfo) {
-  for (const key in mediaInfo) {
-    if (key === 'timestamp') return
-    const value = mediaInfo[key as keyof MediaInfo]
-    // Check for null, and not just falsy, because 0 and '' are falsy
-    if (value !== null && value !== self.cache.get(key)) {
-      self.send(`${key.toUpperCase()} ${value}`)
-      self.cache.set(key, value)
-    }
-  }
-}
-
 function SendMediaInfoLegacy(self: WNPReduxWebSocket, mediaInfo: MediaInfo) {
-  for (const key in mediaInfo) {
-    if (key === 'timestamp') return
+  for (let key in mediaInfo) {
+    if (key === 'timestamp' || key === 'playerControls') continue
     let value = mediaInfo[key as keyof MediaInfo]
+
+    // Conversion to legacy keys
+    if (key === 'playerName') key = 'player'
+    else if (key === 'coverUrl') key = 'cover'
+    else if (key === 'durationSeconds') key = 'duration'
+    else if (key === 'positionSeconds') key = 'position'
+    else if (key === 'repeatMode') key = 'repeat'
+    else if (key === 'shuffleActive') key = 'shuffle'
 
     // Conversion to legacy values
     if (key === 'state')
       value = value === StateMode.PLAYING ? 1 : value === StateMode.PAUSED ? 2 : 0
+    else if (key === 'duration')
+      value = timeInSecondsToString(value as number)
+    else if (key === 'position')
+      value = timeInSecondsToString(value as number)
     else if (key === 'repeat')
       value = value === RepeatMode.ALL ? 2 : value === RepeatMode.ONE ? 1 : 0
     else if (key === 'shuffle')
@@ -186,6 +210,47 @@ function SendMediaInfoLegacy(self: WNPReduxWebSocket, mediaInfo: MediaInfo) {
     // Check for null, and not just falsy, because 0 and '' are falsy
     if (value !== null && value !== self.cache.get(key)) {
       self.send(`${key.toUpperCase()}:${value}`)
+      self.cache.set(key, value)
+    }
+  }
+}
+
+function SendMediaInfoRev1(self: WNPReduxWebSocket, mediaInfo: MediaInfo) {
+  for (let key in mediaInfo) {
+    if (key === 'timestamp' || key === 'playerControls') continue
+    let value = mediaInfo[key as keyof MediaInfo]
+
+    // Conversion to rev1 keys
+    if (key === 'playerName') key = 'player'
+    else if (key === 'coverUrl') key = 'cover'
+    else if (key === 'durationSeconds') key = 'duration'
+    else if (key === 'positionSeconds') key = 'position'
+    else if (key === 'repeatMode') key = 'repeat'
+    else if (key === 'shuffleActive') key = 'shuffle'
+
+    // Conversion to rev1 values
+    if (key === 'duration')
+      value = timeInSecondsToString(value as number)
+    else if (key === 'position')
+      value = timeInSecondsToString(value as number)
+
+    // Check for null, and not just falsy, because 0 and '' are falsy
+    if (value !== null && value !== self.cache.get(key)) {
+      self.send(`${key.toUpperCase()} ${value}`)
+      self.cache.set(key, value)
+    }
+  }
+}
+
+const formatKey = (key: string) => key.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase()
+
+function SendMediaInfoRev2(self: WNPReduxWebSocket, mediaInfo: MediaInfo) {
+  for (const key in mediaInfo) {
+    if (key === 'timestamp') continue
+    const value = mediaInfo[key as keyof MediaInfo]
+    // Check for null, and not just falsy, because 0 and '' are falsy
+    if (value !== null && value !== self.cache.get(key)) {
+      self.send(`${formatKey(key)} ${value}`)
       self.cache.set(key, value)
     }
   }

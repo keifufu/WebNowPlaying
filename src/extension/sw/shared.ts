@@ -4,7 +4,7 @@ import { defaultSettings, Settings } from '../../utils/settings'
 // To use a different key for storing, to migrate settings.
 // Example: updateFrequency used to be an object, now it's a number
 const settingsMap: { [Prop in keyof Partial<Settings>]: string } = {
-  updateFrequencyMs: 'updateFrequencyMs2',
+  // updateFrequencyMs: 'updateFrequencyMs2',
   customAdapters: 'customAdapters2'
 }
 

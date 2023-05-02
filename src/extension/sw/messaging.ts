@@ -9,7 +9,8 @@ export type ServiceWorkerMessage = {
   report?: { message: string },
   colorScheme?: 'light' | 'dark',
   port?: number
-  gh?: string
+  gh?: string,
+  useNativeAPIs?: boolean
 }
 
 const reportCache = new Map<string, boolean>()
@@ -62,7 +63,9 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
       await reloadSockets()
       break
     case 'getSocketInfo': {
-      sendResponse(JSON.stringify(Array.from(getSocketInfo().entries())))
+      const socketInfo = getSocketInfo()
+      const jsonString = JSON.stringify({ ...socketInfo, states: Array.from(socketInfo.states.entries()) })
+      sendResponse(jsonString)
       break
     }
     case 'connectSocket':

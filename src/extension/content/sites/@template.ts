@@ -1,33 +1,32 @@
-import { RepeatMode, Site, StateMode } from '../../types'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 
 const site: Site = {
   match: () => false,
   ready: () => false,
+  ratingSystem: RatingSystem.NONE,
   info: {
-    player: () => '' as any, // The name of the player
+    playerName: () => '' as any, // The name of the player
     state: () => StateMode.STOPPED,
     title: () => '', // The title of the current song
     artist: () => '', // The artist of the current song
     album: () => '', // The album of the current song
-    cover: () => '', // A link to the cover image of the current song
-    duration: () => '0:00', // The duration of the current song (mm:ss)
-    position: () => '0:00', // The current position of the song (mm:ss)
+    coverUrl: () => '', // A link to the cover image of the current song
+    durationSeconds: () => 0, // The duration of the current song (mm:ss)
+    positionSeconds: () => 0, // The current position of the song (mm:ss)
     volume: () => 100, // The volume of the player (1-100)
     rating: () => 0, // The rating of the current song (1-5)
-    repeat: () => RepeatMode.NONE,
-    shuffle: () => false
+    repeatMode: () => RepeatMode.NONE,
+    shuffleActive: () => false
   },
   events: {
-    togglePlaying: null,
-    next: null,
-    previous: null,
+    setState: null,
+    skipPrevious: null,
+    skipNext: null,
     setPositionSeconds: null,
     setPositionPercentage: null,
     setVolume: null, // Volume is 1-100
-    toggleRepeat: null,
-    toggleShuffle: null,
-    toggleThumbsUp: null,
-    toggleThumbsDown: null,
+    toggleRepeatMode: null,
+    toggleShuffleActive: null,
     setRating: null
   }
 }

@@ -1,5 +1,6 @@
-import { getMediaSessionCover } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode } from '../../types'
+import { convertTimeToSeconds, getMediaSessionCover } from '../../../utils/misc'
+import { DEFAULT_UPDATE_FREQUENCY } from '../../../utils/settings'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 import { ContentUtils, ratingUtils } from '../utils'
 
@@ -12,18 +13,19 @@ const site: Site = {
   init: () => {
     setInterval(async () => {
       currentVolume = await ContentUtils.getYouTubeMusicVolume() ?? 100
-    }, ContentUtils.getSettings().updateFrequencyMs / 2)
+    }, DEFAULT_UPDATE_FREQUENCY / 2)
   },
   ready: () =>
     navigator.mediaSession.metadata !== null
     && querySelector<boolean, HTMLElement>('video', (el) => true, false),
+  ratingSystem: RatingSystem.LIKE_DISLIKE,
   info: {
-    player: () => 'YouTube Music',
+    playerName: () => 'YouTube Music',
     state: () => querySelectorReport<StateMode, HTMLVideoElement>('video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
-    cover: () => {
+    coverUrl: () => {
       const link = getMediaSessionCover().split('?')[0].replace('vi_webp', 'vi')
       if (!link) return ''
       const videoId = link.split('/vi/')?.[1]?.split('/')[0]
@@ -47,8 +49,8 @@ const site: Site = {
       if (lastCoverVideoId !== videoId) return link
       return currentCoverUrl
     },
-    duration: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[1] ?? '0:00', '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLElement>('.time-info.ytmusic-player-bar', (el) => el.innerText.split(' / ')[0] ?? '0:00', '0:00', 'position'),
+    durationSeconds: () => querySelectorReport<number, HTMLElement>('.time-info.ytmusic-player-bar', (el) => convertTimeToSeconds(el.innerText.split(' / ')[1] ?? '0:00'), 0, 'durationSeconds'),
+    positionSeconds: () => querySelectorReport<number, HTMLElement>('.time-info.ytmusic-player-bar', (el) => convertTimeToSeconds(el.innerText.split(' / ')[0] ?? '0:00'), 0, 'positionSeconds'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('video', (el) => (el.muted ? 0 : currentVolume), currentVolume, 'volume'),
     rating: () => {
       const likeButtonPressed = querySelectorReport<boolean, HTMLButtonElement>('(.middle-controls-buttons yt-button-shape)[1]', (el) => el.getAttribute('aria-pressed') === 'true', false, 'rating')
@@ -57,19 +59,22 @@ const site: Site = {
       if (dislikeButtonPressed) return 1
       return 0
     },
-    repeat: () => querySelectorReport<RepeatMode, HTMLElement>('ytmusic-player-bar', (el) => {
+    repeatMode: () => querySelectorReport<RepeatMode, HTMLElement>('ytmusic-player-bar', (el) => {
       const repeatMode = el.getAttribute('repeat-mode_')
       if (repeatMode === 'ALL') return RepeatMode.ALL
       if (repeatMode === 'ONE') return RepeatMode.ONE
       return RepeatMode.NONE
-    }, RepeatMode.NONE, 'repeat'),
+    }, RepeatMode.NONE, 'repeatMode'),
     // YouTube music doesn't do shuffling the traditional way, it just shuffles the current queue with no way of undoing it
-    shuffle: () => false
+    shuffleActive: () => false
   },
   events: {
-    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('#play-pause-button', (el) => el.click(), 'togglePlaying'),
-    next: () => querySelectorEventReport<HTMLButtonElement>('.next-button', (el) => el.click(), 'next'),
-    previous: () => querySelectorEventReport<HTMLButtonElement>('.previous-button', (el) => el.click(), 'previous'),
+    setState: (state) => {
+      if (site.info.state() === state) return
+      querySelectorEventReport<HTMLButtonElement>('#play-pause-button', (el) => el.click(), 'setState')
+    },
+    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>('.previous-button', (el) => el.click(), 'skipPrevious'),
+    skipNext: () => querySelectorEventReport<HTMLButtonElement>('.next-button', (el) => el.click(), 'skipNext'),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
       querySelectorEventReport<HTMLElement>('#progress-bar tp-yt-paper-progress', (el) => {
@@ -100,11 +105,18 @@ const site: Site = {
       ContentUtils.setYouTubeMusicVolume(volume)
       currentVolume = volume
     },
-    toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('.repeat', (el) => el.click(), 'toggleRepeat'),
-    toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.shuffle', (el) => el.click(), 'toggleShuffle'),
-    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('(.middle-controls-buttons button)[1]', (el) => el.click(), 'toggleThumbsUp'),
-    toggleThumbsDown: () => querySelectorEventReport<HTMLButtonElement>('.middle-controls-buttons button', (el) => el.click(), 'toggleThumbsDown'),
-    setRating: (rating: number) => ratingUtils.likeDislike(site, rating)
+    toggleRepeatMode: () => querySelectorEventReport<HTMLButtonElement>('.repeat', (el) => el.click(), 'toggleRepeatMode'),
+    toggleShuffleActive: () => querySelectorEventReport<HTMLButtonElement>('.shuffle', (el) => el.click(), 'toggleShuffleActive'),
+    setRating: (rating: number) => {
+      ratingUtils.likeDislike(rating, site, {
+        toggleLike: () => {
+          querySelectorEventReport<HTMLButtonElement>('(.middle-controls-buttons button)[1]', (el) => el.click(), 'setRating')
+        },
+        toggleDislike: () => {
+          querySelectorEventReport<HTMLButtonElement>('.middle-controls-buttons button', (el) => el.click(), 'setRating')
+        }
+      })
+    }
   }
 }
 

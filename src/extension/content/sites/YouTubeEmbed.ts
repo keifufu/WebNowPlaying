@@ -1,5 +1,4 @@
-import { timeInSecondsToString } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode } from '../../types'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 
 let shuffleState = false
@@ -12,8 +11,9 @@ const site: Site = {
   ready: () =>
     querySelector<boolean, HTMLElement>('.ytp-title-text', (el) => el.innerText.length > 0, false)
     && querySelector<boolean, HTMLVideoElement>('.html5-video-player', (el) => !el.classList.contains('unstarted-mode'), false),
+  ratingSystem: RatingSystem.NONE,
   info: {
-    player: () => 'YouTube Embeds',
+    playerName: () => 'YouTube Embeds',
     state: () => {
       let state = querySelectorReport<StateMode, HTMLVideoElement>('.html5-main-video', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state')
       // It is possible for the video to be "playing" but not started
@@ -25,8 +25,8 @@ const site: Site = {
     // Not reporting artist, as it seems to sometimes return a empty string as innerText when the artist hasn't loaded yet.
     artist: () => querySelector<string, HTMLElement>('.ytp-title-expanded-title', (el) => el.innerText, ''),
     album: () => querySelector<string, HTMLElement>('.ytp-playlist-menu-title', (el) => el.innerText, ''),
-    cover: () => {
-      const link = querySelectorReport<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '', 'cover')
+    coverUrl: () => {
+      const link = querySelectorReport<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '', 'coverUrl')
       if (!link) return currentCoverUrl
       const videoId = new URLSearchParams(link).get('v')
 
@@ -47,40 +47,21 @@ const site: Site = {
 
       return currentCoverUrl
     },
-    duration: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLVideoElement>('.html5-main-video', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
+    durationSeconds: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video', (el) => el.duration, 0, 'durationSeconds'),
+    positionSeconds: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video', (el) => el.currentTime, 0, 'positionSeconds'),
     volume: () => querySelectorReport<number, HTMLVideoElement>('.html5-main-video', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => 0,
-    repeat: () => querySelectorReport<RepeatMode, HTMLVideoElement>('.html5-main-video', (el) => (el.loop ? RepeatMode.ONE : RepeatMode.NONE), RepeatMode.NONE, 'repeat'),
-    shuffle: () => shuffleState
+    repeatMode: () => querySelectorReport<RepeatMode, HTMLVideoElement>('.html5-main-video', (el) => (el.loop ? RepeatMode.ONE : RepeatMode.NONE), RepeatMode.NONE, 'repeatMode'),
+    shuffleActive: () => shuffleState
   },
   events: {
-    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('.ytp-play-button', (el) => el.click(), 'togglePlaying'),
-    next: () => {
-      const link = querySelectorReport<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '', 'cover')
-      if (!link) return
-      // Not using reporting querySelectors right now
-      const list = new URLSearchParams(link).get('list')
-      if (shuffleState && list) {
-        const playlist = querySelector<HTMLElement | null, HTMLElement>('.ytp-playlist-menu-items', (el) => el, null)
-        // Open the playlist menu and close it again to load the children
-        if (!playlistLoaded && playlist?.children.length === 0) {
-          querySelectorEventReport<HTMLButtonElement>('.ytp-playlist-menu-button', (el) => {
-            el.click()
-            el.click()
-          }, 'next')
-          playlistLoaded = true
-        }
-        (playlist?.children[
-          Math.floor(Math.random() * playlist?.children.length)
-        ] as HTMLButtonElement).click()
-      } else {
-        querySelectorEventReport<HTMLButtonElement>('.ytp-next-button', (el) => el.click(), 'next')
-      }
+    setState: (state) => {
+      if (site.info.state() === state) return
+      querySelectorEventReport<HTMLButtonElement>('.ytp-play-button', (el) => el.click(), 'setState')
     },
-    previous: () => {
+    skipPrevious: () => {
       querySelectorEventReport<HTMLVideoElement>('.html5-main-video', (video) => {
-        const link = querySelectorReport<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '', 'cover')
+        const link = querySelector<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '')
         if (!link) return
         const previousButton = querySelector<HTMLButtonElement | null, HTMLButtonElement>('.ytp-prev-button', (el) => el, null)
         const list = new URLSearchParams(link).get('list')
@@ -92,7 +73,7 @@ const site: Site = {
               querySelectorEventReport<HTMLButtonElement>('.ytp-playlist-menu-button', (el) => {
                 el.click()
                 el.click()
-              }, 'next')
+              }, 'skipPrevious')
               playlistLoaded = true
             }
             (playlist?.children[
@@ -106,7 +87,29 @@ const site: Site = {
         } else {
           video.currentTime = 0
         }
-      }, 'previous')
+      }, 'skipPrevious')
+    },
+    skipNext: () => {
+      const link = querySelector<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '')
+      if (!link) return
+      // Not using reporting querySelectors right now
+      const list = new URLSearchParams(link).get('list')
+      if (shuffleState && list) {
+        const playlist = querySelector<HTMLElement | null, HTMLElement>('.ytp-playlist-menu-items', (el) => el, null)
+        // Open the playlist menu and close it again to load the children
+        if (!playlistLoaded && playlist?.children.length === 0) {
+          querySelectorEventReport<HTMLButtonElement>('.ytp-playlist-menu-button', (el) => {
+            el.click()
+            el.click()
+          }, 'skipNext')
+          playlistLoaded = true
+        }
+        (playlist?.children[
+          Math.floor(Math.random() * playlist?.children.length)
+        ] as HTMLButtonElement).click()
+      } else {
+        querySelectorEventReport<HTMLButtonElement>('.ytp-next-button', (el) => el.click(), 'skipNext')
+      }
     },
     setPositionSeconds: (positionInSeconds: number) => querySelectorEventReport<HTMLVideoElement>('.html5-main-video', (el) => el.currentTime = positionInSeconds, 'setPositionSeconds'),
     setPositionPercentage: null,
@@ -116,16 +119,14 @@ const site: Site = {
         el.volume = volume / 100
       }, 'setVolume')
     },
-    toggleRepeat: () => querySelectorEventReport<HTMLVideoElement>('.html5-main-video', (el) => el.loop = !el.loop, 'toggleRepeat'),
-    toggleShuffle: () => {
-      const link = querySelectorReport<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '', 'cover')
+    toggleRepeatMode: () => querySelectorEventReport<HTMLVideoElement>('.html5-main-video', (el) => el.loop = !el.loop, 'toggleRepeatMode'),
+    toggleShuffleActive: () => {
+      const link = querySelector<string, HTMLAnchorElement>('.ytp-title-link', (el) => el.search, '')
       if (!link) return
       const list = new URLSearchParams(link).get('list')
       if (list) shuffleState = !shuffleState
       else shuffleState = false
     },
-    toggleThumbsUp: null,
-    toggleThumbsDown: null,
     setRating: null
   }
 }

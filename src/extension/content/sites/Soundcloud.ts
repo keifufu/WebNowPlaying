@@ -1,38 +1,42 @@
-import { getMediaSessionCover } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode } from '../../types'
+import { convertTimeToSeconds, getMediaSessionCover } from '../../../utils/misc'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEvent, querySelectorEventReport, querySelectorReport } from '../selectors'
 import { ratingUtils } from '../utils'
 
 const site: Site = {
   match: () => window.location.hostname === 'soundcloud.com',
   ready: () => navigator.mediaSession.metadata !== null,
+  ratingSystem: RatingSystem.LIKE,
   info: {
-    player: () => 'Soundcloud',
+    playerName: () => 'Soundcloud',
     state: () => (navigator.mediaSession.playbackState === 'playing' ? StateMode.PLAYING : StateMode.PAUSED),
     title: () => navigator.mediaSession.metadata?.title || '',
     artist: () => navigator.mediaSession.metadata?.artist || '',
     album: () => navigator.mediaSession.metadata?.album || '',
-    cover: () => getMediaSessionCover(),
-    duration: () => querySelectorReport<string, HTMLElement>('(.playbackTimeline__duration > span)[1]', (el) => el.innerText, '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLElement>('(.playbackTimeline__timePassed > span)[1]', (el) => el.innerText, '0:00', 'position'),
+    coverUrl: () => getMediaSessionCover(),
+    durationSeconds: () => querySelectorReport<number, HTMLElement>('(.playbackTimeline__duration > span)[1]', (el) => convertTimeToSeconds(el.innerText), 0, 'durationSeconds'),
+    positionSeconds: () => querySelectorReport<number, HTMLElement>('(.playbackTimeline__timePassed > span)[1]', (el) => convertTimeToSeconds(el.innerText), 0, 'positionSeconds'),
     volume: () => {
       const p = querySelectorReport<number, HTMLElement>('.volume__sliderProgress', (el) => el.getBoundingClientRect().height, 1, 'volume')
       const h = querySelectorReport<number, HTMLElement>('.volume__sliderBackground', (el) => el.getBoundingClientRect().height, 1, 'volume')
       return (p / h) * 100
     },
     rating: () => querySelectorReport<number, HTMLElement>('.playbackSoundBadge__like', (el) => (el.className.includes('selected') ? 5 : 0), 0, 'rating'),
-    repeat: () => {
+    repeatMode: () => {
       if (querySelector<boolean, HTMLElement>('.m-one', (el) => el !== null, false)) return RepeatMode.ONE
       if (querySelector<boolean, HTMLElement>('.m-all', (el) => el !== null, false)) return RepeatMode.ALL
       return RepeatMode.NONE
     },
     // Not reporting this as .m-shuffling is only present when shuffle is enabled
-    shuffle: () => querySelector<boolean, HTMLElement>('.m-shuffling', (el) => true, false)
+    shuffleActive: () => querySelector<boolean, HTMLElement>('.m-shuffling', (el) => true, false)
   },
   events: {
-    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('.playControl', (el) => el.click(), 'togglePlaying'),
-    next: () => querySelectorEventReport<HTMLButtonElement>('.skipControl__next', (el) => el.click(), 'next'),
-    previous: () => querySelectorEventReport<HTMLButtonElement>('.skipControl__previous', (el) => el.click(), 'previous'),
+    setState: (state) => {
+      if (site.info.state() === state) return
+      querySelectorEventReport<HTMLButtonElement>('.playControl', (el) => el.click(), 'setState')
+    },
+    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>('.skipControl__previous', (el) => el.click(), 'skipPrevious'),
+    skipNext: () => querySelectorEventReport<HTMLButtonElement>('.skipControl__next', (el) => el.click(), 'skipNext'),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
       querySelectorEventReport<HTMLElement>('.playbackTimeline__progressWrapper', (el) => {
@@ -114,11 +118,15 @@ const site: Site = {
         }, 25)
       })
     },
-    toggleRepeat: () => querySelectorEventReport<HTMLButtonElement>('.repeatControl', (el) => el.click(), 'toggleRepeat'),
-    toggleShuffle: () => querySelectorEventReport<HTMLButtonElement>('.shuffleControl', (el) => el.click(), 'toggleShuffle'),
-    toggleThumbsUp: () => querySelectorEventReport<HTMLButtonElement>('.playbackSoundBadge__like', (el) => el.click(), 'toggleThumbsUp'),
-    toggleThumbsDown: null,
-    setRating: (rating: number) => ratingUtils.like(site, rating)
+    toggleRepeatMode: () => querySelectorEventReport<HTMLButtonElement>('.repeatControl', (el) => el.click(), 'toggleRepeatMode'),
+    toggleShuffleActive: () => querySelectorEventReport<HTMLButtonElement>('.shuffleControl', (el) => el.click(), 'toggleShuffleActive'),
+    setRating: (rating: number) => {
+      ratingUtils.like(rating, site, {
+        toggleLike: () => {
+          querySelectorEventReport<HTMLButtonElement>('.playbackSoundBadge__like', (el) => el.click(), 'setRating')
+        }
+      })
+    }
   }
 }
 

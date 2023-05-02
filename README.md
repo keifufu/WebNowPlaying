@@ -9,7 +9,7 @@ Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplayi
 Edge, Opera, etc. also use the Chrome Web Store
 
 **Note:** Due to a bug in firefox, you will have to manually grant it permissions.  
-Right click "WebNowPlaying Redux" > Manage Extension > Permissions > Access your data for all websites
+Right click "WebNowPlaying Redux" -> Manage Extension -> Permissions -> Check "Access your data for all websites"
 
 ## Adapters
 - [WebNowPlaying-Redux-Rainmeter](https://github.com/keifufu/WebNowPlaying-Redux-Rainmeter) by [keifufu](https://github.com/keifufu), [tjhrulz](https://github.com/tjhrulz/)
@@ -18,7 +18,11 @@ Right click "WebNowPlaying Redux" > Manage Extension > Permissions > Access your
 - Want to create or submit your own adapter? Click [here](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/CreatingAdapters.md)!
 
 ## Spotify Desktop
-Supported via [WebNowPlaying-Redux-Spicetify](https://github.com/keifufu/WebNowPlaying-Redux-Spicetify)
+- Supported mostly via [Native APIs](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/NativeAPIs.md) (missing volume control)  
+- Supported fully via [WebNowPlaying-Redux-Spicetify](https://github.com/keifufu/WebNowPlaying-Redux-Spicetify)
+
+## Other Desktop players
+Read [Native APIs](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/NativeAPIs.md)
 
 ## Supported websites
 - Apple Music
@@ -52,6 +56,6 @@ View the wiki page [here](https://github.com/keifufu/WebNowPlaying-Redux/wiki/Tr
 ## Building from source
 - Install [Node.js](https://nodejs.org)
 - Install pnpm globally with `npm i -g pnpm`
-- Run `pnpm i`
+- Run `pnpm install`
 - Run `pnpm run build`
 - The output will be in /dist

@@ -1,5 +1,5 @@
 import { randomToken } from '../../utils/misc'
-import { SiteInfo } from '../types'
+import { StateMode } from '../types'
 import { ContentUtils, getCurrentSite, getMediaInfo, setSendFullMediaInfo } from './utils'
 
 let port: chrome.runtime.Port
@@ -20,7 +20,7 @@ function connect(id: string) {
 
 type PortMessage = {
   event: 'getMediaInfo' | 'executeMediaEvent',
-  communicationRevision?: 'legacy' | '1',
+  communicationRevision?: 'legacy' | '1' | '2',
   mediaEventData?: string,
 }
 
@@ -44,6 +44,9 @@ function onMessage(message: PortMessage, port: chrome.runtime.Port) {
         case '1':
           OnMediaEventRev1(message.mediaEventData)
           break
+        case '2':
+          OnMediaEventRev2(message.mediaEventData)
+          break
         default: break
       }
       break
@@ -51,77 +54,128 @@ function onMessage(message: PortMessage, port: chrome.runtime.Port) {
   }
 }
 
-function OnMediaEventLegacy(message: string): keyof SiteInfo | null {
-  const site = getCurrentSite()
-  if (!site || !site.ready()) return null
-
-  let updateInfo: keyof SiteInfo | null = null
-  const [type, data] = message.toUpperCase().split(' ')
-  switch (type) {
-    case 'PLAYPAUSE': site.events.togglePlaying?.(); updateInfo = 'state'; break
-    case 'NEXT': site.events.next?.(); updateInfo = 'title'; break
-    case 'PREVIOUS': site.events.previous?.(); updateInfo = 'title'; break
-    case 'SETPOSITION': {
-      // Example string: SetPosition 34:SetProgress 0,100890207715134:
-      const [positionInSeconds, positionPercentageStr] = data.split(':')
-      const positionPercentage = positionPercentageStr.split('SETPROGRESS ')[1]
-      site.events.setPositionSeconds?.(parseInt(positionInSeconds))
-      // We replace(',', '.') because all legacy versions didn't use InvariantCulture
-      site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
-      updateInfo = 'position'
-      break
+function OnMediaEventLegacy(message: string) {
+  try {
+    enum Events {
+      PLAYPAUSE,
+      PREVIOUS,
+      NEXT,
+      SETPOSITION,
+      SETVOLUME,
+      REPEAT,
+      SHUFFLE,
+      TOGGLETHUMBSUP,
+      TOGGLETHUMBSDOWN,
+      RATING
     }
-    case 'SETVOLUME': site.events.setVolume?.(parseInt(data)); updateInfo = 'volume'; break
-    case 'REPEAT': site.events.toggleRepeat?.(); updateInfo = 'repeat'; break
-    case 'SHUFFLE': site.events.toggleShuffle?.(); updateInfo = 'shuffle'; break
-    case 'TOGGLETHUMBSUP': site.events.toggleThumbsUp?.(); updateInfo = 'rating'; break
-    case 'TOGGLETHUMBSDOWN': site.events.toggleThumbsDown?.(); updateInfo = 'rating'; break
-    case 'RATING': site.events.setRating?.(parseInt(data)); updateInfo = 'rating'; break
-    default: break
-  }
 
-  return updateInfo
+    const site = getCurrentSite()
+    if (!site || !site.ready()) return null
+
+    const [type, data] = message.toUpperCase().split(' ')
+    switch (Events[type as keyof typeof Events]) {
+      case Events.PLAYPAUSE: site.events.setState?.(site.info.state() === StateMode.PLAYING ? StateMode.PAUSED : StateMode.PLAYING); break
+      case Events.PREVIOUS: site.events.skipPrevious?.(); break
+      case Events.NEXT: site.events.skipNext?.(); break
+      case Events.SETPOSITION: {
+        // Example string: SetPosition 34:SetProgress 0,100890207715134:
+        const [positionInSeconds, positionPercentageStr] = data.split(':')
+        const positionPercentage = positionPercentageStr.split('SETPROGRESS ')[1]
+        site.events.setPositionSeconds?.(parseInt(positionInSeconds))
+        // We replace(',', '.') because all legacy versions didn't use InvariantCulture
+        site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
+        break
+      }
+      case Events.SETVOLUME: site.events.setVolume?.(parseInt(data)); break
+      case Events.REPEAT: site.events.toggleRepeatMode?.(); break
+      case Events.SHUFFLE: site.events.toggleShuffleActive?.(); break
+      case Events.TOGGLETHUMBSUP: site.events.setRating?.(site.info.rating() === 5 ? 0 : 5); break
+      case Events.TOGGLETHUMBSDOWN: site.events.setRating?.(site.info.rating() === 1 ? 0 : 1); break
+      case Events.RATING: site.events.setRating?.(parseInt(data)); break
+      default: break
+    }
+  } catch (err) {
+    // ignore, optimally send it back to ws
+  }
 }
 
-function OnMediaEventRev1(message: string): keyof SiteInfo | null {
-  enum Events {
-    TOGGLE_PLAYING,
-    NEXT,
-    PREVIOUS,
-    SET_POSITION,
-    SET_VOLUME,
-    TOGGLE_REPEAT,
-    TOGGLE_SHUFFLE,
-    TOGGLE_THUMBS_UP,
-    TOGGLE_THUMBS_DOWN,
-    SET_RATING
-  }
-
-  const site = getCurrentSite()
-  if (!site || !site.ready()) return null
-  const [type, data] = message.split(' ')
-
-  let updateInfo: keyof SiteInfo | null = null
-  switch (Events[type as keyof typeof Events]) {
-    case Events.TOGGLE_PLAYING: site.events.togglePlaying?.(); updateInfo = 'state'; break
-    case Events.NEXT: site.events.next?.(); updateInfo = 'title'; break
-    case Events.PREVIOUS: site.events.previous?.(); updateInfo = 'title'; break
-    case Events.SET_POSITION: {
-      const [positionInSeconds, positionPercentage] = data.split(':')
-      site.events.setPositionSeconds?.(parseInt(positionInSeconds))
-      // We still replace(',', '.') because v1.0.0 - v1.0.5 didn't use InvariantCulture
-      site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
-      updateInfo = 'position'
-      break
+function OnMediaEventRev1(message: string) {
+  try {
+    enum Events {
+      TOGGLE_PLAYING,
+      PREVIOUS,
+      NEXT,
+      SET_POSITION,
+      SET_VOLUME,
+      TOGGLE_REPEAT,
+      TOGGLE_SHUFFLE,
+      TOGGLE_THUMBS_UP,
+      TOGGLE_THUMBS_DOWN,
+      SET_RATING
     }
-    case Events.SET_VOLUME: site.events.setVolume?.(parseInt(data)); updateInfo = 'volume'; break
-    case Events.TOGGLE_REPEAT: site.events.toggleRepeat?.(); updateInfo = 'repeat'; break
-    case Events.TOGGLE_SHUFFLE: site.events.toggleShuffle?.(); updateInfo = 'shuffle'; break
-    case Events.TOGGLE_THUMBS_UP: site.events.toggleThumbsUp?.(); updateInfo = 'rating'; break
-    case Events.TOGGLE_THUMBS_DOWN: site.events.toggleThumbsDown?.(); updateInfo = 'rating'; break
-    case Events.SET_RATING: site.events.setRating?.(parseInt(data)); updateInfo = 'rating'; break
-    default: break
-  }
 
-  return updateInfo
+    const site = getCurrentSite()
+    if (!site || !site.ready()) return null
+    const [type, data] = message.toUpperCase().split(' ')
+
+    switch (Events[type as keyof typeof Events]) {
+      case Events.TOGGLE_PLAYING: site.events.setState?.(site.info.state() === StateMode.PLAYING ? StateMode.PAUSED : StateMode.PLAYING); break
+      case Events.PREVIOUS: site.events.skipPrevious?.(); break
+      case Events.NEXT: site.events.skipNext?.(); break
+      case Events.SET_POSITION: {
+        const [positionInSeconds, positionPercentage] = data.split(':')
+        site.events.setPositionSeconds?.(parseInt(positionInSeconds))
+        // We still replace(',', '.') because v1.0.0 - v1.0.5 didn't use InvariantCulture
+        site.events.setPositionPercentage?.(parseFloat(positionPercentage.replace(',', '.')))
+        break
+      }
+      case Events.SET_VOLUME: site.events.setVolume?.(parseInt(data)); break
+      case Events.TOGGLE_REPEAT: site.events.toggleRepeatMode?.(); break
+      case Events.TOGGLE_SHUFFLE: site.events.toggleShuffleActive?.(); break
+      case Events.TOGGLE_THUMBS_UP: site.events.setRating?.(site.info.rating() === 5 ? 0 : 5); break
+      case Events.TOGGLE_THUMBS_DOWN: site.events.setRating?.(site.info.rating() === 1 ? 0 : 1); break
+      case Events.SET_RATING: site.events.setRating?.(parseInt(data)); break
+      default: break
+    }
+  } catch (err) {
+    // ignore, optimally send it back to ws
+  }
+}
+
+function OnMediaEventRev2(message: string) {
+  try {
+    enum Events {
+      TRY_SET_STATE,
+      TRY_SKIP_PREVIOUS,
+      TRY_SKIP_NEXT,
+      TRY_SET_POSITION,
+      TRY_SET_VOLUME,
+      TRY_TOGGLE_REPEAT_MODE,
+      TRY_TOGGLE_SHUFFLE_ACTIVE,
+      TRY_SET_RATING
+    }
+
+    const site = getCurrentSite()
+    if (!site || !site.ready()) return null
+    const [type, data] = message.toUpperCase().split(' ')
+
+    switch (Events[type as keyof typeof Events]) {
+      case Events.TRY_SET_STATE: site.events.setState?.(data === 'PLAYING' ? StateMode.PLAYING : StateMode.PAUSED); break
+      case Events.TRY_SKIP_PREVIOUS: site.events.skipPrevious?.(); break
+      case Events.TRY_SKIP_NEXT: site.events.skipNext?.(); break
+      case Events.TRY_SET_POSITION: {
+        const [positionInSeconds, positionPercentage] = data.split(':')
+        site.events.setPositionSeconds?.(parseInt(positionInSeconds))
+        site.events.setPositionPercentage?.(parseFloat(positionPercentage))
+        break
+      }
+      case Events.TRY_SET_VOLUME: site.events.setVolume?.(parseInt(data)); break
+      case Events.TRY_TOGGLE_REPEAT_MODE: site.events.toggleRepeatMode?.(); break
+      case Events.TRY_TOGGLE_SHUFFLE_ACTIVE: site.events.toggleShuffleActive?.(); break
+      case Events.TRY_SET_RATING: site.events.setRating?.(parseInt(data)); break
+      default: break
+    }
+  } catch (err) {
+    // ignore, optimally send it back to ws
+  }
 }

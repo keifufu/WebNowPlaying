@@ -68,7 +68,7 @@ export const getCurrentSite = (): Site | null => {
   for (const site of sites) {
     if (site.match()) {
       match = true
-      if (!settings.disabledSites.includes(site.info.player()))
+      if (!settings.disabledSites.includes(site.info.playerName()))
         currentSite = site
     }
   }
@@ -95,7 +95,7 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
 
   if (!site || !site.ready()) return null
 
-  const values: (keyof SiteInfo)[] = ['player', 'state', 'title', 'artist', 'album', 'cover', 'duration', 'position', 'volume', 'rating', 'repeat', 'shuffle']
+  const values: (keyof SiteInfo)[] = ['playerName', 'state', 'title', 'artist', 'album', 'coverUrl', 'durationSeconds', 'positionSeconds', 'volume', 'rating', 'repeatMode', 'shuffleActive']
   for (const key of values) {
     let value = site.info[key]?.()
     // For numbers, round it to an integer
@@ -119,6 +119,24 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
     }
   }
 
+  const playerControls = JSON.stringify({
+    supports_play_pause: site.events.setState !== null,
+    supports_skip_previous: site.events.skipPrevious !== null,
+    supports_skip_next: site.events.skipNext !== null,
+    supports_set_position: site.events.setPositionSeconds !== null || site.events.setPositionPercentage !== null,
+    supports_set_volume: site.events.setVolume !== null,
+    supports_toggle_repeat_mode: site.events.toggleRepeatMode !== null,
+    supports_toggle_shuffle_active: site.events.toggleShuffleActive !== null,
+    supports_set_rating: site.events.setRating !== null,
+    rating_system: site.ratingSystem
+  })
+
+  if (mediaInfoCache.get('playerControls') !== playerControls) {
+    mediaInfo.playerControls = playerControls
+    mediaInfoCache.set('playerControls', playerControls)
+    mediaInfoChanged = true
+  }
+
   if (sendFullMediaInfo) {
     sendFullMediaInfo = false
     return Object.fromEntries(mediaInfoCache)
@@ -129,17 +147,22 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
 }
 
 export const ratingUtils = {
-  like: (site: Site, rating: number) => {
-    if (rating >= 3 && site.info.rating?.() !== 5)
-      site.events.toggleThumbsUp?.()
-    else if (rating < 3 && site.info.rating?.() === 5)
-      site.events.toggleThumbsUp?.()
+  like: (rating: number, site: Site, { toggleLike }: { toggleLike: () => void }) => {
+    if (rating >= 3 && site.info.rating() !== 5)
+      toggleLike()
+    else if (rating < 3 && site.info.rating() === 5)
+      toggleLike()
   },
-  likeDislike: (site: Site, rating: number) => {
-    if (rating >= 3 && site.info.rating?.() !== 5)
-      site.events.toggleThumbsUp?.()
-    else if (rating < 3 && site.info.rating?.() !== 1)
-      site.events.toggleThumbsDown?.()
+  likeDislike: (rating: number, site: Site, { toggleLike, toggleDislike }: { toggleLike: () => void, toggleDislike: () => void }) => {
+    if (rating === 0 && site.info.rating() === 5)
+      return toggleLike()
+    else if (rating === 0 && site.info.rating() === 1)
+      return toggleDislike()
+
+    if (rating >= 3 && site.info.rating() !== 5)
+      toggleLike()
+    else if (rating < 3 && site.info.rating() !== 1)
+      toggleDislike()
   }
 }
 

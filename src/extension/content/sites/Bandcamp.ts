@@ -1,12 +1,13 @@
-import { capitalize, timeInSecondsToString } from '../../../utils/misc'
-import { RepeatMode, Site, StateMode } from '../../types'
+import { capitalize } from '../../../utils/misc'
+import { RatingSystem, RepeatMode, Site, StateMode } from '../../types'
 import { querySelector, querySelectorEventReport, querySelectorReport } from '../selectors'
 
 const site: Site = {
   match: () => window.location.hostname.endsWith('bandcamp.com') || document.querySelector('[content="@bandcamp"]') !== null,
   ready: () => querySelector<boolean, HTMLAudioElement>('audio', (el) => !!el.src, false),
+  ratingSystem: RatingSystem.NONE,
   info: {
-    player: () => 'Bandcamp',
+    playerName: () => 'Bandcamp',
     state: () => querySelectorReport<StateMode, HTMLAudioElement>('audio', (el) => (el.paused ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state'),
     title: () => {
       // TItle of the current song when playing in collections page
@@ -29,18 +30,21 @@ const site: Site = {
       if (albumTitle.length > 0) return querySelector<string, HTMLElement>('.trackTitle', (el) => el.innerText, '')
       return ''
     },
-    cover: () => querySelectorReport<string, HTMLImageElement>('.carousel-player-inner img, .popupImage img', (el) => el.src, '', 'cover'),
-    duration: () => querySelectorReport<string, HTMLAudioElement>('audio', (el) => timeInSecondsToString(el.duration), '0:00', 'duration'),
-    position: () => querySelectorReport<string, HTMLAudioElement>('audio', (el) => timeInSecondsToString(el.currentTime), '0:00', 'position'),
+    coverUrl: () => querySelectorReport<string, HTMLImageElement>('.carousel-player-inner img, .popupImage img', (el) => el.src, '', 'coverUrl'),
+    durationSeconds: () => querySelectorReport<number, HTMLAudioElement>('audio', (el) => el.duration, 0, 'durationSeconds'),
+    positionSeconds: () => querySelectorReport<number, HTMLAudioElement>('audio', (el) => el.currentTime, 0, 'positionSeconds'),
     volume: () => querySelectorReport<number, HTMLAudioElement>('audio', (el) => (el.muted ? 0 : el.volume * 100), 100, 'volume'),
     rating: () => 0,
-    repeat: () => RepeatMode.NONE,
-    shuffle: () => false
+    repeatMode: () => RepeatMode.NONE,
+    shuffleActive: () => false
   },
   events: {
-    togglePlaying: () => querySelectorEventReport<HTMLButtonElement>('.playpause, .playbutton', (el) => el.click(), 'togglePlaying'),
-    next: () => querySelectorEventReport<HTMLButtonElement>('.nextbutton, .next div', (el) => el.click(), 'next'),
-    previous: () => querySelectorEventReport<HTMLButtonElement>('.prevbutton, .prev div', (el) => el.click(), 'previous'),
+    setState: (state) => {
+      if (site.info.state() === state) return
+      querySelectorEventReport<HTMLButtonElement>('.playpause, .playbutton', (el) => el.click(), 'setState')
+    },
+    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>('.prevbutton, .prev div', (el) => el.click(), 'skipPrevious'),
+    skipNext: () => querySelectorEventReport<HTMLButtonElement>('.nextbutton, .next div', (el) => el.click(), 'skipNext'),
     setPositionSeconds: (positionInSeconds: number) => querySelectorEventReport<HTMLAudioElement>('audio', (el) => el.currentTime = positionInSeconds, 'setPositionSeconds'),
     setPositionPercentage: null,
     setVolume: (volume: number) => {
@@ -50,10 +54,8 @@ const site: Site = {
         else el.muted = false
       }, 'setVolume')
     },
-    toggleRepeat: null,
-    toggleShuffle: null,
-    toggleThumbsUp: null,
-    toggleThumbsDown: null,
+    toggleRepeatMode: null,
+    toggleShuffleActive: null,
     setRating: null
   }
 }
