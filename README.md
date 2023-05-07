@@ -51,6 +51,7 @@ Please keep in mind that I can't easily develop for paid services.
 View the wiki page [here](https://github.com/keifufu/WebNowPlaying-Redux/wiki/Troubleshooting)
 
 ## TODO
+- Jellyfin music support
 - Volume support for: Deezer, Pandora, Tidal
 
 ## Building from source
