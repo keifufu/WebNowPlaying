@@ -164,11 +164,8 @@ export const disconnectSocket = (port: number) => {
   sockets.delete(port)
 }
 
-let forceEnableNativeAPIs = false
-export const setForceEnableNativeApis = (value: boolean) => forceEnableNativeAPIs = value
 export const getSocketInfo = () => {
   const info: SocketInfo = {
-    forceEnableNativeAPIs,
     states: new Map()
   }
 

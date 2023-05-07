@@ -1,7 +1,6 @@
 import { isVersionOutdated, timeInSecondsToString } from '../../utils/misc'
 import { Adapter, CustomAdapter, Settings } from '../../utils/settings'
 import { MediaInfo, RepeatMode, StateMode } from '../types'
-import { setForceEnableNativeApis } from './port'
 import { getGithubVersion, readSettings, setOutdated } from './shared'
 
 export class WNPReduxWebSocket {
@@ -108,11 +107,6 @@ export class WNPReduxWebSocket {
   }
 
   private async onMessage(event: MessageEvent<string>) {
-    if (event.data.startsWith('FORCE_ENABLE_NATIVE_APIS')) {
-      setForceEnableNativeApis(event.data.split(' ')[1].toLowerCase() === 'true')
-      return
-    }
-
     if (this.communicationRevision) {
       switch (this.communicationRevision) {
         case 'legacy':

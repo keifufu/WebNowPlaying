@@ -2,7 +2,7 @@ import { createSignal } from 'solid-js'
 import { SocketInfo } from '../../../utils/settings'
 import { ServiceWorkerUtils } from '../../../utils/sw'
 
-const [socketInfo, setSocketInfo] = createSignal<SocketInfo>({ forceEnableNativeAPIs: false, states: new Map() })
+const [socketInfo, setSocketInfo] = createSignal<SocketInfo>({ states: new Map() })
 export const useSocketInfo = () => socketInfo
 
 setInterval(update, 250)

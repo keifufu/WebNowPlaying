@@ -14,8 +14,4 @@ Not supported yet
 
 **OR** (if you don't use the browser extension and only want native players)  
 - Create a folder called "wnp_force_enable_native_api" in your user's directory (C:\Users\<username>)  
-Simply press WIN+R and paste `cmd /c "mkdir "%UserProfile%/wnp_force_enable_native_api""`
-
-## "Enabled due to local policy"
-That means the second method of enabling Native APIs as described above was used.  
-To disable it, simply delete the folder.
+Simply press WIN+R and paste `cmd /c "mkdir -p "%AppData%/WebNowPlaying/enable_native_api""`

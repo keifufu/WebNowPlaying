@@ -1,5 +1,4 @@
-import { AiFillWarning } from 'solid-icons/ai'
-import { Component, For, Index, Show } from 'solid-js'
+import { Component, For, Index } from 'solid-js'
 import { BuiltInAdapters, defaultSocketInfoState } from '../../../utils/settings'
 import Adapter from '../components/Adapter'
 import Anchor from '../components/Anchor'
@@ -56,21 +55,13 @@ const AdaptersPage: Component = () => {
         <div class={`-mx-3 w-[111%] border-t border-solid ${borderColorClass()}`} />
         <div class='flex flex-col pt-1.5'>
           <div class='flex items-center'>
-            <Checkbox disabled={socketInfo().forceEnableNativeAPIs} noMt text='Use native APIs as fallback' checked={settings().useNativeAPIs} onChange={() => {
+            <Checkbox noMt text='Use native APIs' checked={settings().useNativeAPIs} onChange={() => {
               setUseNativeAPIs(!settings().useNativeAPIs)
             }} />
             <div class='ml-1.5 text-sm'>
               (<Hyperlink text='Learn more' highlight link='https://github.com/keifufu/WebNowPlaying-Redux/blob/main/NativeAPIs.md' />)
             </div>
           </div>
-          <Show when={socketInfo().forceEnableNativeAPIs}>
-            <div class='flex items-center'>
-              <AiFillWarning color='#fcdf53' class='mr-1.5 mt-1 inline-block' />
-              <div class='mt-0.5 text-sm'>
-                Enabled due to local policy
-              </div>
-            </div>
-          </Show>
         </div>
       </div>
     </div>

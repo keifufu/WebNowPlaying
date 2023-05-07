@@ -115,7 +115,6 @@ export type SocketInfoState = {
   _isPlaceholder?: boolean
 }
 export type SocketInfo = {
-  forceEnableNativeAPIs: boolean
   states: Map<number, SocketInfoState>
 }
 export const defaultSocketInfoState = {
