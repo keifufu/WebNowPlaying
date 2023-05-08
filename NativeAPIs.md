@@ -16,5 +16,4 @@ Not supported yet
 - Open the browser extensions settings panel and toggle "Use native APIs as fallback"  
 
 **OR** (if you don't use the browser extension and only want native players)  
-- Create a folder called "wnp_force_enable_native_api" in your user's directory (C:\Users\<username>)  
-Simply press WIN+R and paste `cmd /c "mkdir -p "%UserProfile%/WebNowPlaying/enable_native_api""`
+- Simply press WIN+R and paste `cmd /c "mkdir -p "%UserProfile%/WebNowPlaying/use_native_apis""`
