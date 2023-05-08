@@ -1,6 +1,6 @@
 # Using Native APIs
 This allows adapters to use your operating systems APIs to get media info from desktop apps.  
-Keep in mind that not all WebNowPlaying features are supported by these apps, as some might not reveal controls like skipping, seeking, etc.
+Keep in mind that not all WebNowPlaying features are supported by these apps, as some might not provide controls like skipping, seeking, etc.
 
 **Note**: Browsers are excluded from Native APIs.  
 This is so it won't interfere with the browser extension as it will always report more accurate information.
