@@ -17,11 +17,7 @@ Right click "WebNowPlaying Redux" -> Manage Extension -> Permissions -> Check "A
 - [WebNowPlaying-Redux-OBS](https://github.com/keifufu/WebNowPlaying-Redux-OBS) by [keifufu](https://github.com/keifufu)
 - Want to create or submit your own adapter? Click [here](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/CreatingAdapters.md)!
 
-## Spotify Desktop
-- Supported mostly via [Native APIs](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/NativeAPIs.md) (missing volume control)  
-- Supported fully via [WebNowPlaying-Redux-Spicetify](https://github.com/keifufu/WebNowPlaying-Redux-Spicetify)
-
-## Other Desktop players
+## Desktop players
 Read [Native APIs](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/NativeAPIs.md)
 
 ## Supported websites
