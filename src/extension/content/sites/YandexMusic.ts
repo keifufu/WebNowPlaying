@@ -6,18 +6,18 @@ import { ratingUtils } from '../utils'
 const site: Site = {
   match: () => window.location.hostname === 'music.yandex.ru',
   ready: () => navigator.mediaSession.metadata !== null && querySelector<boolean, HTMLElement>('.player-controls__btn_play', (el) => true, false),
-  ratingSystem: RatingSystem.LIKE,
+  ratingSystem: RatingSystem.LIKE_DISLIKE,
   info: {
-    playerName: () => 'Yandex Music', // The name of the player
+    playerName: () => 'Yandex Music',
     state: () => (querySelectorReport<StateMode, HTMLElement>('.player-controls__btn_play', (el) => (el.classList.contains('d-icon_play') ? StateMode.PAUSED : StateMode.PLAYING), StateMode.PAUSED, 'state')),
-    title: () => navigator.mediaSession.metadata?.title || '', // The title of the current song
-    artist: () => navigator.mediaSession.metadata?.artist || '', // The artist of the current song
-    album: () => navigator.mediaSession.metadata?.album || '', // The album of the current song
-    coverUrl: () => getMediaSessionCover(), // A link to the cover image of the current song
+    title: () => navigator.mediaSession.metadata?.title || '',
+    artist: () => navigator.mediaSession.metadata?.artist || '',
+    album: () => navigator.mediaSession.metadata?.album || '',
+    coverUrl: () => getMediaSessionCover(),
     durationSeconds: () => querySelectorReport<number, HTMLElement>('.progress__bar .progress__right', (el) => convertTimeToSeconds(el.innerText), 0, 'durationSeconds'),
     positionSeconds: () => querySelectorReport<number, HTMLElement>('.progress__bar .progress__left', (el) => convertTimeToSeconds(el.innerText), 0, 'positionSeconds'),
-    volume: () => querySelectorReport<number, HTMLElement>('.d-slider-vert__filled', (el) => parseFloat(el.style.getPropertyValue('height').replace('%', '')), 100, 'volume'),
-    rating: () => 0, // The rating of the current song (1-5)
+    volume: () => querySelectorReport<number, HTMLElement>('.volume__icon', (el) => ((el.classList.contains('volume__icon_mute')) ? 0 : 100), 100, 'volume'),
+    rating: () => querySelectorReport<number, HTMLElement>('.player-controls__track-controls .d-icon_heart-full', (el) => (el === null ? 0 : 5), 0, 'rating'),
     repeatMode: () => querySelectorReport<RepeatMode, HTMLButtonElement>('.player-controls__btn_repeat', (el) => {
       const state = el.classList
       if (state.contains('player-controls__btn_repeat_state1')) return RepeatMode.ALL
@@ -30,7 +30,11 @@ const site: Site = {
       'shuffleActive')
   },
   events: {
-    setState: (state) => querySelectorEventReport<HTMLButtonElement>('.player-controls__btn_play', (el) => (state === StateMode.PLAYING ? el.click() : el.click()), 'setState'),
+    setState: (state) => querySelectorEventReport<HTMLButtonElement>('.player-controls__btn_play', (el) => {
+      el.click()
+      if (state === StateMode.PLAYING) return StateMode.PAUSED
+      return StateMode.PLAYING
+    }, 'setState'),
     skipPrevious: () => querySelectorEventReport<HTMLButtonElement>('.d-icon_track-prev', (el) => el.click(), 'skipPrevious'),
     skipNext: () => querySelectorEventReport<HTMLButtonElement>('.d-icon_track-next', (el) => el.click(), 'skipNext'),
     setPositionSeconds: null,
@@ -55,16 +59,20 @@ const site: Site = {
         }))
       }, 'setPositionPercentage')
     },
-    setVolume: () => querySelectorEventReport<HTMLButtonElement>('.volume__icon', (el) => (el.click()), 'setVolume'), // Volume is on/off
+    setVolume: (volume: number) => {
+      const currVolume = site.info.volume()
+      if ((currVolume === 0 && volume > 0) || (currVolume === 100 && volume < 100))
+        querySelectorEventReport<HTMLButtonElement>('.volume__btn', (el) => el.click(), 'setVolume')
+    },
     toggleRepeatMode: () => querySelectorEventReport<HTMLButtonElement>('.player-controls__btn_repeat', (el) => el.click(), 'toggleRepeatMode'),
     toggleShuffleActive: () => querySelectorEventReport<HTMLButtonElement>('.player-controls__btn_shuffle', (el) => el.click(), 'toggleShuffleActive'),
     setRating: (rating: number) => {
       ratingUtils.likeDislike(rating, site, {
         toggleLike: () => {
-          querySelectorEventReport<HTMLButtonElement>('.d-like_theme-player', (el) => el.click(), 'setRating')
+          querySelectorEventReport<HTMLButtonElement>('.player-controls__btn .d-icon_heart', (el) => el.click(), 'setRating')
         },
         toggleDislike: () => {
-          querySelectorEventReport<HTMLButtonElement>('.d-like_theme-player', (el) => el.click(), 'setRating')
+          querySelectorEventReport<HTMLButtonElement>('.player-controls__btn .d-icon_heart-full', (el) => el.click(), 'setRating')
         }
       })
     }
