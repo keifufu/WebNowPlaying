@@ -13,7 +13,10 @@ If you see it show up in the media control center or the popup you get when chan
 Not supported yet
 
 ## Enabling/Disabling Native APIs
-- Open the browser extensions settings panel and toggle "Use native APIs as fallback"  
+_Note: these instructions are for 2.0.1 and newer. For 2.0.0 refer to [these instructions](https://github.com/keifufu/WebNowPlaying-Redux/blob/b3f56118dac87d83eb66dbb3fa92fe8a8e0b8283/NativeAPIs.md)._
 
-**OR** (if you don't use the browser extension and only want native players)  
-- Simply press WIN+R and paste `cmd /c "mkdir -p "%UserProfile%/WebNowPlaying/use_native_apis""`
+Open the browser extension settings panel and toggle "Use native APIs".
+
+**OR** (if you don't use the browser extension and only want native players)
+- To **disable**: press WIN+R and paste `cmd /c "rmdir "%LocalAppData%/WebNowPlaying/disable_native_apis""`
+- To **enable**: press WIN+R and paste `cmd /c "mkdir -p "%LocalAppData%/WebNowPlaying/disable_native_apis""`
