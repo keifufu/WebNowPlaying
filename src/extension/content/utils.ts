@@ -17,6 +17,7 @@ import Soundcloud from './sites/Soundcloud'
 import Spotify from './sites/Spotify'
 import Tidal from './sites/Tidal'
 import Twitch from './sites/Twitch'
+import YandexMusic from './sites/YandexMusic'
 import YouTube from './sites/YouTube'
 import YouTubeEmbed from './sites/YouTubeEmbed'
 import YouTubeMusic from './sites/YouTubeMusic'
@@ -60,7 +61,7 @@ export const ContentUtils = {
 }
 
 export const getCurrentSite = (): Site | null => {
-  const sites = [AppleMusic, Bandcamp, Deezer, Invidious, Jellyfin, Navidrome, Netflix, Pandora, Plex, RadioAddict, Soundcloud, Spotify, Tidal, Twitch, YouTube, YouTubeEmbed, YouTubeMusic]
+  const sites = [AppleMusic, Bandcamp, Deezer, Invidious, Jellyfin, Navidrome, Netflix, Pandora, Plex, RadioAddict, Soundcloud, Spotify, Tidal, Twitch, YandexMusic, YouTube, YouTubeEmbed, YouTubeMusic]
   const settings = ContentUtils.getSettings()
 
   let match = false
