@@ -13,7 +13,7 @@ If you see it show up in the media control center or the popup you get when chan
 Not supported yet
 
 ## Enabling/Disabling Native APIs
-_Note: these instructions are for 2.0.1 and newer. For 2.0.0 refer to [these instructions](https://github.com/keifufu/WebNowPlaying-Redux/blob/b3f56118dac87d83eb66dbb3fa92fe8a8e0b8283/NativeAPIs.md)._
+_Note: these instructions are for 2.0.1 and newer. For 2.0.0 refer to [these instructions](https://github.com/keifufu/WebNowPlaying-Redux/blob/b3f56118dac87d83eb66dbb3fa92fe8a8e0b8283/NativeAPIs.md)._  
 Native APIs are enabled by default as of `2023-06-10`
 
 Open the browser extension settings panel and toggle "Use native APIs".
