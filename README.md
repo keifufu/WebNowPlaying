@@ -35,6 +35,7 @@ Read [Native APIs](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/Nati
 - Spotify
 - Tidal
 - Twitch
+- Yandex Music
 - YouTube
 - YouTube Embeds
 - YouTube Music
