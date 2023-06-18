@@ -8,6 +8,7 @@ import Deezer from './sites/Deezer'
 import Generic from './sites/Generic'
 import Invidious from './sites/Invidious'
 import Jellyfin from './sites/Jellyfin'
+import Kick from './sites/Kick'
 import Navidrome from './sites/Navidrome'
 import Netflix from './sites/Netflix'
 import Pandora from './sites/Pandora'
@@ -61,7 +62,7 @@ export const ContentUtils = {
 }
 
 export const getCurrentSite = (): Site | null => {
-  const sites = [AppleMusic, Bandcamp, Deezer, Invidious, Jellyfin, Navidrome, Netflix, Pandora, Plex, RadioAddict, Soundcloud, Spotify, Tidal, Twitch, YandexMusic, YouTube, YouTubeEmbed, YouTubeMusic]
+  const sites = [AppleMusic, Bandcamp, Deezer, Invidious, Jellyfin, Kick, Navidrome, Netflix, Pandora, Plex, RadioAddict, Soundcloud, Spotify, Tidal, Twitch, YandexMusic, YouTube, YouTubeEmbed, YouTubeMusic]
   const settings = ContentUtils.getSettings()
 
   let match = false

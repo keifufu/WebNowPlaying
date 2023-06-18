@@ -25,6 +25,10 @@
   "permissions": [
     "storage"
   ],
+  "granted_host_permissions": true,
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "web_accessible_resources": [
     {
       "resources": [ "injected.js" ],

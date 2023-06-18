@@ -26,6 +26,7 @@ Read [Native APIs](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/Nati
 - Deezer
 - Invidious
 - Jellyfin
+- Kick
 - Navidrome
 - Netflix
 - Pandora
