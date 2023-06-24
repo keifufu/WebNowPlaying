@@ -19,5 +19,5 @@ Native APIs are enabled by default as of 2.0.1
 Open the browser extension settings panel and toggle "Use native APIs".
 
 **OR** (if you don't use the browser extension and only want native players)
-- To **disable**: press WIN+R and paste `cmd /c "rmdir "%LocalAppData%/WebNowPlaying/disable_native_apis""`
-- To **re-enable**: press WIN+R and paste `cmd /c "mkdir -p "%LocalAppData%/WebNowPlaying/disable_native_apis""`
+- To **disable**: press WIN+R and paste `cmd /c "mkdir -p "%LocalAppData%/WebNowPlaying/disable_native_apis""`
+- To **re-enable**: press WIN+R and paste `cmd /c "rmdir "%LocalAppData%/WebNowPlaying/disable_native_apis""`
