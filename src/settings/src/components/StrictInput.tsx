@@ -1,19 +1,19 @@
-import { Component, createEffect } from 'solid-js'
+import { Component, createEffect } from "solid-js";
 
 type Props = {
-  value: string
-  onInput: (value: string) => void
-  class?: string
-  placeholder?: string
-}
+  value: string;
+  onInput: (value: string) => void;
+  class?: string;
+  placeholder?: string;
+};
 
 // A input that always reflects props.value
 const StrictInput: Component<Props> = (props) => {
-  let ref: HTMLInputElement
+  let ref: HTMLInputElement;
 
   createEffect(() => {
-    if (ref) ref.value = props.value
-  })
+    if (ref) ref.value = props.value;
+  });
 
   return (
     <input
@@ -22,12 +22,12 @@ const StrictInput: Component<Props> = (props) => {
       class={props.class}
       placeholder={props.placeholder}
       onInput={(e) => {
-        const value = e.currentTarget.value
-        props.onInput(value)
-        ref.value = props.value
+        const value = e.currentTarget.value;
+        props.onInput(value);
+        ref.value = props.value;
       }}
     />
-  )
-}
+  );
+};
 
-export default StrictInput
+export default StrictInput;

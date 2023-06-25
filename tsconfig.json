@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client", "chrome"],
+    "types": ["vite/client", "chrome", "firefox-webext-browser"],
     "noEmit": false,
     "isolatedModules": true
   }
