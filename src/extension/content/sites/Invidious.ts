@@ -27,6 +27,8 @@ const site: Site = {
       querySelectorReport<RepeatMode, HTMLVideoElement>("video", (el) => (el.loop ? RepeatMode.ONE : RepeatMode.NONE), RepeatMode.NONE, "repeatMode"),
     shuffleActive: () => false,
   },
+  canSkipPrevious: () => document.referrer.includes("window.location.host"),
+  canSkipNext: () => querySelector<boolean, HTMLElement>(".thumbnail", () => true, false),
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

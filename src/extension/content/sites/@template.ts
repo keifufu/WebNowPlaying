@@ -19,6 +19,8 @@ const site: Site = {
     repeatMode: () => RepeatMode.NONE,
     shuffleActive: () => false,
   },
+  canSkipPrevious: () => false,
+  canSkipNext: () => false,
   events: {
     setState: null,
     skipPrevious: null,

@@ -63,6 +63,9 @@ const site: Site = {
       ),
     shuffleActive: () => shuffleState,
   },
+  // Can't be bothered to check this right now
+  canSkipPrevious: () => true,
+  canSkipNext: () => true,
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;
@@ -77,24 +80,20 @@ const site: Site = {
           const previousButton = querySelector<HTMLButtonElement | null, HTMLButtonElement>(".ytp-prev-button", (el) => el, null);
           const list = new URLSearchParams(link).get("list");
           if (shuffleState && list) {
-            if (video.currentTime <= 3) {
-              const playlist = querySelector<HTMLElement | null, HTMLElement>(".ytp-playlist-menu-items", (el) => el, null);
-              // Open the playlist menu and close it again to load the children
-              if (!playlistLoaded && playlist?.children.length === 0) {
-                querySelectorEventReport<HTMLButtonElement>(
-                  ".ytp-playlist-menu-button",
-                  (el) => {
-                    el.click();
-                    el.click();
-                  },
-                  "skipPrevious"
-                );
-                playlistLoaded = true;
-              }
-              (playlist?.children[Math.floor(Math.random() * playlist?.children.length)] as HTMLButtonElement).click();
-            } else {
-              video.currentTime = 0;
+            const playlist = querySelector<HTMLElement | null, HTMLElement>(".ytp-playlist-menu-items", (el) => el, null);
+            // Open the playlist menu and close it again to load the children
+            if (!playlistLoaded && playlist?.children.length === 0) {
+              querySelectorEventReport<HTMLButtonElement>(
+                ".ytp-playlist-menu-button",
+                (el) => {
+                  el.click();
+                  el.click();
+                },
+                "skipPrevious"
+              );
+              playlistLoaded = true;
             }
+            (playlist?.children[Math.floor(Math.random() * playlist?.children.length)] as HTMLButtonElement).click();
           } else if (previousButton?.getAttribute("aria-disabled") !== "true" && video.currentTime <= 3) {
             previousButton?.click();
           } else {

@@ -15,7 +15,7 @@ const site: Site = {
   },
   ready: () =>
     (currentNetflixInfo?.isPlayerReady ?? false) &&
-    querySelector<boolean, HTMLVideoElement>("video", (el) => true, false) &&
+    querySelector<boolean, HTMLVideoElement>("video", () => true, false) &&
     querySelector<boolean, HTMLVideoElement>("video", (el) => el.duration > 0, false),
   ratingSystem: RatingSystem.NONE,
   info: {
@@ -53,7 +53,7 @@ const site: Site = {
     },
     coverUrl: () => {
       if (currentNetflixInfo?.metadata._metadata.video) {
-        const { artwork, boxart, storyart } = currentNetflixInfo?.metadata._metadata.video;
+        const { artwork, boxart, storyart } = currentNetflixInfo.metadata._metadata.video;
         let art;
         if (artwork.length > 0) art = artwork;
         else if (storyart.length > 0) art = storyart;
@@ -69,6 +69,14 @@ const site: Site = {
     rating: () => 0,
     repeatMode: () => RepeatMode.NONE,
     shuffleActive: () => false,
+  },
+  canSkipPrevious: () => {
+    const data = currentNetflixInfo?.navData;
+    return !!data?.prevId && !!data?.currId;
+  },
+  canSkipNext: () => {
+    const data = currentNetflixInfo?.navData;
+    return !!data?.nextId && !!data?.currId;
   },
   events: {
     setState: (state) =>

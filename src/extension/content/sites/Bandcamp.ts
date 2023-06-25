@@ -50,6 +50,18 @@ const site: Site = {
     repeatMode: () => RepeatMode.NONE,
     shuffleActive: () => false,
   },
+  canSkipPrevious: () =>
+    querySelector<boolean, HTMLDivElement>(
+      ".prevbutton, .prev div",
+      (el) => !el.classList.contains("disabled") || !el.classList.contains("hiddenelem"),
+      false
+    ),
+  canSkipNext: () =>
+    querySelector<boolean, HTMLDivElement>(
+      ".nextbutton, .next div",
+      (el) => !el.classList.contains("disabled") || !el.classList.contains("hiddenelem"),
+      false
+    ),
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

@@ -73,6 +73,10 @@ const site: Site = {
         "shuffleActive"
       ),
   },
+  // Can't detect if we can skip, the buttons are always clickable and clicking them with
+  // no other songs in queue it will just pause/unpause.
+  canSkipPrevious: () => true,
+  canSkipNext: () => true,
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

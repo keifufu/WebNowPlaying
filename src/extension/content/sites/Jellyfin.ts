@@ -54,6 +54,9 @@ const site: Site = {
     },
     shuffleActive: () => querySelector<boolean, HTMLButtonElement>(".btnShuffleQueue", (el) => el.classList.contains("buttonActive"), false),
   },
+  // Doesn't seem like it's possible to check if we can skip
+  canSkipPrevious: () => true,
+  canSkipNext: () => true,
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

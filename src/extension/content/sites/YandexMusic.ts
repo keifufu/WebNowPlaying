@@ -46,6 +46,8 @@ const site: Site = {
     shuffleActive: () =>
       querySelector<boolean, HTMLButtonElement>(".player-controls__btn_shuffle", (el) => el.classList.contains("player-controls__btn_on"), false),
   },
+  canSkipPrevious: () => querySelector<boolean, HTMLButtonElement>(".d-icon_track-prev", (el) => !el.disabled, false),
+  canSkipNext: () => querySelector<boolean, HTMLButtonElement>(".d-icon_track-next", (el) => !el.disabled, false),
   events: {
     setState: (state) =>
       querySelectorEvent<HTMLButtonElement>(".player-controls__btn_play", (el) => {

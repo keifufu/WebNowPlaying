@@ -4,8 +4,8 @@ import { querySelector, querySelectorEvent, querySelectorEventReport, querySelec
 const site: Site = {
   match: () => window.location.hostname === "www.twitch.tv",
   ready: () =>
-    querySelector<boolean, HTMLElement>(".video-player__default-player", (el) => true, false) &&
-    querySelector<boolean, HTMLVideoElement>("video", (el) => true, false) &&
+    querySelector<boolean, HTMLElement>(".video-player__default-player", () => true, false) &&
+    querySelector<boolean, HTMLVideoElement>("video", () => true, false) &&
     querySelector<boolean, HTMLElement>('h2[data-a-target="stream-title"]', (el) => el.innerText.length > 0, false),
   ratingSystem: RatingSystem.NONE,
   info: {
@@ -68,6 +68,8 @@ const site: Site = {
     repeatMode: () => RepeatMode.NONE,
     shuffleActive: () => false,
   },
+  canSkipPrevious: () => querySelector<boolean, HTMLVideoElement>("video", () => false, false),
+  canSkipNext: () => querySelector<boolean, HTMLVideoElement>("video", () => true, false),
   events: {
     setState: (state) =>
       querySelectorEventReport<HTMLVideoElement>("video", (el) => (state === StateMode.PLAYING ? el.play() : el.pause()), "setState"),

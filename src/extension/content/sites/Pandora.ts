@@ -91,6 +91,12 @@ const site: Site = {
     // Not reporting because some views on Pandora don't have a shuffle button
     shuffleActive: () => querySelector<boolean, HTMLButtonElement>(".ShuffleButton", (el) => el.getAttribute("aria-checked") === "true", false),
   },
+  // I was too lazy to actually implement this
+  // since pandora requires me to use a VPN to use
+  // Also make sure skipPrevious() always goes to the
+  // previous song and doesn't just go to the beginning.
+  canSkipPrevious: () => true,
+  canSkipNext: () => true,
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

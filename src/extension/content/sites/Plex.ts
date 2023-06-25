@@ -42,6 +42,8 @@ const site: Site = {
     shuffleActive: () =>
       querySelector<boolean, HTMLButtonElement>('button[data-testid="shuffleButton"]', (el) => el.className.includes("Active"), false),
   },
+  canSkipPrevious: () => querySelector<boolean, HTMLButtonElement>('button[data-testid="previousButton"', (el) => !el.disabled, false),
+  canSkipNext: () => querySelector<boolean, HTMLButtonElement>('button[data-testid="nextButton"', (el) => !el.disabled, false),
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

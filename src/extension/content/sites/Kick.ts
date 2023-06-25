@@ -54,6 +54,8 @@ const site: Site = {
       ),
     shuffleActive: () => false,
   },
+  canSkipPrevious: () => false,
+  canSkipNext: () => false,
   events: {
     setState: (state) =>
       querySelectorEventReport<HTMLVideoElement>("#video-holder video", (el) => (state === StateMode.PLAYING ? el.play() : el.pause()), "setState"),

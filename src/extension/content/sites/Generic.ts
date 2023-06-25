@@ -123,6 +123,8 @@ const site: Site = {
     repeatMode: () => (element?.loop ? RepeatMode.ONE : RepeatMode.NONE),
     shuffleActive: () => false,
   },
+  canSkipPrevious: () => !!element,
+  canSkipNext: () => !!element,
   events: {
     setState: (state) => {
       if (!element) return;

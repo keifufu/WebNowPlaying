@@ -46,6 +46,8 @@ const site: Site = {
         "shuffleActive"
       ),
   },
+  canSkipPrevious: () => querySelector<boolean, HTMLButtonElement>("(.player-controls button)[0]", (el) => !el.disabled, false),
+  canSkipNext: () => querySelector<boolean, HTMLButtonElement>("(.player-controls button)[2]", (el) => !el.disabled, false),
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

@@ -24,12 +24,14 @@ const site: Site = {
     coverUrl: () => getMediaSessionCover(),
     durationSeconds: () => getElapsedTime(),
     positionSeconds: () => getElapsedTime(),
-    volume: () => querySelector<number, HTMLElement>(".player-muted", (el) => 0, 100),
+    volume: () => querySelector<number, HTMLElement>(".player-muted", () => 0, 100),
     rating: () =>
       querySelectorReport<number, HTMLElement>(".player-favorite", (el) => (el.classList.contains("player-favorite-added") ? 5 : 0), 0, "rating"),
     repeatMode: () => RepeatMode.NONE,
     shuffleActive: () => false,
   },
+  canSkipPrevious: () => true,
+  canSkipNext: () => true,
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

@@ -47,16 +47,24 @@ const site: Site = {
       return shuffleButton?.classList.contains("shuffled") || false;
     },
   },
+  // Doesn't seem like it's possible to check if we can skip
+  canSkipPrevious: () => true,
+  canSkipNext: () => true,
   events: {
     setState: (state) =>
       querySelectorEventReport<HTMLAudioElement>("audio", (el) => (state === StateMode.PLAYING ? el.play() : el.pause()), "setState"),
-    skipPrevious: () =>
-      document
+    skipPrevious: () => {
+      const el: HTMLButtonElement | null | undefined = document
         .querySelector("amp-chrome-player")
         ?.shadowRoot?.querySelector("apple-music-playback-controls")
         ?.shadowRoot?.querySelector('amp-playback-controls-item-skip[class="previous"]')
-        ?.shadowRoot?.querySelector<HTMLButtonElement>(".button--previous")
-        ?.click(),
+        ?.shadowRoot?.querySelector<HTMLButtonElement>(".button--previous");
+      if (!el) return;
+      if (site.info.positionSeconds() > 3) {
+        setTimeout(() => el.click(), 500);
+      }
+      el.click();
+    },
     skipNext: () =>
       document
         .querySelector("amp-chrome-player")

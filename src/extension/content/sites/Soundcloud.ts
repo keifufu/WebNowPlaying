@@ -41,8 +41,10 @@ const site: Site = {
       return RepeatMode.NONE;
     },
     // Not reporting this as .m-shuffling is only present when shuffle is enabled
-    shuffleActive: () => querySelector<boolean, HTMLElement>(".m-shuffling", (el) => true, false),
+    shuffleActive: () => querySelector<boolean, HTMLElement>(".m-shuffling", () => true, false),
   },
+  canSkipPrevious: () => querySelector<boolean, HTMLButtonElement>(".skipControl__previous", (el) => !el.disabled, false),
+  canSkipNext: () => querySelector<boolean, HTMLButtonElement>(".skipControl__next", (el) => !el.disabled, false),
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;

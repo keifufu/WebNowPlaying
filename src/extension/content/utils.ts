@@ -153,8 +153,8 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
 
   const playerControls = JSON.stringify({
     supports_play_pause: site.events.setState !== null,
-    supports_skip_previous: site.events.skipPrevious !== null,
-    supports_skip_next: site.events.skipNext !== null,
+    supports_skip_previous: site.canSkipPrevious(),
+    supports_skip_next: site.canSkipNext(),
     supports_set_position: site.events.setPositionSeconds !== null || site.events.setPositionPercentage !== null,
     supports_set_volume: site.events.setVolume !== null,
     supports_toggle_repeat_mode: site.events.toggleRepeatMode !== null,

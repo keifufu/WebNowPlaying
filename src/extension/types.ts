@@ -86,6 +86,8 @@ export type Site = {
   ready: () => boolean;
   ratingSystem: RatingSystem;
   info: SiteInfo;
+  canSkipPrevious: () => boolean;
+  canSkipNext: () => boolean;
   events: {
     setState: ((state: StateMode) => void) | null;
     skipPrevious: (() => void) | null;

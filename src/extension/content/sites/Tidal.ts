@@ -79,12 +79,24 @@ const site: Site = {
         "shuffleActive"
       ),
   },
+  canSkipPrevious: () => querySelector<boolean, HTMLButtonElement>("(#playbackControlBar button)[1]", (el) => !el.disabled, false),
+  canSkipNext: () => querySelector<boolean, HTMLButtonElement>("(#playbackControlBar button)[3]", (el) => !el.disabled, false),
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;
       querySelectorEventReport<HTMLButtonElement>("(#playbackControlBar button)[2]", (el) => el.click(), "setState");
     },
-    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>("(#playbackControlBar button)[1]", (el) => el.click(), "skipPrevious"),
+    skipPrevious: () =>
+      querySelectorEventReport<HTMLButtonElement>(
+        "(#playbackControlBar button)[1]",
+        (el) => {
+          if (site.info.positionSeconds() > 5) {
+            setTimeout(() => el.click(), 500);
+          }
+          el.click();
+        },
+        "skipPrevious"
+      ),
     skipNext: () => querySelectorEventReport<HTMLButtonElement>("(#playbackControlBar button)[3]", (el) => el.click(), "skipNext"),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {

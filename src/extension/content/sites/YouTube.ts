@@ -87,20 +87,17 @@ const site: Site = {
         false
       ),
   },
+  canSkipPrevious: () =>
+    queryYouTubeContainer<boolean, HTMLButtonElement>(".ytp-prev-button, #navigation-button-up button", (el) => !el.disabled, false),
+  canSkipNext: () =>
+    queryYouTubeContainer<boolean, HTMLButtonElement>(".ytp-next-button, #navigation-button-down button", (el) => !el.disabled, false),
   events: {
     setState: (state) =>
       queryYouTubeContainer<any, HTMLVideoElement>(".html5-main-video[src]", (el) => (state === StateMode.PLAYING ? el.play() : el.pause()), null),
     skipPrevious: () => {
       const chapters = findNearestChapters();
       if (chapters?.previous) return site.events.setPositionSeconds?.(chapters.previous);
-      queryYouTubeContainer<any, HTMLVideoElement>(
-        ".html5-main-video[src]",
-        (el) => {
-          if (el.currentTime > 5) el.currentTime = 0;
-          else queryYouTubeContainer<any, HTMLButtonElement>(".ytp-prev-button, #navigation-button-up button", (el) => el.click(), null);
-        },
-        null
-      );
+      queryYouTubeContainer<any, HTMLButtonElement>(".ytp-prev-button, #navigation-button-up button", (el) => el.click(), null);
     },
     skipNext: () => {
       const chapters = findNearestChapters();

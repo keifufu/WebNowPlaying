@@ -67,12 +67,29 @@ const site: Site = {
         "shuffleActive"
       ),
   },
+  // We can never tell if we can't skip previous as spotify will just go to the beginning of the song
+  // I mean, we could read the queue but I can't be bothered
+  canSkipPrevious: () => true,
+  // If we are at the end of a queue, pressing next will also just go to the beginning again
+  canSkipNext: () => true,
   events: {
     setState: (state) => {
       if (site.info.state() === state) return;
       querySelectorEventReport<HTMLButtonElement>("(.player-controls__buttons button)[2]", (el) => el.click(), "setState");
     },
-    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>("(.player-controls__buttons button)[1]", (el) => el.click(), "skipPrevious"),
+    skipPrevious: () =>
+      querySelectorEventReport<HTMLButtonElement>(
+        "(.player-controls__buttons button)[1]",
+        (el) => {
+          // If position is greater than 2 seconds, we have to click twice to actually go back a song
+          // Also, this check has to come before the first click because otherwise positionSeconds is 0
+          if (site.info.positionSeconds() > 2) {
+            setTimeout(() => el.click(), 500);
+          }
+          el.click();
+        },
+        "skipPrevious"
+      ),
     skipNext: () => querySelectorEventReport<HTMLButtonElement>("(.player-controls__buttons button)[3]", (el) => el.click(), "skipNext"),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
