@@ -3,7 +3,7 @@
   "name": "WebNowPlaying Redux",
   "short_name": "WebNowPlaying Redux",
   "description": "A browser extension that provides information and controls for media playing in the browser to external adapters.  ",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "icons": {
     "128": "icons/icon-darkmode-128.png",
     "256": "icons/icon-darkmode-256.png"
@@ -22,17 +22,13 @@
   "background": {
     "scripts": ["sw.js"]
   },
-  "permissions": [
-    "storage"
-  ],
+  "permissions": ["storage"],
   "granted_host_permissions": true,
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "host_permissions": ["*://*/*"],
   "web_accessible_resources": [
     {
-      "resources": [ "injected.js" ],
-      "matches": [ "<all_urls>" ]
+      "resources": ["injected.js"],
+      "matches": ["<all_urls>"]
     }
   ],
   "browser_specific_settings": {
