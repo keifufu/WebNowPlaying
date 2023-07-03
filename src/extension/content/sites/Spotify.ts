@@ -42,7 +42,7 @@ const site: Site = {
       ),
     rating: () =>
       querySelectorReport<number, HTMLButtonElement>(
-        "(.Root__now-playing-bar button)[1]",
+        ".control-button-heart",
         (el) => (el.getAttribute("aria-checked") === "true" ? 5 : 0),
         0,
         "rating"
