@@ -157,7 +157,7 @@ const site: Site = {
     setRating: (rating: number) => {
       ratingUtils.like(rating, site, {
         toggleLike: () => {
-          querySelectorEventReport<HTMLButtonElement>("(.Root__now-playing-bar button)[1]", (el) => el.click(), "setRating");
+          querySelectorEventReport<HTMLButtonElement>(".control-button-heart", (el) => el.click(), "setRating");
         },
       });
     },
