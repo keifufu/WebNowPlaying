@@ -79,6 +79,8 @@ function OnMediaEventLegacy(message: string) {
         site.events.setState?.(site.info.state() === StateMode.PLAYING ? StateMode.PAUSED : StateMode.PLAYING);
         break;
       case Events.PREVIOUS:
+        site.events.setPositionSeconds(0);
+        site.events.setPositionPercentage(0.0);
         site.events.skipPrevious?.();
         break;
       case Events.NEXT:
@@ -143,6 +145,8 @@ function OnMediaEventRev1(message: string) {
         site.events.setState?.(site.info.state() === StateMode.PLAYING ? StateMode.PAUSED : StateMode.PLAYING);
         break;
       case Events.PREVIOUS:
+        site.events.setPositionSeconds(0);
+        site.events.setPositionPercentage(0.0);
         site.events.skipPrevious?.();
         break;
       case Events.NEXT:
@@ -203,6 +207,8 @@ function OnMediaEventRev2(message: string) {
         site.events.setState?.(data === "PLAYING" ? StateMode.PLAYING : StateMode.PAUSED);
         break;
       case Events.TRY_SKIP_PREVIOUS:
+        site.events.setPositionSeconds(0);
+        site.events.setPositionPercentage(0.0);
         site.events.skipPrevious?.();
         break;
       case Events.TRY_SKIP_NEXT:

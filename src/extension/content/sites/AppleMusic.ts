@@ -60,9 +60,6 @@ const site: Site = {
         ?.shadowRoot?.querySelector('amp-playback-controls-item-skip[class="previous"]')
         ?.shadowRoot?.querySelector<HTMLButtonElement>(".button--previous");
       if (!el) return;
-      if (site.info.positionSeconds() > 3) {
-        setTimeout(() => el.click(), 500);
-      }
       el.click();
     },
     skipNext: () =>

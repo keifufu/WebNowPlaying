@@ -106,18 +106,7 @@ const site: Site = {
       if (site.info.state() === state) return;
       querySelectorEventReport<HTMLButtonElement>("#play-pause-button", (el) => el.click(), "setState");
     },
-    skipPrevious: () =>
-      querySelectorEventReport<HTMLButtonElement>(
-        ".previous-button",
-        (el) => {
-          // Click twice if position > 4
-          if (site.info.positionSeconds() > 4) {
-            setTimeout(() => el.click(), 500);
-          }
-          el.click();
-        },
-        "skipPrevious"
-      ),
+    skipPrevious: () => querySelectorEventReport<HTMLButtonElement>(".previous-button", (el) => el.click(), "skipPrevious"),
     skipNext: () => querySelectorEventReport<HTMLButtonElement>(".next-button", (el) => el.click(), "skipNext"),
     setPositionSeconds: null,
     setPositionPercentage: (positionPercentage: number) => {
