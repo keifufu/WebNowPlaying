@@ -7,7 +7,7 @@ const site: Site = {
   match: () => window.location.hostname === "open.spotify.com",
   ready: () =>
     navigator.mediaSession.metadata !== null &&
-    querySelector<boolean, HTMLElement>("(.player-controls__buttons button svg path)[3]", (el) => true, false),
+    querySelector<boolean, HTMLElement>("(.player-controls__buttons button svg path)[3]", () => true, false),
   ratingSystem: RatingSystem.LIKE,
   info: {
     playerName: () => "Spotify",
