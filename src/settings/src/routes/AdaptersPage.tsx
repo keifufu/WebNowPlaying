@@ -40,7 +40,7 @@ const AdaptersPage: Component = () => {
         </div>
         <div class="ml-16 mt-3">
           Want to create or submit your own adapter? Click{" "}
-          <Hyperlink text="here" highlight link="https://github.com/keifufu/WebNowPlaying-Redux/blob/main/CreatingAdapters.md" />!
+          <Hyperlink text="here" highlight link="https://wnp.keifufu.dev/creating-adapters/getting-started" />!
         </div>
       </div>
       <div class="mt-auto w-full">
@@ -56,7 +56,7 @@ const AdaptersPage: Component = () => {
               }}
             />
             <div class="ml-1.5 text-sm">
-              (<Hyperlink text="Learn more" highlight link="https://github.com/keifufu/WebNowPlaying-Redux/blob/main/NativeAPIs.md" />)
+              (<Hyperlink text="Learn more" highlight link="https://wnp.keifufu.dev/desktop-players" />)
             </div>
           </div>
         </div>
