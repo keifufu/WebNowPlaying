@@ -137,8 +137,9 @@ export const getMediaInfo = (): Partial<MediaInfo> | null => {
     if (typeof value === "number") value = Math.round(value);
     // Trim strings
     else if (typeof value === "string") value = value.trim();
-    // Title sanitation
-    if (key === "title") value = sanitizeTitle(value as string, site.info.artist());
+    // Title and artist sanitation
+    if (key === "title") value = sanitizeTitle(value as string, sanitizeArtist(site.info.artist()));
+    if (key === "artist") value = sanitizeArtist(value as string);
     if (value !== null && value !== undefined && mediaInfoCache.get(key) !== value) {
       if (key === "state" || key === "title" || (key === "volume" && (mediaInfoCache.get("state") || StateMode.STOPPED) === StateMode.PLAYING)) {
         const timestamp = value.toString().length > 0 ? Date.now() : 0;
@@ -196,4 +197,10 @@ function sanitizeTitle(title: string, artist: string) {
   if (typeof title !== "string" || typeof artist !== "string") return "";
   // TODO: maybe one day
   return title;
+}
+
+function sanitizeArtist(artist: string) {
+  if (typeof artist !== "string") return "";
+  artist.replace(" - Topic", "");
+  return artist;
 }
