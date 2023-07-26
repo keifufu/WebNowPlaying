@@ -2,7 +2,11 @@ A browser extension that provides information and controls for media playing in 
 It detects information about the media being played, such as the title, artist, album, and more.  
 This information can be utilized by external adapters to manage the media, including actions like pausing, skipping, adjusting the volume, and more.
 
+Documentation and Usage:  
+https://wnp.keifufu.dev
+
 Adapters:
+
 - WebNowPlaying-Redux-Rainmeter
 - WebNowPlaying-Redux-Macro-Deck
 - WebNowPlaying-Redux-OBS
