@@ -5,6 +5,7 @@ import Anchor from "../components/Anchor";
 import Checkbox from "../components/Checkbox";
 import CustomAdapter from "../components/CustomAdapter";
 import Hyperlink from "../components/Hyperlink";
+import { openSanitizationSettings } from "../components/SanitizationSettings";
 import { useSettings } from "../hooks/useSettings";
 import { useSocketInfo } from "../hooks/useSocketInfo";
 import { useBorderColorClass } from "../hooks/useTheme";
@@ -58,6 +59,9 @@ const AdaptersPage: Component = () => {
             <div class="ml-1.5 text-sm">
               (<Hyperlink text="Learn more" highlight link="https://wnp.keifufu.dev/desktop-players" />)
             </div>
+            {/* <div class="ml-auto text-sm">
+              <Anchor text="Title Sanitization" highlight onClick={openSanitizationSettings} />
+            </div> */}
           </div>
         </div>
       </div>
