@@ -5,8 +5,6 @@ import { querySelector, querySelectorEventReport, querySelectorReport } from "..
 import { ContentUtils, ratingUtils } from "../utils";
 
 let currentVolume = 100;
-const currentCoverUrl = "";
-const lastCoverVideoId = "";
 
 const site: Site = {
   match: () => window.location.hostname === "music.youtube.com",
