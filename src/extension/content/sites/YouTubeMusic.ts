@@ -31,7 +31,7 @@ const site: Site = {
       // This won't return the highest quality cover, but it's good enough for now.
       // Check the git history for how we used to do it. I changed it back to this
       // because the cover would flicker and I couldn't be bothered to fix it :3
-      getMediaSessionCover().split("?")[0].replace("vi_webp", "vi"),
+      getMediaSessionCover().split("?")[0],
     durationSeconds: () =>
       querySelectorReport<number, HTMLElement>(
         ".time-info.ytmusic-player-bar",

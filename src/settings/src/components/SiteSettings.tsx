@@ -14,12 +14,12 @@ export const openSiteSettings = (site: TSupportedSites) => {
   setIsOpen(true);
 };
 
-export const Settings: Component = () => {
+export const SiteSettingsComp: Component = () => {
   const borderColorClass = useBorderColorClass();
   const { theme } = useTheme();
   const siteSettings = () => SiteSettings[site() as TSupportedSites];
   const { settings, _saveSettingsInternal } = useSettings();
-  const getValue = (key: string) => settings()[key as keyof typeof Settings];
+  const getValue = (key: string) => settings()[key as keyof typeof SiteSettingsComp];
   const saveValue = (key: string, value: any) => _saveSettingsInternal({ ...settings(), [key]: value });
 
   return (
@@ -58,4 +58,4 @@ export const Settings: Component = () => {
   );
 };
 
-export default Settings;
+export default SiteSettingsComp;

@@ -2,7 +2,7 @@ import { IoSettingsSharp } from "solid-icons/io";
 import { Component, For, Show } from "solid-js";
 import { SiteSettings, SupportedSites, TSupportedSites } from "../../../utils/settings";
 import Checkbox from "../components/Checkbox";
-import { openSiteSettings } from "../components/Settings";
+import { openSiteSettings } from "../components/SiteSettings";
 import { useSettings } from "../hooks/useSettings";
 import { useBorderColorClass } from "../hooks/useTheme";
 
