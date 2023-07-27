@@ -5,8 +5,8 @@ import { querySelector, querySelectorEventReport, querySelectorReport } from "..
 import { ContentUtils, ratingUtils } from "../utils";
 
 let currentVolume = 100;
-let currentCoverUrl = "";
-let lastCoverVideoId = "";
+const currentCoverUrl = "";
+const lastCoverVideoId = "";
 
 const site: Site = {
   match: () => window.location.hostname === "music.youtube.com",
@@ -29,28 +29,11 @@ const site: Site = {
     title: () => navigator.mediaSession.metadata?.title || "",
     artist: () => navigator.mediaSession.metadata?.artist || "",
     album: () => navigator.mediaSession.metadata?.album || "",
-    coverUrl: () => {
-      const link = getMediaSessionCover().split("?")[0].replace("vi_webp", "vi");
-      if (!link) return "";
-      const videoId = link.split("/vi/")?.[1]?.split("/")[0];
-
-      if (videoId && lastCoverVideoId !== videoId) {
-        const img = document.createElement("img");
-        img.setAttribute("src", `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`);
-        img.addEventListener("load", () => {
-          if (img.height > 90) currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-          else currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-          lastCoverVideoId = videoId;
-        });
-        img.addEventListener("error", () => {
-          currentCoverUrl = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-          lastCoverVideoId = videoId;
-        });
-      }
-
-      if (lastCoverVideoId !== videoId) return link;
-      return currentCoverUrl;
-    },
+    coverUrl: () =>
+      // This won't return the highest quality cover, but it's good enough for now.
+      // Check the git history for how we used to do it. I changed it back to this
+      // because the cover would flicker and I couldn't be bothered to fix it :3
+      getMediaSessionCover().split("?")[0].replace("vi_webp", "vi"),
     durationSeconds: () =>
       querySelectorReport<number, HTMLElement>(
         ".time-info.ytmusic-player-bar",
