@@ -28,8 +28,10 @@ const ghCache = new Map<string, string>();
 export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
   switch (request.event) {
     case "sendAutomaticReport": {
+      // Disabled for now, damn useless anyway
+      break;
       // We only send 'sendAutomaticReport' if telemetry is enabled, no need to check here
-      const isDev = await isDeveloperMode();
+      /* const isDev = await isDeveloperMode();
       if (isDev || !request.report || reportCache.get(request.report.message)) return;
       reportCache.set(request.report.message, true);
       fetch("https://keifufu.dev/report", {
@@ -43,7 +45,7 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
           "Content-Type": "application/json",
         },
       });
-      break;
+      break; */
     }
     case "resetOutdated":
       chrome.action.setBadgeText({ text: "" });

@@ -56,8 +56,10 @@ const ReportIssuesPage: Component = () => {
       </div>
       <textarea
         value={text()}
-        placeholder="Describe the issue here, please be as descriptive as possible.\nAdd your discord tag if you want to hear back from us."
-        disabled={submittingState() !== "none" && submittingState() !== "error"}
+        placeholder={`Disabled as y'all only report "don't worke!!".\nCreate an issue on GitHub if you can actually provide details.`}
+        disabled
+        // placeholder="Describe the issue here, please be as descriptive as possible.\nAdd your discord tag if you want to hear back from us."
+        // disabled={submittingState() !== "none" && submittingState() !== "error"}
         onInput={onInput}
         class={clsx(
           `mt-2 mb-1 h-full w-full resize-none rounded-md border border-solid ${borderColorClass()} bg-transparent p-2`,
