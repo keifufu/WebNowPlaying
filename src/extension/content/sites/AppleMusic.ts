@@ -22,7 +22,15 @@ const site: Site = {
     artist: () => navigator.mediaSession.metadata?.artist || "",
     album: () => navigator.mediaSession.metadata?.album || "",
     coverUrl: () => getMediaSessionCover(),
-    durationSeconds: () => querySelectorReport<number, HTMLAudioElement>("audio", (el) => el.duration, 0, "durationSeconds"),
+    // durationSeconds: () => querySelectorReport<number, HTMLAudioElement>("audio", (el) => el.duration, 0, "durationSeconds"),
+    durationSeconds : () => {
+      const el = querySelector<HTMLElement | null, HTMLElement>("amp-lcd", (el) => el, null) 
+        || querySelector<HTMLElement | null, HTMLElement>("amp-footer-player", (el) => el.querySelector("amp-lcd"), null);
+
+      if (!el || !el.shadowRoot) return 0;
+      let max = el.shadowRoot.querySelector<HTMLProgressElement>("#playback-progress")?.max;
+      return max || 0
+    },
     positionSeconds: () => querySelectorReport<number, HTMLAudioElement>("audio", (el) => el.currentTime, 0, "positionSeconds"),
     volume: () => querySelectorReport<number, HTMLAudioElement>("audio", (el) => (el.muted ? 0 : el.volume * 100), 100, "volume"),
     rating: () => 0,
