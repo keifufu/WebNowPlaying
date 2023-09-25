@@ -195,6 +195,5 @@ export type VKInfo = {
   volume: number;
   repeatMode: RepeatMode;
   shuffleActive: boolean;
-
   isPlayerReady: boolean;
 };

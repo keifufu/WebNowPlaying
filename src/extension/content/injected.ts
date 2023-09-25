@@ -308,7 +308,6 @@ const VK = {
       volume: Math.floor((player?.getVolume() ?? 1) ** (1 / 3) * 100),
       repeatMode: player?.isRepeatAll() ? RepeatMode.ALL : player?.isRepeatCurrentAudio() ? RepeatMode.ONE : RepeatMode.NONE,
       shuffleActive: player?.getPlaylistQueue()?.shuffled ?? false,
-
       isPlayerReady: player !== null,
     };
   },
