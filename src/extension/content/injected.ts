@@ -300,8 +300,8 @@ const VK = {
     let player = VK.getPlayer();
     return {
       state: !player?.getCurrentPlaylist() ? StateMode.STOPPED : player.isPlaying() ? StateMode.PLAYING : StateMode.PAUSED,
-      title: player?.stats?.currentAudio?.title ?? "",
-      artist: player?.stats?.currentAudio?.performer ?? "",
+      title: VK.unescape(player?.stats?.currentAudio?.title ?? ""),
+      artist: VK.unescape(player?.stats?.currentAudio?.performer ?? ""),
       cover: player?.stats?.currentAudio?.coverUrl_p ?? "",
       duration: player?.stats?.currentAudio?.duration ?? 0,
       position: Math.floor((player?.getCurrentProgress() ?? 0) * (player?.stats?.currentAudio?.duration ?? 0)),
@@ -337,4 +337,6 @@ const VK = {
     if (player?.getPlaylistQueue()?.shuffled) return player?.getPlaylistQueue()?.shuffle();
     return player?.getPlaylistQueue()?.shuffle(Math.random());
   },
+  // https://stackoverflow.com/questions/18106164/unescape-apostrophe-39-in-javascript
+  unescape: (input: string) => new DOMParser().parseFromString(input, "text/html").querySelector("html")!.textContent!,
 };
