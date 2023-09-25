@@ -184,3 +184,17 @@ export type NetflixInfo = {
   };
   isPlayerReady: boolean;
 };
+
+export type VKInfo = {
+  state: StateMode;
+  title: string;
+  artist: string;
+  cover: string;
+  duration: number;
+  position: number;
+  volume: number;
+  repeatMode: RepeatMode;
+  shuffleActive: boolean;
+
+  isPlayerReady: boolean;
+};

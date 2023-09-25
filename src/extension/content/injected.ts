@@ -1,4 +1,4 @@
-import { NetflixInfo, YouTubeVideoDetails } from "../types";
+import { NetflixInfo, YouTubeVideoDetails, VKInfo, StateMode, RepeatMode } from "../types";
 
 window.addEventListener("message", (e: any) => {
   if (e.data.type === "wnp-message") {
@@ -66,6 +66,93 @@ window.addEventListener("message", (e: any) => {
             id: e.data.id,
             type: "wnp-response",
             value: Netflix.getInfo(),
+          },
+          "*"
+        );
+        break;
+      case "getVKInfo":
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: VK.getInfo(),
+          },
+          "*"
+        );
+        break;
+      case "setVKState":
+        VK.setState(e.data.data);
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: null,
+          },
+          "*"
+        );
+        break;
+      case "skipVKPrevious":
+        VK.skipPrevious();
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: null,
+          },
+          "*"
+        );
+        break;
+      case "skipVKNext":
+        VK.skipNext();
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: null,
+          },
+          "*"
+        );
+        break;
+      case "setVKPosition":
+        VK.setPosition(e.data.data);
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: null,
+          },
+          "*"
+        );
+        break;
+      case "setVKVolume":
+        VK.setVolume(e.data.data);
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: null,
+          },
+          "*"
+        );
+        break;
+      case "toggleVKRepeatMode":
+        VK.toggleRepeatMode();
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: null,
+          },
+          "*"
+        );
+        break;
+      case "toggleVKShuffleActive":
+        VK.toggleShuffleActive();
+        window.postMessage(
+          {
+            id: e.data.id,
+            type: "wnp-response",
+            value: null,
           },
           "*"
         );
@@ -205,4 +292,49 @@ const Netflix = {
     metadata: Netflix.getMetadata(),
     isPlayerReady: Netflix.getPlayer()?.isReady?.() || false,
   }),
+};
+
+const VK = {
+  getPlayer: () => (window as any)?.getAudioPlayer() ?? null,
+  getInfo(): VKInfo {
+    let player = VK.getPlayer();
+    return {
+      state: !player?.getCurrentPlaylist() ? StateMode.STOPPED : player.isPlaying() ? StateMode.PLAYING : StateMode.PAUSED,
+      title: player?.stats?.currentAudio?.title ?? "",
+      artist: player?.stats?.currentAudio?.performer ?? "",
+      cover: player?.stats?.currentAudio?.coverUrl_p ?? "",
+      duration: player?.stats?.currentAudio?.duration ?? 0,
+      position: Math.floor((player?.getCurrentProgress() ?? 0) * (player?.stats?.currentAudio?.duration ?? 0)),
+      volume: Math.floor((player?.getVolume() ?? 1) ** (1 / 3) * 100),
+      repeatMode: player?.isRepeatAll() ? RepeatMode.ALL : player?.isRepeatCurrentAudio() ? RepeatMode.ONE : RepeatMode.NONE,
+      shuffleActive: player?.getPlaylistQueue()?.shuffled ?? false,
+
+      isPlayerReady: player !== null,
+    };
+  },
+  setState(state: StateMode) {
+    switch (state) {
+      case StateMode.PAUSED:
+        return VK.getPlayer()?.pause();
+      case StateMode.STOPPED:
+        return VK.getPlayer()?.stop();
+      case StateMode.PLAYING:
+        return VK.getPlayer()?.play();
+    }
+  },
+  skipPrevious: () => VK.getPlayer()?.playPrev(),
+  skipNext: () => VK.getPlayer()?.playNext(),
+  setPosition: (pos: number) => VK.getPlayer()?.seekToTime(pos),
+  setVolume: (vol: number) => VK.getPlayer()?.setVolume((vol / 100) ** 3),
+  toggleRepeatMode() {
+    let player = VK.getPlayer();
+    if (player?.isRepeatAll()) return player.toggleRepeatCurrentAudio();
+    if (player?.isRepeatCurrentAudio()) return player.toggleRepeatCurrentAudio();
+    return player?.toggleRepeatAll();
+  },
+  toggleShuffleActive() {
+    let player = VK.getPlayer();
+    if (player?.getPlaylistQueue()?.shuffled) return player?.getPlaylistQueue()?.shuffle();
+    return player?.getPlaylistQueue()?.shuffle(Math.random());
+  },
 };
