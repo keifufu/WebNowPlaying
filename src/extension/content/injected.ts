@@ -338,5 +338,5 @@ const VK = {
     return player?.getPlaylistQueue()?.shuffle(Math.random());
   },
   // https://stackoverflow.com/questions/18106164/unescape-apostrophe-39-in-javascript
-  unescape: (input: string) => new DOMParser().parseFromString(input, "text/html").querySelector("html")!.textContent!,
+  unescape: (input: string): string => new DOMParser().parseFromString(input, "text/html").querySelector("html")!.textContent!,
 };
