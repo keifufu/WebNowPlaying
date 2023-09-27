@@ -1,7 +1,7 @@
 import { randomToken } from "../../utils/misc";
 import { defaultSettings } from "../../utils/settings";
 import { ServiceWorkerUtils } from "../../utils/sw";
-import { MediaInfo, NetflixInfo, Site, SiteInfo, StateMode, YouTubeInfo } from "../types";
+import { MediaInfo, NetflixInfo, Site, SiteInfo, StateMode, VKInfo, YouTubeInfo } from "../types";
 import AppleMusic from "./sites/AppleMusic";
 import Bandcamp from "./sites/Bandcamp";
 import Deezer from "./sites/Deezer";
@@ -18,6 +18,7 @@ import Soundcloud from "./sites/Soundcloud";
 import Spotify from "./sites/Spotify";
 import Tidal from "./sites/Tidal";
 import Twitch from "./sites/Twitch";
+import VK from "./sites/VK";
 import YandexMusic from "./sites/YandexMusic";
 import YouTube from "./sites/YouTube";
 import YouTubeEmbed from "./sites/YouTubeEmbed";
@@ -60,6 +61,14 @@ export const ContentUtils = {
   setYouTubeMusicVolume: (volume: number) => ContentUtils.sendMessage({ event: "setYouTubeMusicVolume", data: volume }),
   seekNetflix: (time: number) => ContentUtils.sendMessage({ event: "seekNetflix", data: time }),
   getNetflixInfo: () => ContentUtils.sendMessage<NetflixInfo>({ event: "getNetflixInfo" }),
+  getVKInfo: () => ContentUtils.sendMessage<VKInfo>({ event: "getVKInfo" }),
+  setVKState: (state: StateMode) => ContentUtils.sendMessage({ event: "setVKState", data: state }),
+  skipVKPrevious: () => ContentUtils.sendMessage({ event: "skipVKPrevious" }),
+  skipVKNext: () => ContentUtils.sendMessage({ event: "skipVKNext" }),
+  setVKPosition: (time: number) => ContentUtils.sendMessage({ event: "setVKPosition", data: time }),
+  setVKVolume: (volume: number) => ContentUtils.sendMessage({ event: "setVKVolume", data: volume }),
+  toggleVKRepeatMode: () => ContentUtils.sendMessage({ event: "toggleVKRepeatMode" }),
+  toggleVKShuffleActive: () => ContentUtils.sendMessage({ event: "toggleVKShuffleActive" }),
 };
 
 export const getCurrentSite = (): Site | null => {
@@ -79,6 +88,7 @@ export const getCurrentSite = (): Site | null => {
     Spotify,
     Tidal,
     Twitch,
+    VK,
     YandexMusic,
     YouTube,
     YouTubeEmbed,
