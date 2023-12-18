@@ -1,46 +1,35 @@
 import clsx from "clsx";
 import { Component, Show } from "solid-js";
-import { useBorderColorClass, useTheme } from "../hooks/useTheme";
 
 const Checkbox: Component<{
-  noMt?: boolean;
   label?: string;
   children?: any;
   text?: string;
   bigText?: boolean;
   checked: boolean;
   disabled?: boolean;
-  onChange: () => void;
+  class?: string;
+  onChange: (event: Event & { currentTarget: HTMLInputElement; target: HTMLInputElement }) => void;
 }> = (props) => {
-  const { theme } = useTheme();
-  const borderColorClass = useBorderColorClass();
-
   return (
-    <div class="flex items-center">
+    <div class={clsx(props.class, "flex items-center")}>
       <input
         id={props.label || props.text}
         type="checkbox"
         checked={props.checked}
         onChange={props.onChange}
         disabled={props.disabled}
+        // eslint-disable-next-line tailwindcss/no-custom-classname
         class={clsx(
-          `form-checkbox mr-2 h-4 w-4 rounded ${borderColorClass()} without-ring bg-transparent transition-all duration-200 ease-in-out`,
-          [theme() === "dark" && "text-cyan-600"],
-          [theme() === "light" && "text-cyan-700"],
-          [theme() === "konami" && "text-cyan-500"],
+          "without-ring form-checkbox mr-2 h-4 w-4 rounded border-indigo-300/80 bg-transparent text-indigo-400 transition-all duration-200 ease-in-out",
           [props.disabled && "opacity-50"],
-          [!props.disabled && "cursor-pointer"]
+          [!props.disabled && "cursor-pointer"],
         )}
       />
       <Show when={props.text}>
         <label
           for={props.label || props.text}
-          class={clsx(
-            [!props.noMt && "-mt-0.5"],
-            [!props.bigText && "text-[0.9rem]"],
-            [props.disabled && "opacity-50"],
-            [!props.disabled && "cursor-pointer"]
-          )}
+          class={clsx([!props.bigText && "text-[0.9rem]"], [props.disabled && "opacity-50"], [!props.disabled && "cursor-pointer"])}
         >
           {props.text}
         </label>

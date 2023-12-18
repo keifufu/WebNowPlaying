@@ -1,11 +1,11 @@
-import { getExtensionVersion, getVersionFromGithub, isDeveloperMode } from "../../utils/misc";
+import { getVersionFromGithub } from "../../utils/misc";
 import { Settings } from "../../utils/settings";
-import { connectSocket, disconnectSocket, getSocketInfo, reloadSockets, updateSettings } from "./port";
+import { EventResult } from "../types";
+import { connectSocket, disconnectSocket, getSocketInfo, reloadSockets, sendEventResult, updateSettings } from "./port";
 import { readSettings, saveSettings } from "./shared";
 
 export type ServiceWorkerMessage = {
   event:
-    | "sendAutomaticReport"
     | "resetOutdated"
     | "getSettings"
     | "saveSettings"
@@ -14,39 +14,23 @@ export type ServiceWorkerMessage = {
     | "getSocketInfo"
     | "connectSocket"
     | "disconnectSocket"
-    | "getGithubVersion";
+    | "getGithubVersion"
+    | "sendEventResult"
+    | "getPortId";
   settings?: Settings;
-  report?: { message: string };
   colorScheme?: "light" | "dark";
   port?: number;
   gh?: string;
-  useNativeAPIs?: boolean;
+  useDesktopPlayers?: boolean;
+  eventId?: string;
+  eventResult?: EventResult;
+  eventSocketPort?: number;
 };
 
-const reportCache = new Map<string, boolean>();
+let nextPortId = 1;
 const ghCache = new Map<string, string>();
-export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
+export const onMessage = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
   switch (request.event) {
-    case "sendAutomaticReport": {
-      // Disabled for now, damn useless anyway
-      break;
-      // We only send 'sendAutomaticReport' if telemetry is enabled, no need to check here
-      /* const isDev = await isDeveloperMode();
-      if (isDev || !request.report || reportCache.get(request.report.message)) return;
-      reportCache.set(request.report.message, true);
-      fetch("https://keifufu.dev/report", {
-        method: "POST",
-        body: JSON.stringify({
-          type: "automatic",
-          extVersion: getExtensionVersion(),
-          message: request.report.message,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      break; */
-    }
     case "resetOutdated":
       chrome.action.setBadgeText({ text: "" });
       chrome.action.setTitle({ title: "" });
@@ -93,17 +77,24 @@ export const MessageHandler = async (request: ServiceWorkerMessage, sendResponse
       disconnectSocket(request.port ?? 0);
       break;
     case "getGithubVersion": {
-      if (ghCache.has(request.gh ?? "")) return sendResponse(ghCache.get(request.gh ?? ""));
+      if (ghCache.has(request.gh ?? "")) {
+        return sendResponse(ghCache.get(request.gh ?? ""));
+      }
 
       const version = await getVersionFromGithub(request.gh ?? "");
       if (version) {
         ghCache.set(request.gh ?? "", version);
         sendResponse(version);
+      } else {
+        sendResponse("Error");
       }
-      sendResponse("Error");
       break;
     }
-    default:
+    case "sendEventResult":
+      sendEventResult(request.eventSocketPort as number, request.eventId as string, request.eventResult as EventResult);
+      break;
+    case "getPortId":
+      sendResponse(nextPortId++);
       break;
   }
 };

@@ -1,199 +1,169 @@
 import { TSupportedSites } from "../utils/settings";
 
-export enum StateMode {
-  STOPPED = "STOPPED",
-  PLAYING = "PLAYING",
-  PAUSED = "PAUSED",
-}
-export enum RepeatMode {
-  NONE = "NONE",
-  ONE = "ONE",
-  ALL = "ALL",
+export class EventError extends Error {
+  constructor() {
+    super();
+    this.name = "EventError";
+  }
 }
 
-export type MediaInfo = {
-  playerName: string;
-  playerControls: string;
-  state: StateMode;
+export enum EventResult {
+  SUCCEEDED = 1,
+  FAILED = 2,
+}
+
+export enum StateMode {
+  PLAYING = 0,
+  PAUSED = 1,
+  STOPPED = 2,
+}
+
+export enum RatingSystem {
+  NONE = 0,
+  LIKE = 1,
+  LIKE_DISLIKE = 2,
+  SCALE = 3,
+}
+
+export enum Repeat {
+  NONE = 1 << 0,
+  ALL = 1 << 1,
+  ONE = 1 << 2,
+}
+
+export type Player = {
+  id: number;
+  name: TSupportedSites;
   title: string;
   artist: string;
   album: string;
-  coverUrl: string;
-  durationSeconds: number;
-  positionSeconds: number;
+  cover: string;
+  state: StateMode;
+  position: number;
+  duration: number;
   volume: number;
   rating: number;
-  repeatMode: RepeatMode;
-  shuffleActive: boolean;
-  timestamp: number;
+  repeat: Repeat;
+  shuffle: boolean;
+  ratingSystem: RatingSystem;
+  availableRepeat: number;
+  canSetState: boolean;
+  canSkipPrevious: boolean;
+  canSkipNext: boolean;
+  canSetPosition: boolean;
+  canSetVolume: boolean;
+  canSetRating: boolean;
+  canSetRepeat: boolean;
+  canSetShuffle: boolean;
+  createdAt: number;
+  updatedAt: number;
+  activeAt: number;
 };
 
-export enum RatingSystem {
-  NONE = "NONE",
-  LIKE_DISLIKE = "LIKE_DISLIKE",
-  LIKE = "LIKE",
-  SCALE = "SCALE",
-}
-
-export const defaultPlayerControls = {
-  supports_play_pause: false,
-  supports_skip_previous: false,
-  supports_skip_next: false,
-  supports_set_position: false,
-  supports_set_volume: false,
-  supports_toggle_repeat_mode: false,
-  supports_toggle_shuffle_active: false,
-  supports_set_rating: false,
-  rating_system: RatingSystem.NONE,
-};
-
-export const defaultMediaInfo: MediaInfo = {
-  playerName: "",
-  playerControls: JSON.stringify(defaultPlayerControls),
-  state: StateMode.STOPPED,
+export const defaultPlayer: Player = {
+  id: 0,
+  name: "" as any,
   title: "",
   artist: "",
   album: "",
-  coverUrl: "",
-  durationSeconds: 0,
-  positionSeconds: 0,
+  cover: "",
+  state: StateMode.STOPPED,
+  duration: 0,
+  position: 0,
   volume: 100,
   rating: 0,
-  repeatMode: RepeatMode.NONE,
-  shuffleActive: false,
-  timestamp: 0,
+  repeat: Repeat.NONE,
+  shuffle: false,
+  ratingSystem: RatingSystem.NONE,
+  availableRepeat: Repeat.NONE,
+  canSetState: false,
+  canSkipPrevious: false,
+  canSkipNext: false,
+  canSetPosition: false,
+  canSetVolume: false,
+  canSetRating: false,
+  canSetRepeat: false,
+  canSetShuffle: false,
+  createdAt: 0,
+  updatedAt: 0,
+  activeAt: 0,
 };
 
-export type SiteInfo = {
-  playerName: () => TSupportedSites; // Default '' (empty string)
-  state: () => StateMode; // Default StateEnum.STOPPED
-  title: () => string; // Default '' (empty string)
-  artist: () => string; // Default '' (empty string)
-  album: () => string; // Default '' (empty string)
-  coverUrl: () => string; // Default '' (empty string)
-  durationSeconds: () => number; // Default '0:00'
-  positionSeconds: () => number; // Default '0:00'
-  volume: () => number; // Default 100
-  rating: () => number; // Default 0
-  repeatMode: () => RepeatMode; // Default RepeatEnum.NONE
-  shuffleActive: () => boolean; // Default false
+export type SiteControls = {
+  ratingSystem: RatingSystem;
+  availableRepeat: Repeat;
+  canSetState: boolean;
+  canSkipPrevious: boolean;
+  canSkipNext: boolean;
+  canSetPosition: boolean;
+  canSetVolume: boolean;
+  canSetRating: boolean;
+  canSetRepeat: boolean;
+  canSetShuffle: boolean;
 };
 
 export type Site = {
-  isInitialized?: boolean;
-  init?: () => void;
-  match: () => boolean;
+  init: (() => void) | null;
   ready: () => boolean;
-  ratingSystem: RatingSystem;
-  info: SiteInfo;
-  canSkipPrevious: () => boolean;
-  canSkipNext: () => boolean;
+  info: {
+    name: () => TSupportedSites;
+    title: () => string;
+    artist: () => string;
+    album: () => string;
+    cover: () => string;
+    state: () => StateMode;
+    duration: () => number;
+    position: () => number;
+    volume: () => number;
+    rating: () => number;
+    repeat: () => Repeat;
+    shuffle: () => boolean;
+  };
   events: {
     setState: ((state: StateMode) => void) | null;
     skipPrevious: (() => void) | null;
     skipNext: (() => void) | null;
-    setPositionSeconds: ((positionInSeconds: number) => void) | null;
-    setPositionPercentage: ((progressPercentage: number) => void) | null;
+    setPosition: ((seconds: number) => void) | null;
     setVolume: ((volume: number) => void) | null;
-    toggleRepeatMode: (() => void) | null;
-    toggleShuffleActive: (() => void) | null;
     setRating: ((rating: number) => void) | null;
+    setRepeat: ((repeat: Repeat) => void) | null;
+    setShuffle: ((shuffle: boolean) => void) | null;
   };
+  controls: () => SiteControls;
 };
 
-export type YouTubeVideoDetails = {
-  videoId?: string;
-  title?: string;
-  lengthSeconds?: string;
-  keywords?: string[];
-  channelId?: string;
-  isOwnerViewing?: boolean;
-  shortDescription?: string;
-  isCrawlable?: boolean;
-  thumbnail?: {
-    thumbnails: {
-      url: string;
-      height: number;
-      width: number;
-    }[];
-  };
-  allowRatings?: boolean;
-  viewCount?: string;
-  author?: string;
-  isPrivate?: boolean;
-  isUnpluggedCorpus?: boolean;
-  isLiveContent?: boolean;
+export type SiteFunctions = keyof Site["events"] | "init" | "getPlayerOptimized" | "getPlayer";
+
+export type SiteArgs = {
+  init: undefined;
+  getPlayerOptimized: undefined;
+  getPlayer: undefined;
+  setState: StateMode;
+  skipPrevious: undefined;
+  skipNext: undefined;
+  setPosition: number;
+  setVolume: number;
+  setRating: number;
+  setRepeat: Repeat;
+  setShuffle: boolean;
 };
 
-export type YouTubePlaylistDetails = {
-  title: string;
-  playlistId: string;
+export type SiteReturnValues = {
+  init: undefined;
+  getPlayerOptimized: Player | null;
+  getPlayer: Player;
+  setState: EventResult;
+  skipPrevious: EventResult;
+  skipNext: EventResult;
+  setPosition: EventResult;
+  setVolume: EventResult;
+  setRating: EventResult;
+  setRepeat: EventResult;
+  setShuffle: EventResult;
 };
 
-export type YouTubeInfo = {
-  videoDetails: YouTubeVideoDetails | null;
-  playlistDetails: YouTubePlaylistDetails | null;
-  containerLocalName: string | null;
-};
-
-type NetflixImage = {
-  url: string;
-  w: number;
-  h: number;
-};
-
-type NetflixEpisode = {
-  thumbs: NetflixImage[];
-  title: string;
-  seq: number;
-};
-
-type NetflixSeason = {
-  episodes: NetflixEpisode[];
-  title: string;
-  longName: string;
-  seq: number;
-  shortName: string;
-};
-
-type NetflixSeasonData = {
-  episode: NetflixEpisode;
-  season: NetflixSeason;
-  seasons: NetflixSeason[];
-  title: string;
-  type: "movie" | "show";
-};
-
-export type NetflixInfo = {
-  seasonData: NetflixSeasonData;
-  navData: {
-    prevId?: string;
-    currId?: string;
-    nextId?: string;
-  };
-  metadata: {
-    _metadata: {
-      video: {
-        artwork: NetflixImage[];
-        boxart: NetflixImage[];
-        storyart: NetflixImage[];
-        title: string;
-        type: "movie" | "show";
-      };
-    };
-  };
-  isPlayerReady: boolean;
-};
-
-export type VKInfo = {
-  state: StateMode;
-  title: string;
-  artist: string;
-  cover: string;
-  duration: number;
-  position: number;
-  volume: number;
-  repeatMode: RepeatMode;
-  shuffleActive: boolean;
-  isPlayerReady: boolean;
+export type SiteIndex = {
+  match: () => boolean;
+  name: TSupportedSites;
+  exec: <T extends SiteFunctions>(func: T, args: SiteArgs[T], shouldThrow?: boolean) => Promise<SiteReturnValues[T]>;
 };

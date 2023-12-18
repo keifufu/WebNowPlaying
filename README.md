@@ -1,6 +1,6 @@
-# WebNowPlaying-Redux
+# WebNowPlaying
 
-A browser extension that provides information and controls for media playing in the browser to external adapters.
+Provides support for browser-based players for [WebNowPlaying](https://wnp.keifufu.dev).
 
 ## Documentation
 
@@ -9,19 +9,22 @@ https://wnp.keifufu.dev
 
 ## Installing
 
-Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying-redux)  
-Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying-redux/jfakgfcdgpghbbefmdfjkbdlibjgnbli)  
+Firefox: [Mozilla Addon Store](https://addons.mozilla.org/en-US/firefox/addon/webnowplaying)  
+Chrome: [Chrome Web Store](https://chrome.google.com/webstore/detail/webnowplaying/jfakgfcdgpghbbefmdfjkbdlibjgnbli)  
 Edge, Opera, etc. also use the Chrome Web Store
-
-**Note:** Due to a bug in firefox, you will have to manually grant it permissions.  
-Right click "WebNowPlaying Redux" -> Manage Extension -> Permissions -> Check "Access your data for all websites"
 
 ## Adapters
 
-- [WebNowPlaying-Redux-Rainmeter](https://github.com/keifufu/WebNowPlaying-Redux-Rainmeter) by [keifufu](https://github.com/keifufu), [tjhrulz](https://github.com/tjhrulz/)
-- [WebNowPlaying-Redux-Macro-Deck](https://github.com/jbcarreon123/WebNowPlaying-Redux-Macro-Deck) by [jbcarreon123](https://github.com/jbcarreon123)
-- [WebNowPlaying-Redux-OBS](https://github.com/keifufu/WebNowPlaying-Redux-OBS) by [keifufu](https://github.com/keifufu)
-- Want to create or submit your own adapter? Click [here](https://github.com/keifufu/WebNowPlaying-Redux/blob/main/CreatingAdapters.md)!
+### Official
+
+- [Rainmeter](https://github.com/keifufu/WebNowPlaying-Rainmeter) by keifufu, [tjhrulz](https://github.com/tjhrulz/)
+- [OBS](https://github.com/keifufu/WebNowPlaying-OBS) by keifufu
+- [CLI](https://github.com/keifufu/WebNowPlaying-CLI) by keifufu
+
+### Unofficial
+
+- [Macro Deck 2](https://github.com/jbcarreon123/WebNowPlaying-Redux-Macro-Deck) by [jbcarreon123](https://github.com/jbcarreon123)
+- Want to create or submit your own adapter? Click [here](https://wnp.keifufu.dev/creating-adapters/getting-started)!
 
 ## Building from source
 

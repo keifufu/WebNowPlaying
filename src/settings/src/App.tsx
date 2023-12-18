@@ -1,105 +1,98 @@
-import { Navigate, Route, Routes } from "@solidjs/router";
-import clsx from "clsx";
-import { Component, createSignal, onMount } from "solid-js";
+import { A, Navigate, Route, Routes, useLocation } from "@solidjs/router";
+import { FaSolidCircleArrowLeft, FaSolidCirclePlus } from "solid-icons/fa";
+import { IoSettingsSharp } from "solid-icons/io";
+import { Component, Show } from "solid-js";
 import { getExtensionVersion } from "../../utils/misc";
 import { ServiceWorkerUtils } from "../../utils/sw";
+import { bg } from "./bg";
 import Hyperlink from "./components/Hyperlink";
-import RouterLink from "./components/RouterLink";
-import SanitizationSettings from "./components/SanitizationSettings";
+import Permissions from "./components/Permissions";
+import SettingsMenu, { showSettingsMenu } from "./components/SettingsMenu";
 import SiteSettings from "./components/SiteSettings";
-import { useBorderColorClass, useTheme } from "./hooks/useTheme";
+import { useSettings } from "./hooks/useSettings";
 import AdaptersPage from "./routes/AdaptersPage";
-import ReportIssuesPage from "./routes/ReportIssuesPage";
+import SanitizationPage from "./routes/SanitizationPage";
 import SupportedSitesPage from "./routes/SupportedSitesPage";
 import UnsupportedSitesPage from "./routes/UnsupportedSitesPage";
-import { lmao } from "./utils/common";
 
 ServiceWorkerUtils.resetOutdated();
 
+// The way the background and blur filter is applied here is
+// a weird workaround to fix overflow on firefox popup corners
+// when backdrop-filter is used.
+// I currently still use backdrop-filter in the settings menu
+// and the site settings dialog, but I can't be bothered to find
+// solutions for those right now, at least there is no overflow
+// by default.
 const App: Component = () => {
-  const { theme, setTheme } = useTheme();
-  const borderColorClass = useBorderColorClass();
+  return (
+    <>
+      <div
+        style={{
+          background: `url(data:image/jpeg;base64,${bg})`,
+        }}
+        class="fixed top-0 h-screen w-screen"
+      />
+      <div
+        style={{
+          background: `url(data:image/jpeg;base64,${bg})`,
+          filter: "blur(20px)",
+          "clip-path": "inset(0.75rem 0.75rem 0.75rem 0.75rem)",
+        }}
+        class="fixed top-0 h-screen w-screen"
+      />
+      <div class="fixed top-0 flex h-screen w-screen select-none flex-col p-3 text-white">
+        <SettingsMenu />
+        <SiteSettings />
+        <Permissions />
+        <div
+          style={{ "box-shadow": "0 4px 30px rgba(0, 0, 0, 0.1)" }}
+          class="flex h-full grow flex-col overflow-hidden rounded-lg bg-indigo-950/40 bg-clip-padding"
+        >
+          <Header />
+          <Routes>
+            <Route path="/adapters" component={AdaptersPage} />
+            <Route path="/sanitization" component={SanitizationPage} />
+            <Route path="/supportedSites" component={SupportedSitesPage} />
+            <Route path="/unsupportedSites" component={UnsupportedSitesPage} />
+            <Route path="*">
+              <Navigate href="/adapters" />
+            </Route>
+          </Routes>
+          <div class="flex self-center rounded-lg pb-2 text-xs text-gray-200">
+            <div>
+              <Hyperlink text="GitHub" link="https://github.com/keifufu/WebNowPlaying" /> |{" "}
+              <Hyperlink text="Documentation" link="https://wnp.keifufu.dev" /> | v{getExtensionVersion()}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
-  const [buffer, setBuffer] = createSignal<string[]>([]);
-
-  onMount(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const konamiCode = [
-        "ArrowUp",
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "ArrowLeft",
-        "ArrowRight",
-        "KeyB",
-        "KeyA",
-        "Enter",
-      ];
-      const nextBuffer = [...buffer(), e.code];
-      if (konamiCode.toString() === nextBuffer.toString()) {
-        if (theme() === "konami") {
-          setTheme(localStorage.getItem("pre-konami-theme") as "dark" | "light");
-        } else {
-          localStorage.setItem("pre-konami-theme", theme());
-          setTheme("konami");
-        }
-        setBuffer([]);
-      } else {
-        if (e.code === "Enter") return setBuffer([]);
-        setBuffer(nextBuffer);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  });
-
-  const toggleTheme = () => {
-    if (theme() === "konami") return;
-    theme() === "dark" ? setTheme("light") : setTheme("dark");
-  };
+const Header: Component = () => {
+  const { addCustomAdapter } = useSettings();
+  const location = useLocation();
 
   return (
-    <div
-      class={clsx(
-        "flex h-screen select-none flex-col",
-        [theme() === "dark" && "bg-[#2b2a33] text-white"],
-        [theme() === "light" && "bg-slate-100 text-gray-800"],
-        [theme() === "konami" && "bg-gradient-to-tl from-[#0CB6C4] to-[#1D358F] text-white"],
-        [lmao() && "lmao"]
-      )}
-    >
-      <div class={`mx-2 mt-2 flex h-min shrink-0 justify-between rounded-md border border-solid ${borderColorClass()} px-4 pt-1 pb-2`}>
-        <RouterLink text="Adapters" link="/adapters" />
-        <RouterLink text="Supported Sites" link="/supportedSites" />
-        <RouterLink text="Unsupported Sites" link="/unsupportedSites" />
-        <RouterLink text="Report Issues" link="/reportIssues" />
-      </div>
-      <div class={`m-2 flex h-full grow overflow-hidden rounded-md border border-solid ${borderColorClass()} p-2`}>
-        <Routes>
-          <Route path="/adapters" component={AdaptersPage} />
-          <Route path="/supportedSites" component={SupportedSitesPage} />
-          <Route path="/unsupportedSites" component={UnsupportedSitesPage} />
-          <Route path="/reportIssues" component={ReportIssuesPage} />
-          <Route path="*">
-            <Navigate href="/adapters" />
-          </Route>
-        </Routes>
-      </div>
-      <div class={`mx-2 mb-2 flex h-min shrink-0 rounded-md border border-solid ${borderColorClass()} px-3 py-1 text-sm`}>
-        <div>
-          Made by <Hyperlink text="keifufu" link="https://github.com/keifufu" />, <Hyperlink text="tjhrulz" link="https://github.com/tjhrulz" />
+    <div class="flex w-full justify-between bg-indigo-950/30 p-2">
+      <Show when={location.pathname === "/adapters"}>
+        <div class="flex cursor-pointer items-center hover:opacity-60" onClick={addCustomAdapter}>
+          <FaSolidCirclePlus size={20} />
+          <p class="pl-1.5">Add custom adapter</p>
         </div>
-        <a class="ml-20 cursor-pointer" onClick={toggleTheme}>
-          Toggle theme
-        </a>
-        <div class="ml-auto">
-          <Hyperlink text="GitHub" link="https://github.com/keifufu/WebNowPlaying-Redux" /> | v{getExtensionVersion()}
+        <div class="flex cursor-pointer items-center hover:opacity-60" onClick={showSettingsMenu}>
+          <p class="pr-1.5">Settings</p>
+          <IoSettingsSharp size={20} />
         </div>
-      </div>
-      <SiteSettings />
-      <SanitizationSettings />
+      </Show>
+      <Show when={location.pathname !== "/adapters"}>
+        <A href="/adapters" class="flex cursor-pointer items-center hover:opacity-60">
+          <FaSolidCircleArrowLeft size={20} />
+          <p class="pl-1.5">Go back</p>
+        </A>
+      </Show>
     </div>
   );
 };

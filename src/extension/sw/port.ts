@@ -1,182 +1,217 @@
-import {
-  Adapter,
-  BuiltInAdapters,
-  CustomAdapter,
-  DEFAULT_UPDATE_FREQUENCY,
-  Settings,
-  SocketInfo,
-  defaultSocketInfoState,
-} from "../../utils/settings";
-import { MediaInfo, StateMode, defaultMediaInfo } from "../types";
+import { Adapter, BuiltInAdapters, CustomAdapter, Settings, SocketInfo, defaultSocketInfoState } from "../../utils/settings";
+import { EventResult, Player, StateMode, defaultPlayer } from "../types";
 import { readSettings } from "./shared";
-import { WNPReduxWebSocket } from "./socket";
-
-type PortMessage = {
-  event: "mediaInfo";
-  mediaInfo: Partial<MediaInfo>;
-};
+import { MessageType, WNPSocket } from "./socket";
 
 const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
-const mediaInfoDictionary = new Map<string, MediaInfo>();
+const playerDictionary = new Map<string, Player>();
 const ports = new Map<string, chrome.runtime.Port>();
-const sockets = new Map<number, WNPReduxWebSocket>();
-let mediaInfoId: string | null = null;
+const sockets = new Map<number, WNPSocket>();
+let activePlayerId: string | null = null;
 
-const updateAll = () => {
-  for (const socket of sockets.values()) {
-    const mediaInfo = mediaInfoDictionary.get(mediaInfoId || "") || defaultMediaInfo;
-    socket.sendUpdate(mediaInfo);
+export function sendEventResult(eventSocketPort: number, eventId: string, eventStatus: EventResult) {
+  const socket = sockets.get(eventSocketPort);
+  if (socket) {
+    switch (socket.communicationRevision) {
+      case "legacy":
+      case "1":
+      case "2":
+        break;
+      case "3":
+        socket.send(`${MessageType.EVENT_RESULT} ${eventId} ${eventStatus}`);
+        break;
+    }
   }
-};
+}
 
-const executeEvent = (communicationRevision: string, mediaEventData: string) => {
-  if (!mediaInfoId) return;
-  ports.get(mediaInfoId)?.postMessage({
-    event: "executeMediaEvent",
-    communicationRevision,
-    mediaEventData,
-  });
-  ports.get(mediaInfoId)?.postMessage({ event: "getMediaInfo" });
-  updateAll();
-};
+function sendUpdateToAll(oldPlayer: Player | null, partialPlayer: Partial<Player>) {
+  for (const socket of sockets.values()) {
+    socket.sendUpdate(playerDictionary.get(activePlayerId ?? "") ?? defaultPlayer, playerDictionary, oldPlayer, partialPlayer);
+  }
 
-const updateMediaInfo = () => {
-  const sortedDictionary = new Map([...mediaInfoDictionary].sort((a, b) => b[1].timestamp - a[1].timestamp));
-  let suitableMatch = false;
+  for (const port of infoPorts.values()) {
+    port.postMessage({ player: playerDictionary.get(activePlayerId ?? "") ?? defaultPlayer });
+  }
+}
 
-  for (const [key, value] of sortedDictionary) {
-    if (value.state === StateMode.PLAYING && value.volume > 0) {
-      mediaInfoId = key;
-      suitableMatch = true;
+function executeEvent(eventSocketPort: number, communicationRevision: string, eventData: string) {
+  switch (communicationRevision) {
+    case "legacy":
+    case "1":
+    case "2": {
+      const port = ports.get(activePlayerId ?? "");
+      if (!port) return;
+      port.postMessage({
+        event: "executeEvent",
+        communicationRevision,
+        eventData,
+      });
+      port.postMessage({ event: "getPlayer" });
+      break;
+    }
+    case "3": {
+      const [id, eventId, ...data] = eventData.split(" ");
+      const port = ports.get(id);
+      if (!port) {
+        return sendEventResult(eventSocketPort, eventId, EventResult.FAILED);
+      }
+      port.postMessage({
+        event: "executeEvent",
+        communicationRevision,
+        eventId,
+        eventData: data.join(" "),
+        eventSocketPort,
+      });
+      port.postMessage({ event: "getPlayer" });
       break;
     }
   }
-
-  if (!suitableMatch) {
-    const fallback = sortedDictionary.size > 0 ? sortedDictionary.entries().next().value : null;
-    if (fallback) mediaInfoId = fallback[0];
-    else mediaInfoId = null;
-  }
-  updateAll();
-};
-
-interface Port extends chrome.runtime.Port {
-  _timer: any;
 }
 
-chrome.runtime.onConnect.addListener((_port) => {
-  const port = _port as Port;
+function recalculateActivePlayer() {
+  let _activePlayerId = null;
+  let maxActiveAt = 0;
+  let foundActive = false;
+
+  for (const [id, player] of playerDictionary) {
+    if (player.state === StateMode.PLAYING && player.volume > 0 && player.activeAt > maxActiveAt) {
+      _activePlayerId = id;
+      maxActiveAt = player.activeAt;
+      foundActive = true;
+    } else if (player.activeAt > maxActiveAt && !foundActive) {
+      _activePlayerId = id;
+      maxActiveAt = player.activeAt;
+    }
+  }
+
+  activePlayerId = _activePlayerId;
+}
+
+const infoPorts = new Map<number, chrome.runtime.Port>();
+let infoPortsId = 0;
+
+export function onPortConnect(port: chrome.runtime.Port) {
+  if (port.name === "info") {
+    const id = infoPortsId++;
+    infoPorts.set(id, port);
+    port.onDisconnect.addListener(() => {
+      infoPorts.delete(id);
+    });
+    port.onMessage.addListener((msg) => {
+      executeEvent(0, "3", `${activePlayerId} 0 ${msg}`);
+    });
+    return;
+  }
+
   clearTimeout(disconnectTimeouts.get(port.name));
   disconnectTimeouts.delete(port.name);
   ports.set(port.name, port);
-  port.onMessage.addListener((message) => onMessage(message, port));
-  port.onDisconnect.addListener(() => {
-    // This only gets fired if the other side disconnects, not if we disconnect from here.
-    deleteTimer(port);
+
+  // Forces the port to reconnect, this is so it won't become idle.
+  const timer = setTimeout(() => {
     ports.delete(port.name);
-    // It should reconnect immediately, 500ms is more than enough.
+    port.disconnect();
+  }, 250e3); // 4.17 minutes
+
+  port.onMessage.addListener(onPortMessage);
+  port.onDisconnect.addListener(() => {
+    // This only gets fired if the other side disconnects,
+    // not if we call .disconnect().
+    clearTimeout(timer);
+    ports.delete(port.name);
+
+    // If the port does not reconnect within 500ms, remove it from playerDictionary.
     disconnectTimeouts.set(
       port.name,
       setTimeout(() => {
-        mediaInfoDictionary.delete(port.name);
-        updateMediaInfo();
-      }, 500)
+        playerDictionary.delete(port.name);
+        recalculateActivePlayer();
+        sendUpdateToAll(null, {});
+      }, 500),
     );
   });
-  port._timer = setTimeout(
-    () => {
-      deleteTimer(port);
-      ports.delete(port.name);
-      port.disconnect();
-    },
-    250e3,
-    port
-  );
-});
+}
 
-function onMessage(message: PortMessage, port: Port) {
+type PortMessage = {
+  event: "player";
+  player: Partial<Player>;
+};
+
+function onPortMessage(message: PortMessage, port: chrome.runtime.Port) {
   switch (message.event) {
-    case "mediaInfo": {
-      const currentMediaInfo = {
-        ...(mediaInfoDictionary.get(port.name) ?? defaultMediaInfo),
-        ...message.mediaInfo,
-      };
-      mediaInfoDictionary.set(port.name, currentMediaInfo);
+    case "player": {
+      const currentPlayer = playerDictionary.get(port.name);
 
-      let shouldUpdate = false;
-      for (const key in message.mediaInfo) if (key !== "position") shouldUpdate = true;
+      if (!currentPlayer) {
+        message.player.id = parseInt(port.name);
+      }
 
-      if (shouldUpdate && currentMediaInfo.title.length > 0) updateMediaInfo();
+      playerDictionary.set(port.name, {
+        ...(currentPlayer || defaultPlayer),
+        ...message.player,
+      });
 
-      updateAll();
+      if ((message.player.title?.length ?? 0) > 0) {
+        recalculateActivePlayer();
+      }
+
+      sendUpdateToAll(currentPlayer ?? null, message.player);
       break;
     }
-    default:
-      break;
   }
 }
 
-function deleteTimer(port: Port) {
-  if (port._timer) {
-    clearTimeout(port._timer);
-    delete port._timer;
-  }
-}
-
-export const initPort = async () => {
-  await reloadSockets();
-};
-
-let _settings: Settings;
 // We want to update settings after they change, we don't want to read them every time (in getSocketInfo particularly)
-export const updateSettings = async () => {
-  _settings = await readSettings();
-  sockets.forEach((socket) => socket.sendSettings(_settings));
-};
-let _interval: NodeJS.Timeout | null = null;
-export const reloadSockets = async () => {
-  _settings = await readSettings();
-  if (_interval) clearInterval(_interval);
+// this is called from messaging.ts after any settings were changed.
+let settings: Settings;
+export async function updateSettings() {
+  settings = await readSettings();
+  sockets.forEach((socket) => socket.sendSettings(settings));
+}
+
+let updateInterval: NodeJS.Timeout | null = null;
+export async function reloadSockets() {
+  settings = await readSettings();
+  if (updateInterval) clearInterval(updateInterval);
+
   // Close all sockets
   for (const [key, socket] of sockets.entries()) {
     socket.close();
     sockets.delete(key);
   }
+
   // Open all sockets
   for (const adapter of BuiltInAdapters) {
-    if (_settings.enabledBuiltInAdapters.includes(adapter.name)) sockets.set(adapter.port, new WNPReduxWebSocket(adapter, executeEvent));
+    if (settings.enabledBuiltInAdapters.includes(adapter.name)) sockets.set(adapter.port, new WNPSocket(adapter, executeEvent));
   }
-  for (const adapter of _settings.customAdapters) {
-    if (adapter.enabled && adapter.port !== 0) sockets.set(adapter.port, new WNPReduxWebSocket(adapter, executeEvent));
+  for (const adapter of settings.customAdapters) {
+    if (adapter.enabled && adapter.port !== 0) sockets.set(adapter.port, new WNPSocket(adapter, executeEvent));
   }
 
-  _interval = setInterval(() => {
-    for (const port of ports.values()) port.postMessage({ event: "getMediaInfo" });
+  // Create a new update interval
+  updateInterval = setInterval(() => {
+    for (const port of ports.values()) {
+      port.postMessage({ event: "getPlayerOptimized" });
+    }
+  }, 250);
+}
 
-    // Running updateAll in an interval shouldn't hurt, as it will only send an update if the mediaInfo has changed.
-    // We do this because otherwise newly connected sockets don't send any info until something changed.
-    updateAll();
-  }, DEFAULT_UPDATE_FREQUENCY);
-};
-
-export const connectSocket = async (port: number) => {
-  _settings = await readSettings();
+export async function connectSocket(port: number) {
+  settings = await readSettings();
   let adapter: Adapter | CustomAdapter | undefined = BuiltInAdapters.find((a) => a.port === port);
-  if (!adapter) adapter = _settings.customAdapters.find((a) => a.port === port);
-  if (!adapter) return;
+  if (!adapter) adapter = settings.customAdapters.find((a) => a.port === port);
+  if (!adapter || sockets.has(port)) return;
+  sockets.set(adapter.port, new WNPSocket(adapter, executeEvent));
+}
 
-  if (sockets.has(port)) return;
-  sockets.set(adapter.port, new WNPReduxWebSocket(adapter, executeEvent));
-};
-
-export const disconnectSocket = (port: number) => {
+export function disconnectSocket(port: number) {
   const socket = sockets.get(port);
   if (!socket) return;
   socket.close();
   sockets.delete(port);
-};
+}
 
-export const getSocketInfo = () => {
+export function getSocketInfo() {
   const info: SocketInfo = {
     states: new Map(),
   };
@@ -199,7 +234,7 @@ export const getSocketInfo = () => {
     });
   }
 
-  for (const adapter of _settings.customAdapters) {
+  for (const adapter of settings.customAdapters) {
     if (info.states.has(adapter.port)) continue;
     info.states.set(adapter.port, {
       ...defaultSocketInfoState,
@@ -208,4 +243,4 @@ export const getSocketInfo = () => {
   }
 
   return info;
-};
+}

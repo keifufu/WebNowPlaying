@@ -1,27 +1,27 @@
-const path = require('path')
+const path = require("path");
 
 module.exports = {
   entry: {
-    injected: path.resolve(__dirname, 'src/extension/content/injected.ts'),
-    content: path.resolve(__dirname, 'src/extension/content/content.ts'),
-    sw: path.resolve(__dirname, 'src/extension/sw/sw.ts')
+    injected: path.resolve(__dirname, "src/extension/content/injected/injected.ts"),
+    content: path.resolve(__dirname, "src/extension/content/content.ts"),
+    sw: path.resolve(__dirname, "src/extension/sw/sw.ts"),
   },
-  mode: 'production',
+  mode: "production",
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
-      }
-    ]
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+    ],
   },
   resolve: {
-    extensions: ['.ts']
+    extensions: [".ts"],
   },
   output: {
-    path: path.resolve(__dirname, 'dist/all'),
-    filename: '[name].js',
-    clean: false
-  }
-}
+    path: path.resolve(__dirname, "dist/all"),
+    filename: "[name].js",
+    clean: false,
+  },
+};

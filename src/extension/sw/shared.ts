@@ -30,8 +30,8 @@ const undoReplaceKeys = (_settings: Settings) => {
   return settings;
 };
 
-export const readSettings = (): Promise<Settings> =>
-  new Promise((resolve) => {
+export const readSettings = (): Promise<Settings> => {
+  return new Promise((resolve) => {
     if (typeof browser === "undefined") {
       chrome.storage.local.get(
         {
@@ -39,7 +39,7 @@ export const readSettings = (): Promise<Settings> =>
         },
         (items) => {
           resolve(undoReplaceKeys(items as Settings));
-        }
+        },
       );
     } else {
       browser.storage.local
@@ -54,6 +54,7 @@ export const readSettings = (): Promise<Settings> =>
         });
     }
   });
+};
 
 export const saveSettings = (settings: Settings) => {
   chrome.storage.local.set({ ...replaceKeys(settings) });
@@ -71,10 +72,14 @@ export const getGithubVersion = async (gh: string): Promise<string> => {
   }
 };
 
-export const setOutdated = () => {
-  chrome.action.setBadgeText({ text: "!" });
+export const setBadge = (badgeText: string, title: string) => {
+  chrome.action.setBadgeText({ text: badgeText });
   chrome.action.setBadgeBackgroundColor({ color: [255, 0, 0, 255] });
   chrome.action.setTitle({
-    title: "One of your adapters is outdated. Click to check.",
+    title,
   });
+};
+
+export const setOutdated = () => {
+  setBadge("!", "One of your adapters is oudated. Click to check.");
 };

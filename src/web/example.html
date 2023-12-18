@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Example</title>
+    <script src="./wnp.js"></script>
+    <script>
+      wnpOnUpdate((player) => {
+        document.getElementById("title").textContent = player.title;
+        document.getElementById("state").textContent = player.state;
+      });
+    </script>
+  </head>
+  <body>
+    <button onclick="wnpStart()">start</button>
+    <button onclick="wnpStop()">stop</button>
+    <button onclick="wnpTryTogglePlayPause()">toggle play pause</button>
+    <div id="title"></div>
+    <div id="state"></div>
+  </body>
+</html>

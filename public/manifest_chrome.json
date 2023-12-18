@@ -1,20 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "WebNowPlaying Redux",
-  "short_name": "WebNowPlaying Redux",
+  "name": "WebNowPlaying",
+  "short_name": "WebNowPlaying",
   "description": "A browser extension that provides information and controls for media playing in the browser to external adapters.",
-  "version": "2.0.10",
+  "version": "3.0.0",
   "icons": {
     "128": "icons/icon-darkmode-128.png",
     "256": "icons/icon-darkmode-256.png"
   },
   "action": {
     "default_popup": "index.html",
-    "default_title": "WebNowPlaying Redux"
+    "default_title": "WebNowPlaying"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["*://*/*"],
       "js": ["content.js"],
       "all_frames": true
     }
@@ -26,7 +26,7 @@
   "web_accessible_resources": [
     {
       "resources": ["injected.js"],
-      "matches": ["<all_urls>"]
+      "matches": ["*://*/*"]
     }
   ]
 }

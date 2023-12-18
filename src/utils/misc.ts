@@ -1,56 +1,49 @@
-export const getMediaSessionCover = () => {
-  // Find biggest album art
+export function getMediaSessionCover() {
   if (!navigator.mediaSession.metadata?.artwork) return "";
-  const [biggestImage] = Array.from(navigator.mediaSession.metadata.artwork).sort((a, b) => {
+  const biggestImage = navigator.mediaSession.metadata.artwork.reduce((a, b) => {
     const aSize = parseInt(a.sizes?.split("x")[1] || "0");
     const bSize = parseInt(b.sizes?.split("x")[1] || "0");
 
-    return bSize - aSize;
-  });
+    return bSize - aSize > 0 ? b : a;
+  }, navigator.mediaSession.metadata.artwork[0]);
 
-  // Never remove the search from the url again
   return biggestImage.src;
-};
-
-export const findBiggestImage = (images: { url: string; width: number; height: number }[]) => {
-  const [biggestImage] = images.sort((a, b) => {
-    const aSize = a.width * a.height;
-    const bSize = b.width * b.height;
-
-    return bSize - aSize;
-  });
-
-  if (!biggestImage) return null;
-  return biggestImage.url;
-};
+}
 
 // Converts every word in a string to start with a capital letter
-export const capitalize = (str: string) => str.toLowerCase().replace(/(?:^|\s)\S/g, (a) => a.toUpperCase());
+export function capitalize(str: string) {
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
-// Convert seconds to a time string acceptable to Rainmeter
-const pad = (num: number, size: number) => num.toString().padStart(size, "0");
-export const timeInSecondsToString = (timeInSeconds: number) => {
-  try {
-    if (isNaN(timeInSeconds)) return "0:00";
-    const timeInMinutes = Math.floor(timeInSeconds / 60);
-    if (timeInMinutes < 60) return timeInMinutes + ":" + pad(Math.floor(timeInSeconds % 60), 2);
+// Convert seconds to a time string like "1:23", "4:03:54"...
+function pad(num: number, size: number) {
+  return num.toString().padStart(size, "0");
+}
+export function timeInSecondsToString(time: number) {
+  if (isNaN(time)) return "0:00";
 
-    return Math.floor(timeInMinutes / 60) + ":" + pad(Math.floor(timeInMinutes % 60), 2) + ":" + pad(Math.floor(timeInSeconds % 60), 2);
-  } catch {
-    return "0:00";
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+
+  if (minutes < 60) {
+    return `${minutes}:${pad(seconds, 2)}`;
+  } else {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}:${pad(remainingMinutes, 2)}:${pad(seconds, 2)}`;
   }
-};
+}
 
-export const isVersionOutdated = (currentVersion: string, latestVersion: string) => {
+export function isVersionOutdated(currentVersion: string, latestVersion: string) {
   // The version is major.minor.patch, compare version against what the extension knows is the latest version
   // C# actually gives us a version with 4 numbers, but this just ignores the last one
   const [major, minor, patch] = latestVersion.split(".").map((v) => parseInt(v));
   const [major2, minor2, patch2] = currentVersion.split(".").map((v) => parseInt(v));
   if (major2 < major || (major2 === major && minor2 < minor) || (major2 === major && minor2 === minor && patch2 < patch)) return true;
   else return false;
-};
+}
 
-export const getVersionFromGithub = async (gh: string) => {
+export async function getVersionFromGithub(gh: string) {
   try {
     const releaseApiLink = `https://api.github.com/repos/${gh}/releases?per_page=1`;
     const response = await fetch(releaseApiLink);
@@ -65,41 +58,31 @@ export const getVersionFromGithub = async (gh: string) => {
   } catch {
     return "Error";
   }
-};
+}
 
 export const convertTimeToSeconds = (time: string) => {
-  const durArr = time.split(":");
+  const arr = time.split(":");
 
-  // Duration will always have seconds and minutes, but hours are optional
-  try {
-    const durSec = parseInt(durArr[durArr.length - 1]);
-    const durMin = parseInt(durArr[durArr.length - 2]) * 60;
-    const durHour = durArr.length > 2 ? parseInt(durArr[0]) * 60 * 60 : 0;
-    return durHour + durMin + durSec;
-  } catch {
-    return 0;
+  if (arr.length >= 2) {
+    const seconds = parseInt(arr[arr.length - 1]) ?? 0;
+    const minutes = (parseInt(arr[arr.length - 2]) ?? 0) * 60;
+    const hours = (arr.length > 2 ? parseInt(arr[0]) ?? 0 : 0) * 3600;
+    return hours + minutes + seconds;
   }
+
+  return 0;
 };
 
-export const getExtensionVersion = () => {
-  if (typeof chrome !== "undefined" && typeof chrome.runtime?.getManifest === "function") return chrome.runtime.getManifest().version;
-  else return "0.0.0";
-};
+export function getExtensionVersion() {
+  if (typeof chrome !== "undefined" && typeof chrome.runtime?.getManifest === "function") {
+    return chrome.runtime.getManifest().version;
+  }
 
-export const randomToken = (length = 24) => {
+  return "0.0.0";
+}
+
+export function randomToken(length = 24) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) result += characters.charAt(Math.floor(Math.random() * characters.length));
-  return result;
-};
-
-let _isDeveloperMode: boolean | null = null;
-export const isDeveloperMode = (): Promise<boolean> =>
-  new Promise((resolve) => {
-    if (_isDeveloperMode !== null) return resolve(_isDeveloperMode);
-    if (typeof chrome === "undefined") return resolve(true);
-    chrome.management.getSelf().then((e) => {
-      _isDeveloperMode = e.installType === "development";
-      resolve(_isDeveloperMode);
-    });
-  });
+  const randomChars = Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length)));
+  return randomChars.join("");
+}

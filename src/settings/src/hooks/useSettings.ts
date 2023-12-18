@@ -1,10 +1,14 @@
 import { createSignal } from "solid-js";
 import { randomToken } from "../../../utils/misc";
-import { BuiltInAdapters, defaultSettings, Settings, TSupportedSites } from "../../../utils/settings";
+import { BuiltInAdapters, defaultSettings, SanitizationSettingsId, Settings, TSupportedSites } from "../../../utils/settings";
 import { ServiceWorkerUtils } from "../../../utils/sw";
 
 const [settings, setSettings] = createSignal<Settings>(defaultSettings);
-(async () => setSettings(await ServiceWorkerUtils.getSettings()))();
+const [hasLoaded, setHasLoaded] = createSignal(false);
+(async () => {
+  setSettings(await ServiceWorkerUtils.getSettings());
+  setHasLoaded(true);
+})();
 const saveSettings = (settings: Settings) => {
   setSettings(settings);
   ServiceWorkerUtils.saveSettings(settings);
@@ -12,17 +16,12 @@ const saveSettings = (settings: Settings) => {
 
 export const useSettings = () => ({
   settings,
+  hasLoaded,
   _saveSettingsInternal: saveSettings,
-  /* setUpdateFrequencyMs: (updateFrequencyMs: number) => {
+  setUseDesktopPlayers: (useDesktopPlayers: boolean) => {
     saveSettings({
       ...settings(),
-      updateFrequencyMs: updateFrequencyMs
-    })
-  }, */
-  setUseNativeAPIs: (useNativeAPIs: boolean) => {
-    saveSettings({
-      ...settings(),
-      useNativeAPIs,
+      useDesktopPlayers: useDesktopPlayers,
     });
   },
   toggleAdapter: (port: number) => {
@@ -74,5 +73,12 @@ export const useSettings = () => ({
       disabledSites: settings().disabledSites.includes(site)
         ? settings().disabledSites.filter((a) => a !== site)
         : [...settings().disabledSites, site],
+    }),
+  toggleSanitizationId: (id: SanitizationSettingsId) =>
+    saveSettings({
+      ...settings(),
+      enabledSanitizationId: settings().enabledSanitizationId.includes(id)
+        ? settings().enabledSanitizationId.filter((e) => e !== id)
+        : [...settings().enabledSanitizationId, id],
     }),
 });

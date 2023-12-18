@@ -1,9 +1,9 @@
-import { ContentUtils } from "../extension/content/utils";
 import { ServiceWorkerMessage } from "../extension/sw/messaging";
+import { EventResult } from "../extension/types";
 import { defaultSettings, Settings } from "./settings";
 
-const _sendSwMessage = <T>(message: ServiceWorkerMessage, defaultValue?: T): Promise<T> =>
-  new Promise((resolve) => {
+function _sendSwMessage<T>(message: ServiceWorkerMessage, defaultValue?: T): Promise<T> {
+  return new Promise((resolve) => {
     if (typeof chrome === "undefined" || !chrome.runtime?.id) {
       resolve(defaultValue as T);
       return;
@@ -13,15 +13,9 @@ const _sendSwMessage = <T>(message: ServiceWorkerMessage, defaultValue?: T): Pro
       resolve(response);
     });
   });
+}
 
-// This is the cache for content.ts, so we don't have to send a message to the service worker every time
-const reportCache = new Map<string, boolean>();
 export const ServiceWorkerUtils = {
-  sendAutomaticReport: (report: { message: string }) => {
-    if (!ContentUtils.getSettings().useTelemetry || reportCache.get(report.message)) return;
-    reportCache.set(report.message, true);
-    _sendSwMessage({ event: "sendAutomaticReport", report });
-  },
   resetOutdated: () => _sendSwMessage({ event: "resetOutdated" }),
   getSettings: () => _sendSwMessage<Settings>({ event: "getSettings" }, defaultSettings),
   saveSettings: (settings: Settings) => _sendSwMessage({ event: "saveSettings", settings }),
@@ -31,4 +25,7 @@ export const ServiceWorkerUtils = {
   connectSocket: (port: number) => _sendSwMessage({ event: "connectSocket", port }),
   disconnectSocket: (port: number) => _sendSwMessage({ event: "disconnectSocket", port }),
   getGithubVersion: (gh: string) => _sendSwMessage<string>({ event: "getGithubVersion", gh }, "Error"),
+  sendEventResult: (eventSocketPort: number, eventId: string, eventResult: EventResult) =>
+    _sendSwMessage({ event: "sendEventResult", eventSocketPort, eventId, eventResult: eventResult }),
+  getPortId: () => _sendSwMessage<number>({ event: "getPortId" }),
 };

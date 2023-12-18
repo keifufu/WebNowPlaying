@@ -1,14 +1,10 @@
 import clsx from "clsx";
-import { Component, createEffect, createSignal } from "solid-js";
+import { Component, For, Show, createEffect, createSignal } from "solid-js";
 import Checkbox from "../components/Checkbox";
-import RadioGroup from "../components/RadioGroup";
 import { useSettings } from "../hooks/useSettings";
-import { useBorderColorClass, useTheme } from "../hooks/useTheme";
 
 const GenericSettingsPage: Component = () => {
   const { settings, toggleUseGeneric, setUseGenericList, setIsListBlocked, setGenericList } = useSettings();
-  const { theme } = useTheme();
-  const borderColorClass = useBorderColorClass();
   const [input, setInput] = createSignal(settings().genericList.join("\n"));
 
   let _timeout: NodeJS.Timeout;
@@ -20,15 +16,15 @@ const GenericSettingsPage: Component = () => {
         input()
           .split("\n")
           .filter((s) => s !== "")
-          .map((s) => s.trim())
+          .map((s) => s.trim()),
       );
     }, 250);
   });
 
   return (
-    <div class="mx-1 flex h-full w-full flex-col">
-      <Checkbox text="Try to parse media from unsupported websites" checked={settings().useGeneric} onChange={toggleUseGeneric} />
-      <div class={`-mx-3 my-2 w-[111%] border-t border-solid ${borderColorClass()}`} />
+    <div class="flex h-full w-full flex-col gap-2 p-2">
+      <Checkbox text="Try to parse media on unsupported websites" checked={settings().useGeneric} onChange={toggleUseGeneric} />
+      <div class="-mx-3 w-[111%] border-t border-solid border-indigo-400" />
       <RadioGroup
         disabled={!settings().useGeneric}
         value={settings().useGenericList ? "list" : "all"}
@@ -42,38 +38,22 @@ const GenericSettingsPage: Component = () => {
             label: "www",
             children: (
               <label for="www" class={clsx("flex items-center", [settings().useGeneric && "cursor-pointer"])}>
-                <span class="text-[0.9rem]">Only </span>
+                <span class="pr-1 text-[0.9rem]">Only </span>
                 <select
                   disabled={!settings().useGeneric || !settings().useGenericList}
                   value={settings().isListBlocked ? "block" : "allow"}
                   onChange={(e) => setIsListBlocked(e.currentTarget.value === "block")}
+                  // eslint-disable-next-line tailwindcss/no-custom-classname
                   class={clsx(
-                    `form-select mx-1 h-6 w-20 rounded-md border border-solid ${borderColorClass()} without-ring py-0 px-2 text-sm`,
+                    `without-ring form-select h-6 w-20 rounded-md border border-solid border-indigo-400 bg-[#2b2a33] px-2 py-0 text-sm text-white focus:ring-indigo-600`,
                     [(!settings().useGeneric || !settings().useGenericList) && "opacity-50"],
                     [settings().useGeneric && settings().useGenericList && "cursor-pointer"],
-                    [theme() === "dark" && "bg-[#2b2a33] text-white"],
-                    [theme() === "light" && "bg-slate-100 text-gray-800"],
-                    [theme() === "konami" && "bg-transparent text-white"]
                   )}
                 >
-                  <option
-                    value="allow"
-                    class={clsx(
-                      [theme() === "dark" && "bg-[#2b2a33] text-white"],
-                      [theme() === "light" && "bg-slate-100 text-gray-800"],
-                      [theme() === "konami" && "bg-slate-100 text-gray-800"]
-                    )}
-                  >
+                  <option value="allow" class={clsx("bg-[#2b2a33] text-white")}>
                     allow
                   </option>
-                  <option
-                    value="block"
-                    class={clsx(
-                      [theme() === "dark" && "bg-[#2b2a33] text-white"],
-                      [theme() === "light" && "bg-slate-100 text-gray-800"],
-                      [theme() === "konami" && "bg-slate-100 text-gray-800"]
-                    )}
-                  >
+                  <option value="block" class={clsx("bg-[#2b2a33] text-white")}>
                     block
                   </option>
                 </select>
@@ -88,10 +68,55 @@ const GenericSettingsPage: Component = () => {
         value={input()}
         onInput={(e) => setInput(e.currentTarget.value)}
         disabled={!settings().useGenericList || !settings().useGeneric}
-        class={clsx(`mt-2 mb-1 h-full w-full resize-none rounded-md border border-solid ${borderColorClass()} bg-transparent p-2`, [
+        class={clsx(`h-full w-full resize-none rounded-md border border-solid border-indigo-400 bg-transparent p-2`, [
           (!settings().useGenericList || !settings().useGeneric) && "opacity-50",
         ])}
       />
+    </div>
+  );
+};
+
+const RadioGroup: Component<{
+  options: { text?: string; value: string; children?: any; label?: any }[];
+  bigText?: boolean;
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}> = (props) => {
+  return (
+    <div class="flex flex-col">
+      <For each={props.options}>
+        {({ text, value, children, label }) => (
+          <div class="flex items-center">
+            <div class="flex items-center pr-2">
+              <input
+                id={text || label}
+                type="radio"
+                checked={props.value === value}
+                onChange={() => props.onChange(value)}
+                disabled={props.disabled}
+                // eslint-disable-next-line tailwindcss/no-custom-classname
+                class={clsx(
+                  `without-ring form-radio h-4 w-4 rounded-full border-indigo-400 bg-transparent text-indigo-400 transition-all duration-100 ease-in-out`,
+                  [props.disabled && "opacity-50"],
+                  [!props.disabled && "cursor-pointer"],
+                )}
+              />
+            </div>
+            <Show when={text}>
+              <label
+                for={text}
+                class={clsx([!props.bigText && "text-[0.9rem]"], [props.disabled && "opacity-50"], [!props.disabled && "cursor-pointer"])}
+              >
+                {text}
+              </label>
+            </Show>
+            <Show when={children}>
+              <div class={clsx([props.disabled && "opacity-50"])}>{children}</div>
+            </Show>
+          </div>
+        )}
+      </For>
     </div>
   );
 };

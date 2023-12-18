@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { Component } from "solid-js";
-import { useTheme } from "../hooks/useTheme";
 
 const Anchor: Component<{
   text: string;
@@ -10,18 +9,13 @@ const Anchor: Component<{
   class?: string;
   disabled?: boolean;
 }> = (props) => {
-  const { theme } = useTheme();
-
   return (
     <a
       class={clsx(
-        "-mt-0.5",
         props.class,
-        [props.highlight && theme() === "dark" && "text-cyan-500"],
-        [props.highlight && theme() === "light" && "text-cyan-700"],
-        [props.highlight && theme() === "konami" && "text-cyan-300"],
-        [!props.disabled && "cursor-pointer"],
-        [props.disabled && "cursor-default opacity-50 hover:no-underline"]
+        [props.highlight && "text-indigo-400"],
+        [!props.disabled && "cursor-pointer hover:text-indigo-300 "],
+        [props.disabled && "cursor-default opacity-50"],
       )}
       href={props.link}
       onClick={(e) => {

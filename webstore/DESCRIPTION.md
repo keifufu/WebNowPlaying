@@ -7,10 +7,11 @@ https://wnp.keifufu.dev
 
 Adapters:
 
-- WebNowPlaying-Redux-Rainmeter
-- WebNowPlaying-Redux-Macro-Deck
-- WebNowPlaying-Redux-OBS
-- Read the full list on GitHub: https://github.com/keifufu/WebNowPlaying-Redux
+- Rainmeter
+- OBS
+- CLI
+- Macro Deck 2
+- Read the full list on GitHub: https://github.com/keifufu/WebNowPlaying
 
 Supports sites like: YouTube, Spotify, Soundcloud, and many others.
-Read the full list on GitHub: https://github.com/keifufu/WebNowPlaying-Redux
+Read the full list here: https://wnp.keifufu.dev/supported-sites

@@ -1,18 +1,15 @@
+@import url(https://fonts.googleapis.com/css?family=Poppins);
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: "Poppins";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 100%; /* Without this, it seems scaled fine when running pnpm start, but not in a popup once the extension is loaded */
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 .without-ring {
@@ -29,52 +26,14 @@ code {
   scrollbar-width: none;
 }
 
-/* Global anchor styles */
-a {
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-
 /* Extension popout size */
 /* html for chrome, firefox wants body */
 html,
 body {
-  min-width: 550px;
-  max-width: 550px;
-  width: 550px;
-  min-height: 478px;
-  max-height: 478px;
-  height: 478px;
-}
-
-.lmao div,
-.lmao input:not([type="checkbox"]):not([type="radio"]),
-.lmao textarea,
-.lmao button {
-  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
-  border-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red) 1;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-family: "Comic Sans MS", cursive, sans-serif;
-  animation: wiggle-zoom 1s ease-in-out infinite;
-}
-
-@keyframes wiggle-zoom {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  25% {
-    transform: rotate(0.1deg) scale(1.005);
-  }
-  50% {
-    transform: rotate(0deg) scale(1);
-  }
-  75% {
-    transform: rotate(-0.1deg) scale(1.005);
-  }
-  100% {
-    transform: rotate(0deg) scale(1);
-  }
+  min-width: 400px;
+  max-width: 400px;
+  width: 400px;
+  min-height: 550px;
+  max-height: 550px;
+  height: 550px;
 }
