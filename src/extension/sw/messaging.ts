@@ -27,9 +27,8 @@ export type ServiceWorkerMessage = {
   eventSocketPort?: number;
 };
 
-let nextPortId = 1;
 const ghCache = new Map<string, string>();
-export const onMessage = async (request: ServiceWorkerMessage, sendResponse: (response?: any) => void) => {
+export const onMessage = async (request: ServiceWorkerMessage, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
   switch (request.event) {
     case "resetOutdated":
       chrome.action.setBadgeText({ text: "" });
@@ -94,7 +93,7 @@ export const onMessage = async (request: ServiceWorkerMessage, sendResponse: (re
       sendEventResult(request.eventSocketPort as number, request.eventId as string, request.eventResult as EventResult);
       break;
     case "getPortId":
-      sendResponse(nextPortId++);
+      sendResponse(sender.tab?.id);
       break;
   }
 };

@@ -15,7 +15,7 @@ chrome.permissions.contains(
 
 chrome.runtime.onConnect.addListener(onPortConnect);
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  onMessage(message, sendResponse);
+  onMessage(message, sender, sendResponse);
   return true;
 });
 reloadSockets();
