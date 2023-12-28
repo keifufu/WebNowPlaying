@@ -151,10 +151,7 @@ function onPortMessage(message: PortMessage, port: chrome.runtime.Port) {
         ...message.player,
       });
 
-      if ((message.player.title?.length ?? 0) > 0) {
-        recalculateActivePlayer();
-      }
-
+      recalculateActivePlayer();
       sendUpdateToAll(currentPlayer ?? null, message.player);
       break;
     }
