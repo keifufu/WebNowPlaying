@@ -45,28 +45,10 @@ const YouTube: Site = {
     duration: () => getContainer()?.player?.getDuration() ?? 0,
     volume: () => (getContainer()?.player?.isMuted() ? 0 : getContainer()?.player?.getVolume() ?? 100),
     rating: () => {
-      // TODO: in shorts, this gets the first #like-button button which is of the first reel, not the current one.
-      // maybe see if the player api has something to get the rating
-
-      let likeButton: HTMLButtonElement | null = null;
-      const getLikeButton = (container: Element | null | undefined) => {
-        if (!container) return;
-        likeButton = container.querySelector("like-button-view-model button, #like-button button");
-      };
-      getLikeButton(getContainer()?.querySelector("ytd-player")?.parentElement?.parentElement);
-      if (!likeButton) getLikeButton(getContainer());
-      if (likeButton && (likeButton as HTMLButtonElement).getAttribute("aria-pressed") === "true") return 5;
-
-      let dislikeButton: HTMLButtonElement | null = null;
-      const getDislikeButton = (container: Element | null | undefined) => {
-        if (!container) return;
-        dislikeButton = container.querySelector("dislike-button-view-model button, #dislike-button button");
-      };
-      getDislikeButton(getContainer()?.querySelector("ytd-player")?.parentElement?.parentElement);
-      if (!dislikeButton) getDislikeButton(getContainer());
-      if (dislikeButton && (dislikeButton as HTMLButtonElement).getAttribute("aria-pressed") === "true") return 1;
-
-      return 0;
+      const buttons = Utils.getRatingButtons();
+      if (buttons.likeButton && buttons.likeButton.getAttribute("aria-pressed") == "true") return 5;
+      else if (buttons.dislikeButton && buttons.dislikeButton.getAttribute("aria-pressed") == "true") return 1;
+      else return 0;
     },
     repeat: () => {
       if (getContainer()?.querySelector<HTMLVideoElement>(".html5-main-video[src]")?.loop) return Repeat.ONE;
@@ -111,26 +93,18 @@ const YouTube: Site = {
     setRating: (rating) => {
       ratingUtils.likeDislike(YouTube, rating, {
         toggleLike: () => {
-          let likeButton: HTMLButtonElement | null = null;
-          const getLikeButton = (container: Element | null | undefined) => {
-            if (!container) return;
-            likeButton = container.querySelector("like-button-view-model button, #like-button button");
-          };
-          getLikeButton(getContainerThrow().querySelector("ytd-player")?.parentElement?.parentElement);
-          if (!likeButton) getLikeButton(getContainerThrow());
-          if (!likeButton) throw new EventError();
-          (likeButton as HTMLButtonElement).click();
+          const buttons = Utils.getRatingButtons();
+          if (!buttons.likeButton) {
+            throw new EventError();
+          }
+          buttons.likeButton.click();
         },
         toggleDislike: () => {
-          let dislikeButton: HTMLButtonElement | null = null;
-          const getDislikeButton = (container: Element | null | undefined) => {
-            if (!container) return;
-            dislikeButton = container.querySelector("dislike-button-view-model button, #dislike-button button");
-          };
-          getDislikeButton(getContainerThrow().querySelector("ytd-player")?.parentElement?.parentElement);
-          if (!dislikeButton) getDislikeButton(getContainerThrow());
-          if (!dislikeButton) throw new EventError();
-          (dislikeButton as HTMLButtonElement).click();
+          const buttons = Utils.getRatingButtons();
+          if (!buttons.dislikeButton) {
+            throw new EventError();
+          }
+          buttons.dislikeButton.click();
         },
       });
     },
@@ -185,6 +159,31 @@ const Utils = {
     const flexyPlayer: T = document.querySelector("ytd-watch-flexy");
     if (flexyPlayer?.active) return flexyPlayer;
     return null;
+  },
+  getRatingButtons: () => {
+    let likeButton: HTMLButtonElement | null = null;
+    let dislikeButton: HTMLButtonElement | null = null;
+    const container = getContainer();
+    if (!container) return { likeButton, dislikeButton };
+
+    /* === LIKE BUTTON === */
+    if (container.nodeName === "YTD-SHORTS") {
+      likeButton = container.querySelector("ytd-reel-video-renderer[is-active]")?.querySelector("#like-button button") ?? null;
+    } else {
+      likeButton = container.querySelector("like-button-view-model button");
+    }
+
+    /* === DISLIKE BUTTON === */
+    if (container.nodeName === "YTD-SHORTS") {
+      dislikeButton = container.querySelector("ytd-reel-video-renderer[is-active]")?.querySelector("#dislike-button button") ?? null;
+    } else {
+      dislikeButton = container.querySelector("dislike-button-view-model button");
+    }
+
+    return {
+      likeButton,
+      dislikeButton,
+    };
   },
   getVideoDetails: () => {
     let details;
