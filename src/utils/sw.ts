@@ -27,5 +27,5 @@ export const ServiceWorkerUtils = {
   getGithubVersion: (gh: string) => _sendSwMessage<string>({ event: "getGithubVersion", gh }, "Error"),
   sendEventResult: (eventSocketPort: number, eventId: string, eventResult: EventResult) =>
     _sendSwMessage({ event: "sendEventResult", eventSocketPort, eventId, eventResult: eventResult }),
-  getPortId: () => _sendSwMessage<number>({ event: "getPortId" }),
+  getPortId: () => _sendSwMessage<number | null>({ event: "getPortId" }),
 };

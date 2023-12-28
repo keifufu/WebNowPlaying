@@ -93,7 +93,7 @@ export const onMessage = async (request: ServiceWorkerMessage, sender: chrome.ru
       sendEventResult(request.eventSocketPort as number, request.eventId as string, request.eventResult as EventResult);
       break;
     case "getPortId":
-      sendResponse(sender.tab?.id);
+      sendResponse(sender.tab?.id ?? null);
       break;
   }
 };

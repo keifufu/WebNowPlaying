@@ -167,6 +167,10 @@ const ContentUtils = {
 
     if (ContentUtils.getCurrentSite() !== null) {
       const portId = await ServiceWorkerUtils.getPortId();
+      if (portId == null) {
+        console.error("[WebNowPlaying] Failed to get a port id, why?");
+        return;
+      }
       ContentUtils.connectPort(portId);
     }
 
