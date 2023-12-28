@@ -151,7 +151,11 @@ function onPortMessage(message: PortMessage, port: chrome.runtime.Port) {
         ...message.player,
       });
 
-      recalculateActivePlayer();
+      // Should only need to update active player if `activeAt` was updated
+      if (message.player.activeAt) {
+        recalculateActivePlayer();
+      }
+
       sendUpdateToAll(currentPlayer ?? null, message.player);
       break;
     }
