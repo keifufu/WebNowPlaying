@@ -3,7 +3,7 @@
   "name": "WebNowPlaying",
   "short_name": "WebNowPlaying",
   "description": "A browser extension that provides information and controls for media playing in the browser to external adapters.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "icons": {
     "128": "icons/icon-darkmode-128.png",
     "256": "icons/icon-darkmode-256.png"

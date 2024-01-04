@@ -2,6 +2,10 @@
 
 Full changelog available via [Github Commits](https://github.com/keifufu/WebNowPlaying/commits/main)
 
+## v3.0.1
+
+- No longer forces users to grant missing permissions
+
 ## v3.0.0
 
 - Improved support for all sites \*¹
