@@ -74,6 +74,11 @@ export const useSettings = () => ({
         ? settings().disabledSites.filter((a) => a !== site)
         : [...settings().disabledSites, site],
     }),
+  setRejectedPermissions: (bool: boolean) =>
+    saveSettings({
+      ...settings(),
+      rejectedPermissions: bool,
+    }),
   toggleSanitizationId: (id: SanitizationSettingsId) =>
     saveSettings({
       ...settings(),

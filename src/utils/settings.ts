@@ -82,6 +82,7 @@ export type Settings = {
   useTelemetry: boolean;
   useDesktopPlayers: boolean;
   enabledSanitizationId: SanitizationSettingsId[];
+  rejectedPermissions: boolean;
   /* Site Settings */
   YouTubeSkipChapters: boolean;
 };
@@ -133,6 +134,7 @@ export const defaultSettings: Settings = {
   useTelemetry: false,
   useDesktopPlayers: true,
   enabledSanitizationId: ["sanitizeArtist"],
+  rejectedPermissions: false,
   /* Site Settings */
   YouTubeSkipChapters: false,
 };
