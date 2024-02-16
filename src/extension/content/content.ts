@@ -88,7 +88,7 @@ const siteIndex: SiteIndex[] = [
     exec,
   },
   {
-    match: () => window.location.hostname === "vk.com",
+    match: () => window.location.hostname === "vk.com" && !window.location.pathname.startsWith("/q_frame"),
     name: "VK",
     exec,
   },

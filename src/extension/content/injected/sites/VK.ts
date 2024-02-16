@@ -1,7 +1,7 @@
 import { EventError, Repeat, Site, StateMode } from "../../../types";
 import { createDefaultControls, createSiteInfo } from "../utils";
 
-const getPlayer = () => (window as any)?.getAudioPlayer();
+const getPlayer = () => (window as any)?.getAudioPlayer?.();
 const getPlayerThrow = () => {
   const player = getPlayer();
   if (player) return player;
