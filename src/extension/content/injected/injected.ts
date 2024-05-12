@@ -3,6 +3,7 @@ import { EventError, EventResult, Player, Site, StateMode, defaultPlayer } from 
 import AppleMusic from "./sites/AppleMusic";
 import Bandcamp from "./sites/Bandcamp";
 import Deezer from "./sites/Deezer";
+import Feishin from "./sites/Feishin";
 import Generic from "./sites/Generic";
 import Invidious from "./sites/Invidious";
 import Jellyfin from "./sites/Jellyfin";
@@ -35,6 +36,7 @@ window.addEventListener("message", (msg: any) => {
     AppleMusic,
     Bandcamp,
     Deezer,
+    Feishin,
     Generic,
     Invidious,
     Jellyfin,

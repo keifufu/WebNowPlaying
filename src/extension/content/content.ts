@@ -28,6 +28,11 @@ const siteIndex: SiteIndex[] = [
     exec,
   },
   {
+	match: () => document.querySelector("title")?.innerText === "Feishin Remote",
+    name: "Feishin",
+    exec,
+  },
+  {
     match: () => !!document.querySelector('link[title="Invidious"]'),
     name: "Invidious",
     exec,

@@ -9,6 +9,7 @@ export type TSupportedSites =
   | "Apple Music"
   | "Bandcamp"
   | "Deezer"
+  | "Feishin"
   | "Invidious"
   | "Jellyfin"
   | "Kick"
@@ -31,6 +32,7 @@ export const SupportedSites: TSupportedSites[] = [
   "Apple Music",
   "Bandcamp",
   "Deezer",
+  "Feishin",
   "Invidious",
   "Jellyfin",
   "Kick",
