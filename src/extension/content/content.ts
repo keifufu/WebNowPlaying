@@ -366,7 +366,7 @@ function sanitizeTitle(title: string, sanitizedArtist: string) {
     title = title.replace(new RegExp(`${sanitizedArtist}\\s?-\\s?`, "i"), "").trim();
   }
   if (settings.enabledSanitizationId.includes("standardizeFeaturing")) {
-    const featuringPattern = /\b(feat\.?|featuring|ft\.?)/gi;
+    const featuringPattern = /\b(feat\.?|featuring|ft\.?)\b/gi;
     title = title.replace(featuringPattern, "ft.").trim();
 
     if (settings.enabledSanitizationId.includes("moveFeaturingToEnd")) {
@@ -377,7 +377,9 @@ function sanitizeTitle(title: string, sanitizedArtist: string) {
           return "";
         })
         .trim();
-      title = title.replace(featuringPattern, "").trim() + " ft. " + featuringText;
+      if (featuringText.length > 0) {
+        title = title.replace(featuringPattern, "").trim() + " ft. " + featuringText;
+      }
     } else {
       title = title.replace(/\(ft\. ([^)]+)\)/g, "ft. $1").trim();
     }
