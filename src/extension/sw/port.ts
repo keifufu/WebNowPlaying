@@ -145,13 +145,10 @@ function onPortMessage(message: PortMessage, port: chrome.runtime.Port) {
     case "player": {
       const currentPlayer = playerDictionary.get(port.name);
 
-      if (!currentPlayer) {
-        message.player.id = parseInt(port.name);
-      }
-
       playerDictionary.set(port.name, {
         ...(currentPlayer || defaultPlayer),
         ...message.player,
+        id: currentPlayer?.id ?? parseInt(port.name),
       });
 
       // Should only need to update active player if `activeAt` was updated
