@@ -143,6 +143,7 @@ type PortMessage = {
 function onPortMessage(message: PortMessage, port: chrome.runtime.Port) {
   switch (message.event) {
     case "player": {
+      if (Object.keys(message.player).length == 0) break;
       const currentPlayer = playerDictionary.get(port.name);
 
       playerDictionary.set(port.name, {

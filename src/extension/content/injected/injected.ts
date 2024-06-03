@@ -25,6 +25,7 @@ import { InjectedUtils } from "./utils";
 
 let reqCount = 0;
 let lastState = StateMode.STOPPED;
+let firstRequest = false;
 
 InjectedUtils.init();
 window.addEventListener("message", (msg: any) => {
@@ -66,11 +67,12 @@ window.addEventListener("message", (msg: any) => {
         break;
       case "getPlayerOptimized": {
         // If site isn't ready, don't bother querying.
-        if (!site.ready()) break;
+        if (!site.ready()) return sendResponse(messageId, null);
         const state = site.info.state();
-        if (state != lastState || state == StateMode.PLAYING) {
-          // If PLAYING or state changed, query all as usual
+        if (state != lastState || state == StateMode.PLAYING || firstRequest) {
+          // If PLAYING or state changed OR this is the first request, query all as usual
           lastState = state;
+          firstRequest = false;
           return sendResponse(messageId, getPlayer(site));
         } else {
           // otherwise, only query every 4th request (1s)

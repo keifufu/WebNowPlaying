@@ -307,7 +307,7 @@ async function getPlayer(optimized = false): Promise<Partial<Player>> {
   }
 
   for (const key in player) {
-    if (key === "updatedAt" || key === "createdAt" || key === "activeAt") continue;
+    if (key === "updatedAt" || key === "createdAt" || key === "activeAt" || key === "id") continue;
 
     const value = player[key as keyof typeof player];
     if (playerCache.get(key) !== value) {
