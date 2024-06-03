@@ -78,7 +78,10 @@ function recalculateActivePlayer() {
       _activePlayerId = id;
       maxActiveAt = player.activeAt;
       foundActive = true;
-    } else if (player.activeAt > maxActiveAt && !foundActive) {
+    } else if (player.state === StateMode.PLAYING && !foundActive) {
+      _activePlayerId = id;
+      maxActiveAt = player.activeAt;
+    } else if (player.state !== StateMode.PLAYING && player.activeAt > maxActiveAt && !foundActive) {
       _activePlayerId = id;
       maxActiveAt = player.activeAt;
     }
