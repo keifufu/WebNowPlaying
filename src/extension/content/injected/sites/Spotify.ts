@@ -1,141 +1,101 @@
-import { convertTimeToSeconds, getMediaSessionCover } from "../../../../utils/misc";
+import { getMediaSessionCover } from "../../../../utils/misc";
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo, positionSecondsToPercent, ratingUtils, setRepeat, setStatePlayPauseButton } from "../utils";
+import { createDefaultControls, createSiteInfo, ratingUtils } from "../utils";
+
+let _Spotify: any = null;
+function getSpotify() {
+  if (_Spotify !== null) return _Spotify;
+  const Spotify = {};
+  (window as any).registry._map.forEach((value: any, key: any) => {
+    (Spotify as any)[key.description] = value.instance;
+  });
+  _Spotify = Spotify;
+  return Spotify;
+}
+
+function getSpotifyThrow() {
+  const Spotify = getSpotify();
+  if (!Spotify || Object.keys(Spotify).length == 0) return Spotify;
+  throw new EventError();
+}
 
 const Spotify: Site = {
   init: null,
-  ready: () => !!navigator.mediaSession.metadata,
+  ready: () => !!getSpotify().PlayerAPI._state,
   info: createSiteInfo({
     name: () => "Spotify",
     title: () => navigator.mediaSession.metadata?.title ?? "",
     artist: () => navigator.mediaSession.metadata?.artist ?? "",
     album: () => navigator.mediaSession.metadata?.album ?? "",
     cover: () => getMediaSessionCover(),
-    state: () => {
-      const path = document.querySelectorAll(".player-controls__buttons button svg path")[3]?.getAttribute("d");
-      if (!path) return StateMode.STOPPED;
-      const playingPath =
-        "M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z";
-      if (path === playingPath) return StateMode.PLAYING;
-      else return StateMode.PAUSED;
+    state: () => (getSpotify().PlayerAPI._state.isPaused === false ? StateMode.PLAYING : StateMode.PAUSED), // technically never STOPPED, unless not ready()
+    position: () => {
+      const PlayerAPI = getSpotify().PlayerAPI;
+      if (PlayerAPI._state.isPaused) {
+        return Math.floor(PlayerAPI._state.positionAsOfTimestamp / 1000);
+      } else {
+        return Math.floor((Date.now() - PlayerAPI._state.timestamp + PlayerAPI._state.positionAsOfTimestamp) / 1000);
+      }
     },
-    position: () => convertTimeToSeconds(document.querySelector<HTMLElement>(".playback-bar > div")?.innerText ?? "0"),
-    duration: () => convertTimeToSeconds(document.querySelectorAll<HTMLElement>(".playback-bar > div")[2]?.innerText ?? "0"),
-    volume: () => {
-      const volumeBar = document.querySelector<HTMLElement>('div[data-testid="volume-bar"] div[data-testid="progress-bar"]');
-      if (!volumeBar) return 100;
-      return parseInt(volumeBar.style.getPropertyValue("--progress-bar-transform")?.replace("%", "") ?? "100");
-    },
-    rating: () => (document.querySelector(".control-button-heart")?.getAttribute("aria-checked") === "true" ? 5 : 0),
+    duration: () => getSpotify().PlayerAPI._state.duration ?? 0,
+    volume: () => getSpotify().PlaybackAPI._volume ?? 0,
+    rating: () => (getSpotify().PlayerAPI._state.item.metadata["collection.in_collection"] === "true" ? 5 : 0),
     repeat: () => {
-      const button = document.querySelectorAll(".player-controls__buttons button")[4];
-      const state = button?.getAttribute("aria-checked");
-      if (state === "true") return Repeat.ALL;
-      if (state === "mixed") return Repeat.ONE;
-      return Repeat.NONE;
+      switch (getSpotify().PlayerAPI._state.repeat) {
+        default:
+          return Repeat.NONE;
+        case 0:
+          return Repeat.NONE;
+        case 1:
+          return Repeat.ALL;
+        case 2:
+          return Repeat.ONE;
+      }
     },
-    shuffle: () => document.querySelector(".player-controls__buttons button")?.getAttribute("aria-checked") === "true",
+    shuffle: () => getSpotify().PlayerAPI._state.shuffle,
   }),
   events: {
     setState: (state) => {
-      const button = document.querySelectorAll<HTMLButtonElement>(".player-controls__buttons button")[2];
-      if (!button) throw new Event("Failed to find button");
-      const currentState = Spotify.info.state();
-      setStatePlayPauseButton(button, currentState, state);
+      const PlayerAPI = getSpotifyThrow().PlayerAPI;
+      switch (state) {
+        case StateMode.STOPPED:
+        case StateMode.PAUSED:
+          PlayerAPI.pause();
+          break;
+        case StateMode.PLAYING:
+          PlayerAPI.resume();
+          break;
+      }
     },
-    skipPrevious: () => {
-      const button = document.querySelectorAll<HTMLButtonElement>(".player-controls__buttons button")[1];
-      if (!button) throw new EventError();
-      button.click();
-    },
-    skipNext: () => {
-      const button = document.querySelectorAll<HTMLButtonElement>(".player-controls__buttons button")[3];
-      if (!button) throw new EventError();
-      button.click();
-    },
-    setPosition: (seconds) => {
-      const percent = positionSecondsToPercent(Spotify, seconds);
-      const el = document.querySelector(".playback-bar > div > div");
-      if (!el) throw new EventError();
-
-      const loc = el.getBoundingClientRect();
-      const position = percent * loc.width;
-
-      el.dispatchEvent(
-        new MouseEvent("mousedown", {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: loc.left + position,
-          clientY: loc.top + loc.height / 2,
-        }),
-      );
-      el.dispatchEvent(
-        new MouseEvent("mouseup", {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: loc.left + position,
-          clientY: loc.top + loc.height / 2,
-        }),
-      );
-    },
-    setVolume: (volume) => {
-      const el = document.querySelector<HTMLElement>('div[data-testid="volume-bar"] div[data-testid="progress-bar"]');
-      if (!el) throw new EventError();
-
-      const loc = el.getBoundingClientRect();
-      const vol = (volume / 100) * loc.width;
-
-      el.dispatchEvent(
-        new MouseEvent("mousedown", {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: loc.left + vol,
-          clientY: loc.top + loc.height / 2,
-        }),
-      );
-      el.dispatchEvent(
-        new MouseEvent("mouseup", {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: loc.left + vol,
-          clientY: loc.top + loc.height / 2,
-        }),
-      );
-    },
+    skipPrevious: () => getSpotifyThrow().PlayerAPI.skipToPrevious(),
+    skipNext: () => getSpotifyThrow().PlayerAPI.skipToNext(),
+    setPosition: (seconds) => getSpotifyThrow().PlayerAPI.seekTo(seconds * 1000),
+    setVolume: (volume) => getSpotifyThrow().PlaybackAPI.setVolume(volume),
     setRating: (rating) => {
       ratingUtils.like(Spotify, rating, {
         toggleLike: () => {
-          const button = document.querySelector<HTMLButtonElement>(".control-button-heart");
-          if (!button) throw new EventError();
-          button.click();
+          const S = getSpotifyThrow();
+          const uris = [S.PlayerAPI._state.item.uri];
+          if (Spotify.info.rating() === 5) S.LibraryAPI.add({ uris });
+          else S.LibraryAPI.remove({ uris });
         },
       });
     },
     setRepeat: (repeat) => {
-      const currentRepeat = Spotify.info.repeat();
-      if (currentRepeat === repeat) return;
-
-      const button = document.querySelectorAll<HTMLButtonElement>(".player-controls__buttons button")[4];
-      if (!button) throw new EventError();
-
-      const repeatMap = {
-        [Repeat.NONE]: 0,
-        [Repeat.ALL]: 1,
-        [Repeat.ONE]: 2,
-      };
-
-      setRepeat(button, repeatMap, currentRepeat, repeat);
+      const PlayerAPI = getSpotifyThrow().PlayerAPI;
+      switch (repeat) {
+        case Repeat.NONE:
+          PlayerAPI.setRepeat(0);
+          break;
+        case Repeat.ONE:
+          PlayerAPI.setRepeat(2);
+          break;
+        case Repeat.ALL:
+          PlayerAPI.setRepeat(1);
+          break;
+      }
     },
-    setShuffle: (shuffle) => {
-      if (Spotify.info.shuffle() === shuffle) return;
-      const button = document.querySelector<HTMLButtonElement>(".player-controls__buttons button");
-      if (!button) throw new EventError();
-      button.click();
-    },
+    setShuffle: (shuffle) => getSpotifyThrow().PlayerAPI.setShuffle(shuffle),
   },
   controls: () =>
     createDefaultControls(Spotify, {
