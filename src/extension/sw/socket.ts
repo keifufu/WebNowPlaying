@@ -18,9 +18,7 @@ export class WNPSocket {
   reconnectAttempts = 0;
   version = "0.0.0";
   communicationRevision: string | null = null;
-  connectionTimeout: NodeJS.Timeout | null = null;
   versionConnectionTimeout: NodeJS.Timeout | null = null;
-  reconnectTimeout: NodeJS.Timeout | null = null;
   isClosed = false;
   executeEvent: (eventSocketPort: number, communicationRevision: string, data: string) => void;
 
@@ -40,17 +38,6 @@ export class WNPSocket {
     this.ws.onclose = this.onClose.bind(this);
     this.ws.onerror = this.onError.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
-
-    // Force connection to not take longer than 5 seconds
-    if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
-    this.connectionTimeout = setTimeout(() => {
-      if (this.ws) {
-        this.ws.onclose = null;
-        this.ws.onerror = null;
-        this.ws.close();
-      }
-      this.retry();
-    }, 5000);
   }
 
   get isConnected() {
@@ -70,8 +57,6 @@ export class WNPSocket {
     this.cache = new Map<string, any>();
     this.communicationRevision = null;
     this.version = "0.0.0";
-    if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
-    if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
     if (this.versionConnectionTimeout) clearTimeout(this.versionConnectionTimeout);
     if (this.ws) {
       this.ws.onclose = null;
@@ -82,14 +67,8 @@ export class WNPSocket {
   private retry() {
     if (this.isClosed) return;
     this.cleanup();
-    // Reconnects once per 5 seconds for 30 seconds, then with a exponential backoff of (2^reconnectAttempts) up to 60 seconds
-    this.reconnectTimeout = setTimeout(
-      () => {
-        this.init();
-        this.reconnectAttempts += 1;
-      },
-      Math.min(5000 * (this.reconnectAttempts <= 30 ? 1 : 2 ** (this.reconnectAttempts - 30)), 60000),
-    );
+    // Just try to reconnect, browsers do some stupid throttling very quickly either way
+    this.init();
   }
 
   public send(data: string | ArrayBuffer) {
@@ -98,7 +77,6 @@ export class WNPSocket {
   }
 
   private onOpen() {
-    if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
     this.reconnectAttempts = 0;
     // If no communication revision is received within 1 second, assume it's WNP for Rainmeter < 0.5.0 (legacy)
     this.versionConnectionTimeout = setTimeout(() => {
