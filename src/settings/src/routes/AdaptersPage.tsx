@@ -18,9 +18,21 @@ import { useSocketInfo } from "../hooks/useSocketInfo";
 const AdaptersPage: Component = () => {
   const { settings, hasLoaded } = useSettings();
   const socketInfo = useSocketInfo();
+  const [showConnectionHelp, setShowConnectionHelp] = createSignal(false);
+
+  createEffect(() => {
+    let show = false;
+    socketInfo().states.forEach((value) => {
+      if (value.reconnectAttempts >= 1) {
+        show = true;
+      }
+    });
+    setShowConnectionHelp(show);
+  });
 
   return (
     <div class="flex h-full w-full flex-col items-center gap-2 overflow-y-scroll p-2">
+      <ConnectionHelp show={showConnectionHelp()} />
       <For each={BuiltInAdapters.filter((e) => e.official)}>
         {(adapter) => (
           <Adapter
@@ -330,6 +342,25 @@ const StrictInput: Component<Props> = (props) => {
         ref.value = props.value;
       }}
     />
+  );
+};
+
+const ConnectionHelp: Component<{ show: boolean }> = (props) => {
+  return (
+    <Show when={props.show}>
+      <div class="flex w-full flex-col rounded-md bg-indigo-950/20 p-2 text-sm">
+        <div class="font-semibold">Unable to connect?</div>
+        <div class="flex items-start justify-start">
+          <ul class="list-inside list-disc">
+            <li>Give it some time, reconnects are slow</li>
+            <li>Make sure the adapter is running</li>
+            <li>
+              See <Hyperlink highlight text="Troubleshooting" link="https://wnp.keifufu.dev/troubleshooting" />
+            </li>
+          </ul>
+        </div>
+      </div>
+    </Show>
   );
 };
 
