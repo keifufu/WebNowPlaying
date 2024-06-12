@@ -23,7 +23,7 @@ const AdaptersPage: Component = () => {
   createEffect(() => {
     let show = false;
     socketInfo().states.forEach((value) => {
-      if (value.reconnectAttempts >= 1) {
+      if (value.reconnectAttempts >= 2) {
         show = true;
       }
     });
@@ -349,10 +349,10 @@ const ConnectionHelp: Component<{ show: boolean }> = (props) => {
   return (
     <Show when={props.show}>
       <div class="flex w-full flex-col rounded-md bg-indigo-950/20 p-2 text-sm">
-        <div class="font-semibold">Unable to connect?</div>
+        <div class="font-semibold text-yellow-400">Unable to connect?</div>
         <div class="flex items-start justify-start">
           <ul class="list-inside list-disc">
-            <li>Give it some time, reconnects are slow</li>
+            <li>Multiple failed connects slow down reconnects</li>
             <li>Make sure the adapter is running</li>
             <li>
               See <Hyperlink highlight text="Troubleshooting" link="https://wnp.keifufu.dev/troubleshooting" />
