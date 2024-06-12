@@ -68,6 +68,7 @@ export class WNPSocket {
     if (this.isClosed) return;
     this.cleanup();
     // Just try to reconnect, browsers do some stupid throttling very quickly either way
+    this.reconnectAttempts++;
     this.init();
   }
 
