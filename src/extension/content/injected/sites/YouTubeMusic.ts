@@ -1,15 +1,13 @@
 import { getMediaSessionCover } from "../../../../utils/misc";
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo, ratingUtils, setRepeat } from "../utils";
+import { _throw, createDefaultControls, createSiteInfo, ratingUtils, setRepeat } from "../utils";
 
 const getPlayer = () => document.querySelector<any>("ytmusic-player-bar")?.playerApi;
-const getPlayerThrow = () => {
-  const player = getPlayer();
-  if (player) return player;
-  throw new EventError();
-};
 
 const YouTubeMusic: Site = {
+  debug: {
+    getPlayer,
+  },
   init: null,
   ready: () => !!navigator.mediaSession.metadata && !!document.querySelector("video"),
   info: createSiteInfo({
@@ -61,28 +59,20 @@ const YouTubeMusic: Site = {
     setState: (state) => {
       switch (state) {
         case StateMode.STOPPED:
-          getPlayerThrow().stopVideo();
+          _throw(getPlayer()?.stopVideo)();
           break;
         case StateMode.PAUSED:
-          getPlayerThrow().pauseVideo();
+          _throw(getPlayer()?.pauseVideo)();
           break;
         case StateMode.PLAYING:
-          getPlayerThrow().playVideo();
+          _throw(getPlayer()?.playVideo)();
           break;
       }
     },
-    skipPrevious: () => {
-      getPlayerThrow().previousVideo();
-    },
-    skipNext: () => {
-      getPlayerThrow().nextVideo();
-    },
-    setPosition: (seconds) => {
-      getPlayerThrow().seekTo(seconds);
-    },
-    setVolume: (volume) => {
-      getPlayerThrow().setVolume(volume);
-    },
+    skipPrevious: () => _throw(getPlayer()?.previousVideo)(),
+    skipNext: () => _throw(getPlayer()?.nextVideo)(),
+    setPosition: (seconds) => _throw(getPlayer()?.seekTo)(seconds),
+    setVolume: (volume) => _throw(getPlayer()?.setVolume)(volume),
     setRating: (rating) => {
       ratingUtils.likeDislike(YouTubeMusic, rating, {
         toggleLike: () => {

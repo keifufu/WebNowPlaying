@@ -27,34 +27,38 @@ let reqCount = 0;
 let lastState = StateMode.STOPPED;
 let firstRequest = false;
 
+const sites = [
+  AppleMusic,
+  Bandcamp,
+  Deezer,
+  Generic,
+  Invidious,
+  Jellyfin,
+  Kick,
+  Navidrome,
+  Netflix,
+  Pandora,
+  Plex,
+  RadioAddict,
+  SoundCloud,
+  Spotify,
+  Tidal,
+  Twitch,
+  VK,
+  YandexMusic,
+  YouTube,
+  YouTubeEmbeds,
+  YouTubeMusic,
+];
+(window as any)._wnp = {};
+sites.forEach((site) => {
+  (window as any)._wnp[site.info.name().replace(" ", "")] = site;
+});
+
 InjectedUtils.init();
 window.addEventListener("message", (msg: any) => {
   if (msg.data.type !== "wnp-message") return;
   const { messageId, siteName, func, args } = msg.data;
-
-  const sites = [
-    AppleMusic,
-    Bandcamp,
-    Deezer,
-    Generic,
-    Invidious,
-    Jellyfin,
-    Kick,
-    Navidrome,
-    Netflix,
-    Pandora,
-    Plex,
-    RadioAddict,
-    SoundCloud,
-    Spotify,
-    Tidal,
-    Twitch,
-    VK,
-    YandexMusic,
-    YouTube,
-    YouTubeEmbeds,
-    YouTubeMusic,
-  ];
   const site: Site | undefined = sites.find((site) => site.info.name() == siteName);
   if (!site) return sendResponse(messageId, EventResult.FAILED);
 
@@ -67,7 +71,7 @@ window.addEventListener("message", (msg: any) => {
         break;
       case "getPlayerOptimized": {
         // If site isn't ready, don't bother querying.
-        if (!site.ready()) return sendResponse(messageId, null);
+        if (!site.ready()) return sendResponse(messageId, defaultPlayer);
         const state = site.info.state();
         if (state != lastState || state == StateMode.PLAYING || firstRequest) {
           // If PLAYING or state changed OR this is the first request, query all as usual

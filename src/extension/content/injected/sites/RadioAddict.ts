@@ -2,7 +2,28 @@ import { getMediaSessionCover } from "../../../../utils/misc";
 import { EventError, Repeat, Site, StateMode } from "../../../types";
 import { createDefaultControls, createSiteInfo, ratingUtils, setStatePlayPauseButton } from "../utils";
 
+let elapsedSeconds = 0;
+let lastTime = Date.now() / 1000;
+function getElapsedTime() {
+  if (RadioAddict.info.state() !== StateMode.PLAYING) {
+    lastTime = Date.now() / 1000;
+    return elapsedSeconds;
+  }
+
+  const timeNow = Date.now() / 1000;
+  const delta = Math.floor(timeNow - lastTime);
+  if (delta > 0) {
+    elapsedSeconds += delta;
+    lastTime = timeNow;
+  }
+
+  return elapsedSeconds;
+}
+
 const RadioAddict: Site = {
+  debug: {
+    getElapsedTime,
+  },
   init: null,
   ready: () => !!navigator.mediaSession.metadata,
   info: createSiteInfo({
@@ -65,23 +86,5 @@ const RadioAddict: Site = {
   },
   controls: () => createDefaultControls(RadioAddict),
 };
-
-let elapsedSeconds = 0;
-let lastTime = Date.now() / 1000;
-function getElapsedTime() {
-  if (RadioAddict.info.state() !== StateMode.PLAYING) {
-    lastTime = Date.now() / 1000;
-    return elapsedSeconds;
-  }
-
-  const timeNow = Date.now() / 1000;
-  const delta = Math.floor(timeNow - lastTime);
-  if (delta > 0) {
-    elapsedSeconds += delta;
-    lastTime = timeNow;
-  }
-
-  return elapsedSeconds;
-}
 
 export default RadioAddict;

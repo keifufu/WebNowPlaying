@@ -1,151 +1,7 @@
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
-import { InjectedUtils, createDefaultControls, createSiteInfo, notDisabled, ratingUtils, setRepeat } from "../utils";
+import { InjectedUtils, _throw, createDefaultControls, createSiteInfo, notDisabled, ratingUtils, setRepeat } from "../utils";
 
 const getContainer = (): (HTMLElement & { player: any }) | undefined => Utils.getContainer();
-const getContainerThrow = () => {
-  const container = getContainer();
-  if (container) return container;
-  throw new EventError();
-};
-
-const YouTube: Site = {
-  init: null,
-  ready: () => true,
-  info: createSiteInfo({
-    name: () => "YouTube",
-    title: () => {
-      const details = Utils.getVideoDetails();
-      if (details?.title) return details.title;
-      return "";
-    },
-    artist: () => {
-      const details = Utils.getVideoDetails();
-      if (details?.author) return details.author;
-      return "";
-    },
-    album: () => {
-      const details = Utils.getPlaylistDetails();
-      if (details?.title) return details.title;
-      return "";
-    },
-    cover: () => {
-      const details = Utils.getVideoDetails();
-      if (details.thumbnail?.thumbnails) {
-        const url = Utils.findBiggestImage(details.thumbnail.thumbnails);
-        if (url) return url.split("?")[0];
-      }
-      return "";
-    },
-    state: () => {
-      const video = getContainer()?.querySelector<HTMLVideoElement>(".html5-main-video[src]");
-      if (!video) return StateMode.STOPPED;
-      return video.paused ? StateMode.PAUSED : StateMode.PLAYING;
-    },
-    position: () => getContainer()?.player?.getCurrentTime() ?? 0,
-    duration: () => getContainer()?.player?.getDuration() ?? 0,
-    volume: () => (getContainer()?.player?.isMuted() ? 0 : getContainer()?.player?.getVolume() ?? 100),
-    rating: () => {
-      const buttons = Utils.getRatingButtons();
-      if (buttons.likeButton && buttons.likeButton.getAttribute("aria-pressed") == "true") return 5;
-      else if (buttons.dislikeButton && buttons.dislikeButton.getAttribute("aria-pressed") == "true") return 1;
-      else return 0;
-    },
-    repeat: () => {
-      if (getContainer()?.querySelector<HTMLVideoElement>(".html5-main-video[src]")?.loop) return Repeat.ONE;
-      const playlistRepeatButtonSvgPath = getContainer()?.querySelector("#playlist-action-menu path")?.getAttribute("d");
-      const svgPathLoopPlaylist =
-        "M20 14h2v5l-16.16.02 1.77 1.77L6.2 22.2 1.99 18l4.21-4.21 1.41 1.41-1.82 1.82L20 17v-3zM4 7l14.21-.02-1.82 1.82 1.41 1.41L22.01 6 17.8 1.79 16.39 3.2l1.77 1.77L2 5v6h2V7z";
-      if (playlistRepeatButtonSvgPath === svgPathLoopPlaylist) return Repeat.ALL;
-      return Repeat.NONE;
-    },
-    shuffle: () => getContainer()?.querySelectorAll("#playlist-action-menu button")[1]?.getAttribute("aria-pressed") === "true",
-  }),
-  events: {
-    setState: (state) => {
-      switch (state) {
-        case StateMode.STOPPED:
-          getContainerThrow().player.stopVideo();
-          break;
-        case StateMode.PAUSED:
-          getContainerThrow().player.pauseVideo();
-          break;
-        case StateMode.PLAYING:
-          getContainerThrow().player.playVideo();
-          break;
-      }
-    },
-    skipPrevious: () => {
-      const chapters = Utils.findNearestChapters();
-      if (chapters?.previous) return YouTube.events.setPosition?.(chapters.previous);
-      getContainerThrow().player.previousVideo();
-    },
-    skipNext: () => {
-      const chapters = Utils.findNearestChapters();
-      if (chapters?.next) return YouTube.events.setPosition?.(chapters.next);
-      getContainerThrow().player.nextVideo();
-    },
-    setPosition: (seconds) => {
-      getContainerThrow().player.seekTo(seconds);
-    },
-    setVolume: (volume) => {
-      getContainerThrow().player.setVolume(volume);
-    },
-    setRating: (rating) => {
-      ratingUtils.likeDislike(YouTube, rating, {
-        toggleLike: () => {
-          const buttons = Utils.getRatingButtons();
-          if (!buttons.likeButton) {
-            throw new EventError();
-          }
-          buttons.likeButton.click();
-        },
-        toggleDislike: () => {
-          const buttons = Utils.getRatingButtons();
-          if (!buttons.dislikeButton) {
-            throw new EventError();
-          }
-          buttons.dislikeButton.click();
-        },
-      });
-    },
-    setRepeat: (repeat) => {
-      const playlistRepeatButton = getContainerThrow().querySelector<HTMLButtonElement>("#playlist-action-menu button");
-      if (playlistRepeatButton) {
-        const currentRepeat = YouTube.info.repeat();
-        if (currentRepeat === repeat) return;
-
-        const repeatMap = {
-          [Repeat.NONE]: 0,
-          [Repeat.ALL]: 1,
-          [Repeat.ONE]: 2,
-        };
-
-        setRepeat(playlistRepeatButton, repeatMap, currentRepeat, repeat);
-      } else {
-        const video = getContainerThrow().querySelector<HTMLVideoElement>(".html5-main-video[src]");
-        if (!video) throw new EventError();
-        video.loop = repeat === Repeat.ONE;
-      }
-    },
-    setShuffle: (shuffle) => {
-      if (YouTube.info.shuffle() === shuffle) return;
-      const button = getContainerThrow().querySelectorAll<HTMLButtonElement>("#playlist-action-menu button")[1];
-      if (!button) throw new EventError();
-      button.click();
-    },
-  },
-  controls: () =>
-    createDefaultControls(YouTube, {
-      ratingSystem: RatingSystem.LIKE_DISLIKE,
-      availableRepeat: (() => {
-        const playlistRepeatButton = document.querySelector("#playlist-action-menu button");
-        if (playlistRepeatButton) return Repeat.NONE | Repeat.ALL | Repeat.ONE;
-        return Repeat.NONE | Repeat.ONE;
-      })(),
-      canSkipPrevious: notDisabled(getContainer()?.querySelector<HTMLButtonElement>(".ytp-prev-button, #navigation-button-up button")),
-      canSkipNext: notDisabled(getContainer()?.querySelector<HTMLButtonElement>(".ytp-next-button, #navigation-button-down button")),
-    }),
-};
 
 const Utils = {
   getContainer: (): any => {
@@ -298,6 +154,145 @@ const Utils = {
 
     return biggestImage.url;
   },
+};
+
+const YouTube: Site = {
+  debug: {
+    getContainer,
+    Utils,
+  },
+  init: null,
+  ready: () => true,
+  info: createSiteInfo({
+    name: () => "YouTube",
+    title: () => {
+      const details = Utils.getVideoDetails();
+      if (details?.title) return details.title;
+      return "";
+    },
+    artist: () => {
+      const details = Utils.getVideoDetails();
+      if (details?.author) return details.author;
+      return "";
+    },
+    album: () => {
+      const details = Utils.getPlaylistDetails();
+      if (details?.title) return details.title;
+      return "";
+    },
+    cover: () => {
+      const details = Utils.getVideoDetails();
+      if (details.thumbnail?.thumbnails) {
+        const url = Utils.findBiggestImage(details.thumbnail.thumbnails);
+        if (url) return url.split("?")[0];
+      }
+      return "";
+    },
+    state: () => {
+      const video = getContainer()?.querySelector<HTMLVideoElement>(".html5-main-video[src]");
+      if (!video) return StateMode.STOPPED;
+      return video.paused ? StateMode.PAUSED : StateMode.PLAYING;
+    },
+    position: () => getContainer()?.player?.getCurrentTime() ?? 0,
+    duration: () => getContainer()?.player?.getDuration() ?? 0,
+    volume: () => (getContainer()?.player?.isMuted() ? 0 : getContainer()?.player?.getVolume() ?? 100),
+    rating: () => {
+      const buttons = Utils.getRatingButtons();
+      if (buttons.likeButton && buttons.likeButton.getAttribute("aria-pressed") == "true") return 5;
+      else if (buttons.dislikeButton && buttons.dislikeButton.getAttribute("aria-pressed") == "true") return 1;
+      else return 0;
+    },
+    repeat: () => {
+      if (getContainer()?.querySelector<HTMLVideoElement>(".html5-main-video[src]")?.loop) return Repeat.ONE;
+      const playlistRepeatButtonSvgPath = getContainer()?.querySelector("#playlist-action-menu path")?.getAttribute("d");
+      const svgPathLoopPlaylist =
+        "M20 14h2v5l-16.16.02 1.77 1.77L6.2 22.2 1.99 18l4.21-4.21 1.41 1.41-1.82 1.82L20 17v-3zM4 7l14.21-.02-1.82 1.82 1.41 1.41L22.01 6 17.8 1.79 16.39 3.2l1.77 1.77L2 5v6h2V7z";
+      if (playlistRepeatButtonSvgPath === svgPathLoopPlaylist) return Repeat.ALL;
+      return Repeat.NONE;
+    },
+    shuffle: () => getContainer()?.querySelectorAll("#playlist-action-menu button")[1]?.getAttribute("aria-pressed") === "true",
+  }),
+  events: {
+    setState: (state) => {
+      switch (state) {
+        case StateMode.STOPPED:
+          _throw(getContainer()?.player?.stopVideo)();
+          break;
+        case StateMode.PAUSED:
+          _throw(getContainer()?.player?.pauseVideo)();
+          break;
+        case StateMode.PLAYING:
+          _throw(getContainer()?.player?.playVideo)();
+          break;
+      }
+    },
+    skipPrevious: () => {
+      const chapters = Utils.findNearestChapters();
+      if (chapters?.previous) return YouTube.events.setPosition?.(chapters.previous);
+      _throw(getContainer()?.player?.previousVideo)();
+    },
+    skipNext: () => {
+      const chapters = Utils.findNearestChapters();
+      if (chapters?.next) return YouTube.events.setPosition?.(chapters.next);
+      _throw(getContainer()?.player?.nextVideo)();
+    },
+    setPosition: (seconds) => _throw(getContainer()?.player?.seekTo)(seconds),
+    setVolume: (volume) => _throw(getContainer()?.player?.setVolume)(volume),
+    setRating: (rating) => {
+      ratingUtils.likeDislike(YouTube, rating, {
+        toggleLike: () => {
+          const buttons = Utils.getRatingButtons();
+          if (!buttons.likeButton) {
+            throw new EventError();
+          }
+          buttons.likeButton.click();
+        },
+        toggleDislike: () => {
+          const buttons = Utils.getRatingButtons();
+          if (!buttons.dislikeButton) {
+            throw new EventError();
+          }
+          buttons.dislikeButton.click();
+        },
+      });
+    },
+    setRepeat: (repeat) => {
+      const playlistRepeatButton = _throw(getContainer()).querySelector<HTMLButtonElement>("#playlist-action-menu button");
+      if (playlistRepeatButton) {
+        const currentRepeat = YouTube.info.repeat();
+        if (currentRepeat === repeat) return;
+
+        const repeatMap = {
+          [Repeat.NONE]: 0,
+          [Repeat.ALL]: 1,
+          [Repeat.ONE]: 2,
+        };
+
+        setRepeat(playlistRepeatButton, repeatMap, currentRepeat, repeat);
+      } else {
+        const video = _throw(getContainer()).querySelector<HTMLVideoElement>(".html5-main-video[src]");
+        if (!video) throw new EventError();
+        video.loop = repeat === Repeat.ONE;
+      }
+    },
+    setShuffle: (shuffle) => {
+      if (YouTube.info.shuffle() === shuffle) return;
+      const button = _throw(getContainer()).querySelectorAll<HTMLButtonElement>("#playlist-action-menu button")[1];
+      if (!button) throw new EventError();
+      button.click();
+    },
+  },
+  controls: () =>
+    createDefaultControls(YouTube, {
+      ratingSystem: RatingSystem.LIKE_DISLIKE,
+      availableRepeat: (() => {
+        const playlistRepeatButton = document.querySelector("#playlist-action-menu button");
+        if (playlistRepeatButton) return Repeat.NONE | Repeat.ALL | Repeat.ONE;
+        return Repeat.NONE | Repeat.ONE;
+      })(),
+      canSkipPrevious: notDisabled(getContainer()?.querySelector<HTMLButtonElement>(".ytp-prev-button, #navigation-button-up button")),
+      canSkipNext: notDisabled(getContainer()?.querySelector<HTMLButtonElement>(".ytp-next-button, #navigation-button-down button")),
+    }),
 };
 
 export default YouTube;

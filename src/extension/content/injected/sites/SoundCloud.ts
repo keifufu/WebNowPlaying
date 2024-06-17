@@ -11,6 +11,7 @@ import {
 } from "../utils";
 
 const SoundCloud: Site = {
+  debug: {},
   init: null,
   ready: () => !!navigator.mediaSession.metadata,
   info: createSiteInfo({

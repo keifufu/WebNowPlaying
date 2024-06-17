@@ -1,17 +1,15 @@
-import { EventError, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo } from "../utils";
+import { Repeat, Site, StateMode } from "../../../types";
+import { _throw, createDefaultControls, createSiteInfo } from "../utils";
 
 // This only supports the collection player.
 // Nobody listens to music on the other sites, hopefully.
 
 const getPlayer = () => (window as any).collectionPlayer.player2;
-const getPlayerThrow = () => {
-  const player = getPlayer();
-  if (player) return player;
-  throw new EventError();
-};
 
 const Bandcamp: Site = {
+  debug: {
+    getPlayer,
+  },
   init: null,
   ready: () => !!document.querySelector("audio")?.src,
   info: createSiteInfo({
@@ -31,24 +29,18 @@ const Bandcamp: Site = {
   }),
   events: {
     setState: (state) => {
-      if (state === StateMode.STOPPED) return getPlayerThrow().stop();
+      if (state === StateMode.STOPPED) return _throw(getPlayer()?.stop)();
       if (Bandcamp.info.state() === state) return;
-      getPlayerThrow().playPause();
+      _throw(getPlayer()?.playPause)();
     },
-    skipPrevious: () => {
-      getPlayerThrow().prev();
-    },
-    skipNext: () => {
-      getPlayerThrow().next();
-    },
+    skipPrevious: () => _throw(getPlayer()?.prev)(),
+    skipNext: () => _throw(getPlayer()?.next)(),
     setPosition: (seconds) => {
-      getPlayerThrow().seeking(true);
-      getPlayerThrow().position(seconds);
-      getPlayerThrow().seeking(false);
+      _throw(getPlayer()?.seeking)(true);
+      _throw(getPlayer()?.position)(seconds);
+      _throw(getPlayer()?.seeking)(false);
     },
-    setVolume: (volume) => {
-      getPlayerThrow().volume(volume / 100);
-    },
+    setVolume: (volume) => _throw(getPlayer()?.volume)(volume / 100),
     setRating: null,
     setRepeat: null,
     setShuffle: null,

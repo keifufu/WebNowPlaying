@@ -1,14 +1,17 @@
-import { EventError, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo } from "../utils";
+import { Repeat, Site, StateMode } from "../../../types";
+import { _throw, createDefaultControls, createSiteInfo } from "../utils";
 
 const getPlayer = () => (window as any)?.getAudioPlayer?.();
-const getPlayerThrow = () => {
-  const player = getPlayer();
-  if (player) return player;
-  throw new EventError();
-};
+
+function unescape(input: string) {
+  return new DOMParser().parseFromString(input, "text/html").querySelector("html")!.textContent!;
+}
 
 const VK: Site = {
+  debug: {
+    getPlayer,
+    unescape,
+  },
   init: null,
   ready: () => !!getPlayer(),
   info: createSiteInfo({
@@ -29,31 +32,23 @@ const VK: Site = {
     setState: (state) => {
       switch (state) {
         case StateMode.STOPPED:
-          getPlayerThrow().stop();
+          _throw(getPlayer()?.stop)();
           break;
         case StateMode.PAUSED:
-          getPlayerThrow().pause();
+          _throw(getPlayer()?.pause)();
           break;
         case StateMode.PLAYING:
-          getPlayerThrow().play();
+          _throw(getPlayer()?.play)();
           break;
       }
     },
-    skipPrevious: () => {
-      getPlayerThrow().playPrev();
-    },
-    skipNext: () => {
-      getPlayerThrow().playNext();
-    },
-    setPosition: (seconds) => {
-      getPlayerThrow().seekToTime(seconds);
-    },
-    setVolume: (volume) => {
-      getPlayerThrow().setVolume((volume / 100) ** 3);
-    },
+    skipPrevious: () => _throw(getPlayer()?.playPrev)(),
+    skipNext: () => _throw(getPlayer()?.playNext)(),
+    setPosition: (seconds) => _throw(getPlayer()?.seekToTime)(seconds),
+    setVolume: (volume) => _throw(getPlayer()?.setVolume)((volume / 100) ** 3),
     setRating: null,
     setRepeat: (repeat) => {
-      const player = getPlayerThrow();
+      const player = _throw(getPlayer());
       switch (repeat) {
         case Repeat.NONE:
           if (player.isRepeatCurrentAudio()) player.toggleRepeatCurrentAudio();
@@ -69,19 +64,12 @@ const VK: Site = {
           break;
       }
     },
-    setShuffle: (shuffle) => {
-      getPlayerThrow()?.getPlaylistQueue()?.shuffle(shuffle);
-    },
+    setShuffle: (shuffle) => _throw(getPlayer()?.getPlaylistQueue()?.shuffle)(shuffle),
   },
   controls: () =>
     createDefaultControls(VK, {
       availableRepeat: Repeat.NONE | Repeat.ALL | Repeat.ONE,
     }),
 };
-
-// https://stackoverflow.com/questions/18106164/unescape-apostrophe-39-in-javascript
-function unescape(input: string) {
-  return new DOMParser().parseFromString(input, "text/html").querySelector("html")!.textContent!;
-}
 
 export default VK;

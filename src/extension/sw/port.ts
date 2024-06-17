@@ -121,6 +121,7 @@ export function onPortConnect(port: chrome.runtime.Port) {
 
   port.onMessage.addListener(onPortMessage);
   port.onDisconnect.addListener(() => {
+    console.log("disconnected");
     // This only gets fired if the other side disconnects,
     // not if we call .disconnect().
     clearTimeout(timer);
@@ -149,15 +150,28 @@ function onPortMessage(message: PortMessage, port: chrome.runtime.Port) {
       if (Object.keys(message.player).length == 0) break;
       const currentPlayer = playerDictionary.get(port.name);
 
+      let activeAtChanged = false;
+      let activeAt = message.player.activeAt ?? currentPlayer?.activeAt ?? 0;
+
+      if ((message.player.title ?? currentPlayer?.title ?? "").length == 0) {
+        activeAt = 0;
+        activeAtChanged = true;
+      }
+
       playerDictionary.set(port.name, {
         ...(currentPlayer || defaultPlayer),
         ...message.player,
         id: currentPlayer?.id ?? parseInt(port.name),
+        activeAt: activeAt,
       });
 
       // Should only need to update active player if `activeAt` was updated
-      if (message.player.activeAt) {
+      if (message.player.activeAt || activeAtChanged) {
         recalculateActivePlayer();
+      }
+
+      if (activeAtChanged) {
+        message.player.activeAt = activeAt;
       }
 
       sendUpdateToAll(currentPlayer ?? null, message.player);

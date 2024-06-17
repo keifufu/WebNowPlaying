@@ -16,7 +16,62 @@ const sanitizeTitle = (title: string) =>
 
 let initialized = false;
 
+window.addEventListener("beforeunload", () => {
+  clearInterval(updateInterval);
+});
+
+let elements: (HTMLVideoElement | HTMLAudioElement)[] = [];
+function updateCurrentElement() {
+  if (elements.length > 0) {
+    // If currently used element does not exist in array, find a new one
+    if (elements.indexOf(element) < 0) {
+      const filtered = elements.filter((e) => !e.muted && e.volume > 0);
+      if (filtered.length > 0) element = filtered[filtered.length - 1];
+    }
+  } else if (!element) {
+    // Find all audio elements and set element to the first one with any length
+    const audios = Array.from(document.getElementsByTagName("audio"));
+    for (const audio of audios) {
+      if (audio.duration > 0) {
+        element = audio;
+        break;
+      }
+    }
+    // If no suitable audio element was found, try again with video elements
+    if (!element) {
+      const videos = Array.from(document.getElementsByTagName("video"));
+      for (const video of videos) {
+        if (video.duration > 0) {
+          element = video;
+          break;
+        }
+      }
+    }
+
+    elements = [];
+  }
+}
+
+function setupElementEvents() {
+  for (let i = 0; i < document.getElementsByTagName("audio").length; i++) {
+    if (document.getElementsByTagName("audio")[i].ontimeupdate === null) {
+      document.getElementsByTagName("audio")[i].ontimeupdate = function () {
+        elements.push(this as HTMLAudioElement);
+      };
+    }
+  }
+
+  for (let i = 0; i < document.getElementsByTagName("video").length; i++) {
+    if (document.getElementsByTagName("video")[i].ontimeupdate === null) {
+      document.getElementsByTagName("video")[i].ontimeupdate = function () {
+        elements.push(this as HTMLVideoElement);
+      };
+    }
+  }
+}
+
 const Generic: Site = {
+  debug: {},
   init: () => {
     if (!initialized) {
       initialized = true;
@@ -156,59 +211,5 @@ const Generic: Site = {
       canSkipNext: !!element,
     }),
 };
-
-window.addEventListener("beforeunload", () => {
-  clearInterval(updateInterval);
-});
-
-let elements: (HTMLVideoElement | HTMLAudioElement)[] = [];
-function updateCurrentElement() {
-  if (elements.length > 0) {
-    // If currently used element does not exist in array, find a new one
-    if (elements.indexOf(element) < 0) {
-      const filtered = elements.filter((e) => !e.muted && e.volume > 0);
-      if (filtered.length > 0) element = filtered[filtered.length - 1];
-    }
-  } else if (!element) {
-    // Find all audio elements and set element to the first one with any length
-    const audios = Array.from(document.getElementsByTagName("audio"));
-    for (const audio of audios) {
-      if (audio.duration > 0) {
-        element = audio;
-        break;
-      }
-    }
-    // If no suitable audio element was found, try again with video elements
-    if (!element) {
-      const videos = Array.from(document.getElementsByTagName("video"));
-      for (const video of videos) {
-        if (video.duration > 0) {
-          element = video;
-          break;
-        }
-      }
-    }
-
-    elements = [];
-  }
-}
-
-function setupElementEvents() {
-  for (let i = 0; i < document.getElementsByTagName("audio").length; i++) {
-    if (document.getElementsByTagName("audio")[i].ontimeupdate === null) {
-      document.getElementsByTagName("audio")[i].ontimeupdate = function () {
-        elements.push(this as HTMLAudioElement);
-      };
-    }
-  }
-
-  for (let i = 0; i < document.getElementsByTagName("video").length; i++) {
-    if (document.getElementsByTagName("video")[i].ontimeupdate === null) {
-      document.getElementsByTagName("video")[i].ontimeupdate = function () {
-        elements.push(this as HTMLVideoElement);
-      };
-    }
-  }
-}
 
 export default Generic;

@@ -9,6 +9,7 @@ import { createDefaultControls, createSiteInfo, positionSecondsToPercent, rating
 // - any amount of testing
 
 const Pandora: Site = {
+  debug: {},
   init: null,
   ready: () =>
     !!document.querySelector(".Tuner__Audio__TrackDetail__title") && !!document.querySelectorAll(".VolumeDurationControl__Duration span")[2],
@@ -133,7 +134,6 @@ const Pandora: Site = {
       button.click();
     },
   },
-
   controls: () =>
     createDefaultControls(Pandora, {
       ratingSystem: RatingSystem.LIKE_DISLIKE,

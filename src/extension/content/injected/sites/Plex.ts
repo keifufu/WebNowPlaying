@@ -5,7 +5,31 @@ import { createDefaultControls, createSiteInfo, notDisabled, setStatePlayPauseBu
 // Plex sucks. I probably won't drop support any time soon but might not bother
 // with less important parts like repeat mode.
 
+function clickButton(button: HTMLButtonElement) {
+  button.dispatchEvent(
+    new MouseEvent("mousedown", {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: 0,
+      clientY: 0,
+    }),
+  );
+  button.dispatchEvent(
+    new MouseEvent("mouseup", {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: 0,
+      clientY: 0,
+    }),
+  );
+}
+
 const Plex: Site = {
+  debug: {
+    clickButton,
+  },
   init: null,
   ready: () => (document.querySelector("video")?.duration || 0) > 0,
   info: createSiteInfo({
@@ -81,24 +105,3 @@ const Plex: Site = {
 };
 
 export default Plex;
-
-function clickButton(button: HTMLButtonElement) {
-  button.dispatchEvent(
-    new MouseEvent("mousedown", {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-      clientX: 0,
-      clientY: 0,
-    }),
-  );
-  button.dispatchEvent(
-    new MouseEvent("mouseup", {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-      clientX: 0,
-      clientY: 0,
-    }),
-  );
-}

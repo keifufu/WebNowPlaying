@@ -324,7 +324,7 @@ async function getPlayer(optimized = false): Promise<Partial<Player>> {
 
       // activeAt calculation
       if (key === "state" || key === "title" || (key === "volume" && player.state === StateMode.PLAYING)) {
-        result.activeAt = value.toString().length > 0 ? Date.now() : 0;
+        result.activeAt = Date.now();
       }
     }
   }

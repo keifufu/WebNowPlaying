@@ -92,8 +92,16 @@ export const onMessage = async (request: ServiceWorkerMessage, sender: chrome.ru
     case "sendEventResult":
       sendEventResult(request.eventSocketPort as number, request.eventId as string, request.eventResult as EventResult);
       break;
-    case "getPortId":
-      sendResponse(sender.tab?.id ?? null);
+    case "getPortId": {
+      const tabId = sender.tab?.id;
+      if (tabId) {
+        // Random number after portId (tabId) to prevent iframes within the same site to share the portId
+        const portId = parseInt(`${tabId}${Math.floor(Math.random() * 9999)}`);
+        sendResponse(portId);
+      } else {
+        sendResponse(null);
+      }
       break;
+    }
   }
 };

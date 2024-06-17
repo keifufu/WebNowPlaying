@@ -1,7 +1,12 @@
 import { capitalize } from "../../../utils/misc";
 import { defaultSettings } from "../../../utils/settings";
 import { ServiceWorkerUtils } from "../../../utils/sw";
-import { RatingSystem, Repeat, Site, SiteControls, StateMode } from "../../types";
+import { EventError, RatingSystem, Repeat, Site, SiteControls, StateMode } from "../../types";
+
+export function _throw<T>(_var: T) {
+  if (_var) return _var;
+  throw new EventError();
+}
 
 export function createSiteInfo(info: Site["info"]): Site["info"] {
   const handler: ProxyHandler<any> = {
@@ -25,6 +30,7 @@ export function createSiteInfo(info: Site["info"]): Site["info"] {
             }
           } else if (typeof result === "string") {
             result = result.trim();
+            result = result.replaceAll("\n", "");
           }
 
           return result;

@@ -2,6 +2,7 @@ import { RatingSystem, Repeat, Site, StateMode } from "../../../types";
 import { createDefaultControls, createSiteInfo } from "../utils";
 
 const Template: Site = {
+  debug: {},
   init: null,
   // This exists for performance reasons. We don't query any other info if ready is false.
   ready: () => false,

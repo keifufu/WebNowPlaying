@@ -103,6 +103,7 @@ export type SiteControls = {
 };
 
 export type Site = {
+  debug: any;
   init: (() => void) | null;
   ready: () => boolean;
   info: {

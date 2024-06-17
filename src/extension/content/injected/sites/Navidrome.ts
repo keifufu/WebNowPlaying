@@ -1,15 +1,32 @@
 import { getMediaSessionCover } from "../../../../utils/misc";
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo, ratingUtils } from "../utils";
+import { _throw, createDefaultControls, createSiteInfo, ratingUtils } from "../utils";
 
 const getPlayer = () => document.querySelector("audio");
-const getPlayerThrow = () => {
-  const player = getPlayer();
-  if (player) return player;
-  throw new EventError();
-};
+
+function setMode(button: HTMLButtonElement, map: any, currentState: number, targetState: number) {
+  const currentModeIndex = map[currentState];
+  const targetModeIndex = map[targetState];
+  const len = Object.entries(map).length;
+  const clickCount = (targetModeIndex - currentModeIndex + len) % len;
+
+  let i = 0;
+  const clickWithDelay = () => {
+    if (i < clickCount) {
+      button.click();
+      i++;
+      setTimeout(clickWithDelay, 100);
+    }
+  };
+
+  clickWithDelay();
+}
 
 const Navidrome: Site = {
+  debug: {
+    getPlayer,
+    setMode,
+  },
   init: null,
   ready: () => !!navigator.mediaSession.metadata && !!document.querySelector("audio"),
   info: createSiteInfo({
@@ -56,10 +73,10 @@ const Navidrome: Site = {
       switch (state) {
         case StateMode.STOPPED:
         case StateMode.PAUSED:
-          getPlayerThrow().pause();
+          _throw(getPlayer()?.pause)();
           break;
         case StateMode.PLAYING:
-          getPlayerThrow().play();
+          _throw(getPlayer()?.play)();
           break;
       }
     },
@@ -73,11 +90,11 @@ const Navidrome: Site = {
       if (!button) throw new EventError();
       button.click();
     },
-    setPosition: (seconds) => {
-      getPlayerThrow().currentTime = seconds;
-    },
+    setPosition: (seconds) => (_throw(getPlayer()).currentTime = seconds),
     setVolume: (volume) => {
-      getPlayerThrow().volume = volume / 100;
+      const player = _throw(getPlayer());
+      player.muted = false;
+      player.volume = volume / 100;
     },
     setRating: (rating) => {
       ratingUtils.like(Navidrome, rating, {
@@ -127,23 +144,5 @@ const Navidrome: Site = {
       availableRepeat: Repeat.NONE | Repeat.ALL | Repeat.ONE,
     }),
 };
-
-function setMode(button: HTMLButtonElement, map: any, currentState: number, targetState: number) {
-  const currentModeIndex = map[currentState];
-  const targetModeIndex = map[targetState];
-  const len = Object.entries(map).length;
-  const clickCount = (targetModeIndex - currentModeIndex + len) % len;
-
-  let i = 0;
-  const clickWithDelay = () => {
-    if (i < clickCount) {
-      button.click();
-      i++;
-      setTimeout(clickWithDelay, 100);
-    }
-  };
-
-  clickWithDelay();
-}
 
 export default Navidrome;

@@ -1,14 +1,12 @@
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo, positionSecondsToPercent, ratingUtils } from "../utils";
+import { _throw, createDefaultControls, createSiteInfo, positionSecondsToPercent, ratingUtils } from "../utils";
 
 const getPlayer = () => (window as any).dzPlayer;
-const getPlayerThrow = () => {
-  const player = getPlayer();
-  if (player) return player;
-  throw new EventError();
-};
 
 const Deezer: Site = {
+  debug: {
+    getPlayer,
+  },
   init: null,
   ready: () => !!navigator.mediaSession.metadata && !!document.querySelector(".track-link"),
   info: createSiteInfo({
@@ -37,31 +35,24 @@ const Deezer: Site = {
     setState: (state) => {
       switch (state) {
         case StateMode.STOPPED:
-          getPlayerThrow().control.stop();
+          _throw(getPlayer()?.control?.stop)();
           break;
         case StateMode.PAUSED:
-          getPlayerThrow().control.pause();
+          _throw(getPlayer()?.control?.pause)();
           break;
         case StateMode.PLAYING:
-          getPlayerThrow().control.play();
+          _throw(getPlayer()?.control?.play)();
           break;
       }
     },
-    skipPrevious: () => {
-      getPlayerThrow().control.prevSong();
-    },
-    skipNext: () => {
-      getPlayerThrow().control.nextSong();
-    },
+    skipPrevious: () => _throw(getPlayer()?.control?.prevSong)(),
+    skipNext: () => _throw(getPlayer()?.control?.nextSong)(),
     setPosition: (seconds) => {
       const percent = positionSecondsToPercent(Deezer, seconds);
-      if (!getPlayerThrow().control.canSeek()) throw new EventError();
-      getPlayerThrow().control.seek(percent);
+      if (!_throw(getPlayer()?.control?.canSeek)()) throw new EventError();
+      _throw(getPlayer()?.control?.seek)(percent);
     },
-    setVolume: (volume) => {
-      // setVolume handles unmuting if muted
-      getPlayerThrow().control.setVolume(volume / 100);
-    },
+    setVolume: (volume) => _throw(getPlayer()?.control?.setVolume)(volume / 100),
     setRating: (rating) => {
       ratingUtils.like(Deezer, rating, {
         toggleLike: () => {
@@ -78,11 +69,9 @@ const Deezer: Site = {
         [Repeat.ONE]: 2,
       };
 
-      getPlayerThrow().control.setRepeat(repeatMap[repeat]);
+      _throw(getPlayer()?.control?.setRepeat)(repeatMap[repeat]);
     },
-    setShuffle: (shuffle) => {
-      getPlayerThrow().control.setShuffle(shuffle);
-    },
+    setShuffle: (shuffle) => _throw(getPlayer()?.control?.setShuffle)(shuffle),
   },
   controls: () =>
     createDefaultControls(Deezer, {

@@ -2,6 +2,7 @@ import { EventError, Repeat, Site, StateMode } from "../../../types";
 import { createDefaultControls, createSiteInfo } from "../utils";
 
 const Twitch: Site = {
+  debug: {},
   init: null,
   ready: () => !!document.querySelector("video"),
   info: createSiteInfo({

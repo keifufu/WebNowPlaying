@@ -1,15 +1,13 @@
 import { getMediaSessionCover } from "../../../../utils/misc";
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo, ratingUtils, setRepeat } from "../utils";
+import { _throw, createDefaultControls, createSiteInfo, ratingUtils, setRepeat } from "../utils";
 
 const getPlayer = () => document.querySelector("video") ?? document.querySelector("audio[src]");
-const getPlayerThrow = () => {
-  const player = getPlayer();
-  if (player) return player;
-  throw new EventError();
-};
 
 const Jellyfin: Site = {
+  debug: {
+    getPlayer,
+  },
   init: null,
   ready: () => !!(document.querySelector("video") || document.querySelector("audio[src]")),
   info: createSiteInfo({
@@ -65,10 +63,10 @@ const Jellyfin: Site = {
       switch (state) {
         case StateMode.STOPPED:
         case StateMode.PAUSED:
-          getPlayerThrow().pause();
+          _throw(getPlayer()?.pause)();
           break;
         case StateMode.PLAYING:
-          getPlayerThrow().play();
+          _throw(getPlayer()?.play)();
           break;
       }
     },
@@ -82,11 +80,9 @@ const Jellyfin: Site = {
       if (!button) throw new EventError();
       button.click();
     },
-    setPosition: (seconds) => {
-      getPlayerThrow().currentTime = seconds;
-    },
+    setPosition: (seconds) => (_throw(getPlayer()).currentTime = seconds),
     setVolume: (volume) => {
-      const player = getPlayerThrow();
+      const player = _throw(getPlayer());
       player.muted = false;
       player.volume = (volume / 100) ** 3;
     },

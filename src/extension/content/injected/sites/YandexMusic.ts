@@ -11,6 +11,7 @@ import {
 } from "../utils";
 
 const YandexMusic: Site = {
+  debug: {},
   init: null,
   ready: () => !!navigator.mediaSession.metadata && !!document.querySelector(".player-controls__btn_play"),
   info: createSiteInfo({

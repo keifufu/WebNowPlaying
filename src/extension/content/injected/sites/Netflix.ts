@@ -1,7 +1,85 @@
 import { EventError, Repeat, Site, StateMode } from "../../../types";
 import { createDefaultControls, createSiteInfo } from "../utils";
 
+const Utils = {
+  getContext: () => (window as any)?.netflix?.appContext,
+  getAPI: () => Utils.getContext().getState?.()?.playerApp?.getAPI?.(),
+  getSessionId: () => {
+    let sessionId = null;
+    for (const id of Utils.getAPI()?.videoPlayer?.getAllPlayerSessionIds?.() ?? []) {
+      if (id.startsWith("watch-")) {
+        sessionId = id;
+        break;
+      }
+    }
+    return sessionId;
+  },
+  getPlayer: () => Utils.getAPI()?.videoPlayer?.getVideoPlayerBySessionId?.(Utils.getSessionId()),
+  getMetadata: (): any => {
+    try {
+      return Object.values(Utils.getContext()?.getPlayerApp?.()?.getState?.()?.videoPlayer?.videoMetadata).find((data: any) => "_video" in data);
+    } catch {
+      return null;
+    }
+  },
+  getSeasonData: () => {
+    const metadata = Utils.getMetadata()?._metadata?.video;
+    if (metadata?.seasons) {
+      // eslint-disable-next-line no-unsafe-optional-chaining
+      const getEpisode = (season: any) => [...season?.episodes].find((episode) => episode?.id === metadata?.currentEpisode);
+      // eslint-disable-next-line no-unsafe-optional-chaining
+      const season = [...metadata?.seasons].find(getEpisode);
+      return {
+        type: metadata?.type,
+        title: metadata?.title,
+        episode: getEpisode(season),
+        season,
+        seasons: metadata?.seasons,
+      };
+    } else {
+      return {
+        type: metadata?.type,
+        title: metadata?.title,
+        episode: null,
+        season: null,
+        seasons: [],
+      };
+    }
+  },
+  getNavData: () => {
+    const data = Utils.getSeasonData();
+    if (data?.season) {
+      const { episodes, seq } = data.season;
+      const seasons = [...data.seasons];
+      const eIndex = [...episodes].findIndex((episode) => episode.id === data.episode.id);
+      const currId = [...episodes][eIndex].id;
+      let prevId;
+      let nextId;
+      if (eIndex > 0) {
+        prevId = [...episodes][eIndex - 1]?.id;
+      } else if (seq > 1) {
+        const prevEpisodes = [...seasons[seq - 2].episodes];
+        prevId = prevEpisodes[prevEpisodes.length - 1]?.id;
+      }
+      if (eIndex === episodes.length - 1 && seq < seasons.length) nextId = [...seasons[seq].episodes][0]?.id;
+      else nextId = [...episodes][eIndex + 1]?.id;
+
+      return { prevId, currId, nextId };
+    }
+    return {};
+  },
+  getInfo: () => ({
+    seasonData: Utils.getSeasonData(),
+    navData: Utils.getNavData(),
+    metadata: Utils.getMetadata(),
+    isPlayerReady: Utils.getPlayer()?.isReady?.() || false,
+  }),
+};
+
 const Netflix: Site = {
+  debug: {
+    Utils,
+  },
   init: null,
   ready: () => !!document.querySelector("video")?.duration,
   info: createSiteInfo({
@@ -114,81 +192,6 @@ const Netflix: Site = {
         return !!data?.nextId && !!data?.currId;
       })(),
     }),
-};
-
-const Utils = {
-  getContext: () => (window as any)?.netflix?.appContext,
-  getAPI: () => Utils.getContext().getState?.()?.playerApp?.getAPI?.(),
-  getSessionId: () => {
-    let sessionId = null;
-    for (const id of Utils.getAPI()?.videoPlayer?.getAllPlayerSessionIds?.() ?? []) {
-      if (id.startsWith("watch-")) {
-        sessionId = id;
-        break;
-      }
-    }
-    return sessionId;
-  },
-  getPlayer: () => Utils.getAPI()?.videoPlayer?.getVideoPlayerBySessionId?.(Utils.getSessionId()),
-  getMetadata: (): any => {
-    try {
-      return Object.values(Utils.getContext()?.getPlayerApp?.()?.getState?.()?.videoPlayer?.videoMetadata).find((data: any) => "_video" in data);
-    } catch {
-      return null;
-    }
-  },
-  getSeasonData: () => {
-    const metadata = Utils.getMetadata()?._metadata?.video;
-    if (metadata?.seasons) {
-      // eslint-disable-next-line no-unsafe-optional-chaining
-      const getEpisode = (season: any) => [...season?.episodes].find((episode) => episode?.id === metadata?.currentEpisode);
-      // eslint-disable-next-line no-unsafe-optional-chaining
-      const season = [...metadata?.seasons].find(getEpisode);
-      return {
-        type: metadata?.type,
-        title: metadata?.title,
-        episode: getEpisode(season),
-        season,
-        seasons: metadata?.seasons,
-      };
-    } else {
-      return {
-        type: metadata?.type,
-        title: metadata?.title,
-        episode: null,
-        season: null,
-        seasons: [],
-      };
-    }
-  },
-  getNavData: () => {
-    const data = Utils.getSeasonData();
-    if (data?.season) {
-      const { episodes, seq } = data.season;
-      const seasons = [...data.seasons];
-      const eIndex = [...episodes].findIndex((episode) => episode.id === data.episode.id);
-      const currId = [...episodes][eIndex].id;
-      let prevId;
-      let nextId;
-      if (eIndex > 0) {
-        prevId = [...episodes][eIndex - 1]?.id;
-      } else if (seq > 1) {
-        const prevEpisodes = [...seasons[seq - 2].episodes];
-        prevId = prevEpisodes[prevEpisodes.length - 1]?.id;
-      }
-      if (eIndex === episodes.length - 1 && seq < seasons.length) nextId = [...seasons[seq].episodes][0]?.id;
-      else nextId = [...episodes][eIndex + 1]?.id;
-
-      return { prevId, currId, nextId };
-    }
-    return {};
-  },
-  getInfo: () => ({
-    seasonData: Utils.getSeasonData(),
-    navData: Utils.getNavData(),
-    metadata: Utils.getMetadata(),
-    isPlayerReady: Utils.getPlayer()?.isReady?.() || false,
-  }),
 };
 
 export default Netflix;

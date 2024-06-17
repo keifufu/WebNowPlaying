@@ -1,47 +1,46 @@
 import { getMediaSessionCover } from "../../../../utils/misc";
-import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo, ratingUtils } from "../utils";
+import { RatingSystem, Repeat, Site, StateMode } from "../../../types";
+import { _throw, createDefaultControls, createSiteInfo, ratingUtils } from "../utils";
 
 let _Spotify: any = null;
 function getSpotify() {
   if (_Spotify !== null) return _Spotify;
-  const Spotify = {};
+  const Spotify: any = {};
   (window as any).registry._map.forEach((value: any, key: any) => {
     (Spotify as any)[key.description] = value.instance;
   });
+  if (!Spotify.PlayerAPI || !Spotify.PlaybackAPI || !Spotify.LibraryAPI) return Spotify;
   _Spotify = Spotify;
   return Spotify;
 }
 
-function getSpotifyThrow() {
-  const Spotify = getSpotify();
-  if (!Spotify || Object.keys(Spotify).length == 0) return Spotify;
-  throw new EventError();
-}
-
 const Spotify: Site = {
+  debug: {
+    getSpotify,
+  },
   init: null,
-  ready: () => !!getSpotify().PlayerAPI._state,
+  ready: () => !!getSpotify()?.PlayerAPI?._state,
   info: createSiteInfo({
     name: () => "Spotify",
     title: () => navigator.mediaSession.metadata?.title ?? "",
     artist: () => navigator.mediaSession.metadata?.artist ?? "",
     album: () => navigator.mediaSession.metadata?.album ?? "",
     cover: () => getMediaSessionCover(),
-    state: () => (getSpotify().PlayerAPI._state.isPaused === false ? StateMode.PLAYING : StateMode.PAUSED), // technically never STOPPED, unless not ready()
+    state: () => (getSpotify()?.PlayerAPI?._state?.isPaused === false ? StateMode.PLAYING : StateMode.PAUSED), // technically never STOPPED, unless not ready()
     position: () => {
-      const PlayerAPI = getSpotify().PlayerAPI;
+      const PlayerAPI = getSpotify()?.PlayerAPI;
+      if (!PlayerAPI?._state) return 0;
       if (PlayerAPI._state.isPaused) {
         return Math.floor(PlayerAPI._state.positionAsOfTimestamp / 1000);
       } else {
         return Math.floor((Date.now() - PlayerAPI._state.timestamp + PlayerAPI._state.positionAsOfTimestamp) / 1000);
       }
     },
-    duration: () => getSpotify().PlayerAPI._state.duration ?? 0,
-    volume: () => getSpotify().PlaybackAPI._volume ?? 0,
-    rating: () => (getSpotify().PlayerAPI._state.item.metadata["collection.in_collection"] === "true" ? 5 : 0),
+    duration: () => getSpotify()?.PlayerAPI?._state?.duration ?? 0,
+    volume: () => getSpotify()?.PlaybackAPI?._volume ?? 0,
+    rating: () => (getSpotify()?.PlayerAPI?._state?.item?.metadata?.["collection.in_collection"] === "true" ? 5 : 0),
     repeat: () => {
-      switch (getSpotify().PlayerAPI._state.repeat) {
+      switch (getSpotify()?.PlayerAPI?._state?.repeat) {
         default:
           return Repeat.NONE;
         case 0:
@@ -52,50 +51,47 @@ const Spotify: Site = {
           return Repeat.ONE;
       }
     },
-    shuffle: () => getSpotify().PlayerAPI._state.shuffle,
+    shuffle: () => getSpotify()?.PlayerAPI?._state?.shuffle ?? false,
   }),
   events: {
     setState: (state) => {
-      const PlayerAPI = getSpotifyThrow().PlayerAPI;
       switch (state) {
         case StateMode.STOPPED:
         case StateMode.PAUSED:
-          PlayerAPI.pause();
+          _throw(getSpotify()?.PlayerAPI?.pause)();
           break;
         case StateMode.PLAYING:
-          PlayerAPI.resume();
+          _throw(getSpotify()?.PlayerAPI?.resume)();
           break;
       }
     },
-    skipPrevious: () => getSpotifyThrow().PlayerAPI.skipToPrevious(),
-    skipNext: () => getSpotifyThrow().PlayerAPI.skipToNext(),
-    setPosition: (seconds) => getSpotifyThrow().PlayerAPI.seekTo(seconds * 1000),
-    setVolume: (volume) => getSpotifyThrow().PlaybackAPI.setVolume(volume),
+    skipPrevious: () => _throw(getSpotify()?.PlayerAPI?.skipToPrevious)(),
+    skipNext: () => _throw(getSpotify()?.PlayerAPI?.skipToNext)(),
+    setPosition: (seconds) => _throw(getSpotify()?.PlayerAPI?.seekTo)(seconds * 1000),
+    setVolume: (volume) => _throw(getSpotify()?.PlayerAPI?.setVolume)(volume),
     setRating: (rating) => {
       ratingUtils.like(Spotify, rating, {
         toggleLike: () => {
-          const S = getSpotifyThrow();
-          const uris = [S.PlayerAPI._state.item.uri];
-          if (Spotify.info.rating() === 5) S.LibraryAPI.add({ uris });
-          else S.LibraryAPI.remove({ uris });
+          const uris = [_throw(getSpotify()?.PlayerAPI?._state?.item?.uri)];
+          if (Spotify.info.rating() === 5) _throw(getSpotify()?.LibraryAPI?.add)({ uris });
+          else _throw(getSpotify()?.LibraryAPI?.remove)({ uris });
         },
       });
     },
     setRepeat: (repeat) => {
-      const PlayerAPI = getSpotifyThrow().PlayerAPI;
       switch (repeat) {
         case Repeat.NONE:
-          PlayerAPI.setRepeat(0);
+          _throw(getSpotify()?.PlayerAPI?.setRepeat)(0);
           break;
         case Repeat.ONE:
-          PlayerAPI.setRepeat(2);
+          _throw(getSpotify()?.PlayerAPI?.setRepeat)(2);
           break;
         case Repeat.ALL:
-          PlayerAPI.setRepeat(1);
+          _throw(getSpotify()?.PlayerAPI?.setRepeat)(1);
           break;
       }
     },
-    setShuffle: (shuffle) => getSpotifyThrow().PlayerAPI.setShuffle(shuffle),
+    setShuffle: (shuffle) => _throw(getSpotify()?.PlayerAPI?.setShuffle)(shuffle),
   },
   controls: () =>
     createDefaultControls(Spotify, {

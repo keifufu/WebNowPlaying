@@ -15,6 +15,7 @@ import {
 
 let lastKnownVolume = 100;
 const Tidal: Site = {
+  debug: {},
   init: null,
   ready: () => !!document.querySelector("#footerPlayer"),
   info: createSiteInfo({

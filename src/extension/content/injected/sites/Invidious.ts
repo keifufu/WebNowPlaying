@@ -1,40 +1,45 @@
 import { EventError, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo } from "../utils";
+import { _throw, createDefaultControls, createSiteInfo } from "../utils";
 
-const w = window as any;
+const getPlayer = () => (window as any).player;
+const getPlayerData = () => (window as any).player_data;
 
 const Invidious: Site = {
+  debug: {
+    getPlayer,
+    getPlayerData,
+  },
   init: null,
   ready: () => !!document.querySelector("video"),
   info: createSiteInfo({
     name: () => "Invidious",
-    title: () => w.player_data.title ?? "",
+    title: () => getPlayerData()?.title ?? "",
     artist: () => document.querySelector<HTMLElement>("#channel-name")?.innerText ?? "",
     album: () => document.querySelector<HTMLElement>("#playlist a")?.innerText ?? "",
     cover: () => {
-      const poster = w.player.poster();
+      const poster = getPlayer()?.poster?.();
       if (poster) return document.location.origin + poster;
       return "";
     },
-    state: () => (w.player.paused() ? StateMode.PAUSED : w.player.paused() === false ? StateMode.PLAYING : StateMode.STOPPED),
-    position: () => w.player.currentTime() ?? 0,
-    duration: () => w.player.duration() ?? 0,
-    volume: () => w.player.volume() * 100 ?? 100,
+    state: () => (getPlayer()?.paused?.() === true ? StateMode.PAUSED : getPlayer()?.paused?.() === false ? StateMode.PLAYING : StateMode.STOPPED),
+    position: () => getPlayer()?.currentTime?.() ?? 0,
+    duration: () => getPlayer()?.duration?.() ?? 0,
+    volume: () => (getPlayer()?.volume?.() ?? 1) * 100,
     rating: () => 0,
-    repeat: () => (w.player.loop() ? Repeat.ONE : Repeat.NONE),
+    repeat: () => (getPlayer()?.loop?.() ? Repeat.ONE : Repeat.NONE),
     shuffle: () => false,
   }),
   events: {
     setState: (state) => {
       switch (state) {
         case StateMode.STOPPED:
-          w.stop();
+          _throw(getPlayer()?.stop)();
           break;
         case StateMode.PAUSED:
-          w.player.pause();
+          _throw(getPlayer()?.pause)();
           break;
         case StateMode.PLAYING:
-          w.player.play();
+          _throw(getPlayer()?.play)();
           break;
       }
     },
@@ -47,16 +52,10 @@ const Invidious: Site = {
       if (!thumbnail) throw new EventError();
       thumbnail.click();
     },
-    setPosition: (seconds) => {
-      w.player.currentTime(seconds);
-    },
-    setVolume: (volume) => {
-      w.player.volume(volume / 100);
-    },
+    setPosition: (seconds) => _throw(getPlayer()?.currentTime)(seconds),
+    setVolume: (volume) => _throw(getPlayer()?.volume)(volume),
     setRating: null,
-    setRepeat: (repeat) => {
-      w.player.loop(repeat === Repeat.ONE);
-    },
+    setRepeat: (repeat) => _throw(getPlayer()?.loop)(repeat === Repeat.ONE),
     setShuffle: null,
   },
   controls: () =>

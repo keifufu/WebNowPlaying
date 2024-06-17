@@ -1,15 +1,13 @@
 import { convertTimeToSeconds } from "../../../../utils/misc";
-import { EventError, Repeat, Site, StateMode } from "../../../types";
-import { createDefaultControls, createSiteInfo } from "../utils";
+import { Repeat, Site, StateMode } from "../../../types";
+import { _throw, createDefaultControls, createSiteInfo } from "../utils";
 
 const getPlayer = () => document.querySelector<HTMLVideoElement>("#video-holder video");
-const getPlayerThrow = () => {
-  const player = getPlayer();
-  if (player) return player;
-  throw new EventError();
-};
 
 const Kick: Site = {
+  debug: {
+    getPlayer,
+  },
   init: null,
   ready: () => !!document.querySelector("#video-holder video"),
   info: createSiteInfo({
@@ -42,31 +40,27 @@ const Kick: Site = {
   }),
   events: {
     setState: (state) => {
-      const player = getPlayerThrow();
       switch (state) {
         case StateMode.STOPPED:
         case StateMode.PAUSED:
-          player.pause();
+          _throw(getPlayer()?.pause)();
           break;
         case StateMode.PLAYING:
-          player.play();
+          _throw(getPlayer()?.play)();
           break;
       }
     },
     skipPrevious: null,
     skipNext: null,
-    setPosition: (seconds) => {
-      getPlayerThrow().currentTime = seconds;
-    },
+    setPosition: (seconds) => (_throw(getPlayer()).currentTime = seconds),
     setVolume: (volume) => {
-      const player = getPlayerThrow();
+      // broken
+      const player = _throw(getPlayer());
       player.muted = false;
       player.volume = volume / 100;
     },
     setRating: null,
-    setRepeat: (repeat) => {
-      getPlayerThrow().loop = repeat === Repeat.ONE;
-    },
+    setRepeat: (repeat) => (_throw(getPlayer()).loop = repeat === Repeat.ONE),
     setShuffle: null,
   },
   controls: () =>
