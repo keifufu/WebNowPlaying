@@ -9,7 +9,7 @@ const YouTubeMusic: Site = {
     getPlayer,
   },
   init: null,
-  ready: () => !!navigator.mediaSession.metadata && !!document.querySelector("video"),
+  ready: () => getPlayer()?.isReady(),
   info: createSiteInfo({
     name: () => "YouTube Music",
     title: () => navigator.mediaSession.metadata?.title ?? "",
