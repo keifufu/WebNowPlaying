@@ -1,4 +1,4 @@
-import { getMediaSessionCover } from "../../../../utils/misc";
+import { convertTimeToSeconds, getMediaSessionCover } from "../../../../utils/misc";
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
 import { _throw, createDefaultControls, createSiteInfo, ratingUtils, setRepeat } from "../utils";
 
@@ -32,7 +32,14 @@ const YouTubeMusic: Site = {
       }
     },
     position: () => getPlayer()?.getCurrentTime() ?? 0,
-    duration: () => getPlayer()?.getDuration() ?? 0,
+    // `getPlayer()?.getDuration()` and `getPlayer()?.getProgressState().duration`
+    // report incorrectly for premium users.
+    // see https://github.com/keifufu/WebNowPlaying/issues/29
+    duration: () => {
+      const timeInfo = document.querySelector<HTMLElement>(".time-info")?.innerText ?? "0:00 / 0:00";
+      const duration = timeInfo.trim().split(" / ")[1];
+      return convertTimeToSeconds(duration);
+    },
     volume: () => getPlayer()?.getVolume() ?? 100,
     rating: () => {
       const likeButtonPressed = document.querySelectorAll(".middle-controls-buttons yt-button-shape")[1]?.getAttribute("aria-pressed") === "true";
