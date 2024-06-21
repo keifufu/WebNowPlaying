@@ -69,7 +69,7 @@ const siteIndex: SiteIndex[] = [
   },
   {
     match: () => window.location.hostname === "soundcloud.com",
-    name: "Soundcloud",
+    name: "SoundCloud",
     exec,
   },
   {

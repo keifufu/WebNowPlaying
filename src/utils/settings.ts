@@ -17,7 +17,7 @@ export type TSupportedSites =
   | "Pandora"
   | "Plex"
   | "Radio Addict"
-  | "Soundcloud"
+  | "SoundCloud"
   | "Spotify"
   | "Tidal"
   | "Twitch"
@@ -39,7 +39,7 @@ export const SupportedSites: TSupportedSites[] = [
   "Pandora",
   "Plex",
   "Radio Addict",
-  "Soundcloud",
+  "SoundCloud",
   "Spotify",
   "Tidal",
   "Twitch",

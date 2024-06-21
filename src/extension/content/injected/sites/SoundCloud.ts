@@ -15,7 +15,7 @@ const SoundCloud: Site = {
   init: null,
   ready: () => !!navigator.mediaSession.metadata,
   info: createSiteInfo({
-    name: () => "Soundcloud",
+    name: () => "SoundCloud",
     title: () => navigator.mediaSession.metadata?.title ?? "",
     artist: () => navigator.mediaSession.metadata?.artist ?? "",
     album: () => navigator.mediaSession.metadata?.album ?? "",
