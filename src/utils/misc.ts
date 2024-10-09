@@ -45,12 +45,19 @@ export function isVersionOutdated(currentVersion: string, latestVersion: string)
 
 export async function getVersionFromGithub(gh: string) {
   try {
-    const releaseApiLink = `https://api.github.com/repos/${gh}/releases?per_page=1`;
+    const releaseApiLink = `https://api.github.com/repos/${gh}/releases`;
     const response = await fetch(releaseApiLink);
     if (response.ok) {
       const json = await response.json();
-      let tag = json[0].tag_name;
-      if (!tag) return "Error";
+
+      let tag = "Error";
+      for (let i = 0; i < json.length; i++) {
+        if (json[i].prerelease === false && json[i].tag_name) {
+          tag = json[i].tag_name;
+          break;
+        }
+      }
+
       if (tag.startsWith("v")) tag = tag.slice(1);
       return tag;
     }
