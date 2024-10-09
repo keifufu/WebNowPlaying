@@ -6,7 +6,27 @@ let _Spotify: any = null;
 function getSpotify() {
   if (_Spotify !== null) return _Spotify;
   const Spotify: any = {};
-  (window as any).registry._map.forEach((value: any, key: any) => {
+
+  // this is kinda cursed
+  const main = document.querySelector("#main");
+  if (!main) return _Spotify;
+  function find(obj: any) {
+    if (obj?.["pendingProps"]?.["platform"]) {
+      return obj["pendingProps"]["platform"];
+    } else {
+      return find(obj["child"]);
+    }
+  }
+  const keys = Object.keys(main);
+  let platform = null;
+  for (let i = 0; i < keys.length; i++) {
+    if (keys[i].startsWith("__reactContainer")) {
+      platform = find((main as any)[keys[i]]);
+    }
+  }
+  if (!platform) return _Spotify;
+
+  platform.getRegistry()._map.forEach((value: any, key: any) => {
     (Spotify as any)[key.description] = value.instance;
   });
   if (!Spotify.PlayerAPI || !Spotify.PlaybackAPI || !Spotify.LibraryAPI) return Spotify;
