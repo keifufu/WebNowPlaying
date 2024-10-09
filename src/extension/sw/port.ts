@@ -121,7 +121,6 @@ export function onPortConnect(port: chrome.runtime.Port) {
 
   port.onMessage.addListener(onPortMessage);
   port.onDisconnect.addListener(() => {
-    console.log("disconnected");
     // This only gets fired if the other side disconnects,
     // not if we call .disconnect().
     clearTimeout(timer);
