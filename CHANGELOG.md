@@ -2,6 +2,17 @@
 
 Full changelog available via [Github Commits](https://github.com/keifufu/WebNowPlaying/commits/main)
 
+## v3.1.0
+
+- Updated Spotify
+- Updated Apple Music
+- Improved active player calculation
+- Fixed issues with v3 adapters
+- Fixed "standardize featuring" option
+- Fixed players sometimes disconnecting for no apparent reason
+- Simplified reconnection logic to let browsers handle reconnects
+- Added connection help message for when adapters fail to connect
+
 ## v3.0.1
 
 - No longer forces users to grant missing permissions
