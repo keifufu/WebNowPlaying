@@ -42,11 +42,10 @@ const YouTubeMusic: Site = {
     },
     volume: () => getPlayer()?.getVolume() ?? 100,
     rating: () => {
-      const likeButtonPressed = document.querySelectorAll(".middle-controls-buttons yt-button-shape")[1]?.getAttribute("aria-pressed") === "true";
-      if (likeButtonPressed) return 5;
-      const dislikeButtonPressed = document.querySelector(".middle-controls-buttons yt-button-shape")?.getAttribute("aria-pressed") === "true";
-      if (dislikeButtonPressed) return 1;
-      return 0;
+      const likeStatus = document.querySelector('.middle-controls-buttons #like-button-renderer')?.getAttribute('like-status');
+      if (likeStatus === 'LIKE') return 5;
+      if (likeStatus === 'DISLIKE') return 1;
+      return 0; // status 'INDIFFERENT', aka no rating
     },
     repeat: () => {
       const state = document.querySelector("ytmusic-player-bar")?.getAttribute("repeat-mode");
@@ -83,12 +82,12 @@ const YouTubeMusic: Site = {
     setRating: (rating) => {
       ratingUtils.likeDislike(YouTubeMusic, rating, {
         toggleLike: () => {
-          const button = document.querySelectorAll<HTMLButtonElement>(".middle-controls-buttons button")[1];
+          const button = document.querySelector<HTMLButtonElement>('.middle-controls-buttons #like-button-renderer #button-shape-like button');
           if (!button) throw new EventError();
           button.click();
         },
         toggleDislike: () => {
-          const button = document.querySelector<HTMLButtonElement>(".middle-controls-buttons button");
+          const button = document.querySelector<HTMLButtonElement>('.middle-controls-buttons #like-button-renderer #button-shape-dislike button');
           if (!button) throw new EventError();
           button.click();
         },
