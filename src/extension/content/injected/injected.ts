@@ -14,11 +14,13 @@ import Plex from "./sites/Plex";
 import RadioAddict from "./sites/RadioAddict";
 import SoundCloud from "./sites/SoundCloud";
 import Spotify from "./sites/Spotify";
+import NeteaseMusic from "./sites/NeteaseMusic";
 import Tidal from "./sites/Tidal";
 import Twitch from "./sites/Twitch";
 import VK from "./sites/VK";
 import YandexMusic from "./sites/YandexMusic";
 import YouTube from "./sites/YouTube";
+import Bilibili from "./sites/Bilibili";
 import YouTubeEmbeds from "./sites/YouTubeEmbeds";
 import YouTubeMusic from "./sites/YouTubeMusic";
 import { InjectedUtils } from "./utils";
@@ -42,11 +44,13 @@ const sites = [
   RadioAddict,
   SoundCloud,
   Spotify,
+  NeteaseMusic,
   Tidal,
   Twitch,
   VK,
   YandexMusic,
   YouTube,
+  Bilibili,
   YouTubeEmbeds,
   YouTubeMusic,
 ];

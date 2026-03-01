@@ -19,11 +19,13 @@ export type TSupportedSites =
   | "Radio Addict"
   | "SoundCloud"
   | "Spotify"
+  | "NeteaseMusic"
   | "Tidal"
   | "Twitch"
   | "VK"
   | "Yandex Music"
   | "YouTube"
+  | "Bilibili"
   | "YouTube Embeds"
   | "YouTube Music";
 
@@ -41,11 +43,13 @@ export const SupportedSites: TSupportedSites[] = [
   "Radio Addict",
   "SoundCloud",
   "Spotify",
+  "NeteaseMusic",
   "Tidal",
   "Twitch",
   "VK",
   "Yandex Music",
   "YouTube",
+  "Bilibili",
   "YouTube Embeds",
   "YouTube Music",
 ];

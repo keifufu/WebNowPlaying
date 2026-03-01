@@ -103,6 +103,11 @@ const siteIndex: SiteIndex[] = [
     exec,
   },
   {
+    match: () => window.location.hostname === "www.bilibili.com",
+    name: "Bilibili",
+    exec,
+  },
+  {
     match: () => window.location.hostname === "www.youtube.com" && window.location.pathname.startsWith("/embed"),
     name: "YouTube Embeds",
     exec,
@@ -110,6 +115,11 @@ const siteIndex: SiteIndex[] = [
   {
     match: () => window.location.hostname === "music.youtube.com",
     name: "YouTube Music",
+    exec,
+  },
+  {
+    match: () => window.location.hostname === "music.163.com",
+    name: "NeteaseMusic",
     exec,
   },
 ];
