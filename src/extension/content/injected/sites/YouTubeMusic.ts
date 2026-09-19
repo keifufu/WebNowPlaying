@@ -2,7 +2,32 @@ import { convertTimeToSeconds, getMediaSessionCover } from "../../../../utils/mi
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
 import { _throw, createDefaultControls, createSiteInfo, ratingUtils, setRepeat } from "../utils";
 
-const getPlayer = () => document.querySelector<any>("ytmusic-player-bar")?.playerApi;
+// YouTube Music replaced the synchronous `playerApi` property of the player bar with an
+// async `resolvePlayerApi()` that returns a Promise of the same object. The adapter reads
+// the player synchronously, so resolve it once per player bar and serve the cached result.
+// Until it resolves getPlayer() returns undefined, which `ready` reports as not ready.
+// see https://github.com/keifufu/WebNowPlaying/issues/59
+const resolvedPlayers = new WeakMap<object, any>();
+const resolvingPlayers = new WeakSet<object>();
+
+const getPlayer = () => {
+  const bar = document.querySelector<any>("ytmusic-player-bar");
+  if (!bar) return undefined;
+  // Older versions of YouTube Music still expose it synchronously.
+  if (bar.playerApi) return bar.playerApi;
+  const resolved = resolvedPlayers.get(bar);
+  if (resolved) return resolved;
+  if (!resolvingPlayers.has(bar) && typeof bar.resolvePlayerApi === "function") {
+    resolvingPlayers.add(bar);
+    new Promise((resolve) => resolve(bar.resolvePlayerApi()))
+      .then((api) => {
+        if (api) resolvedPlayers.set(bar, api);
+      })
+      .catch(() => {})
+      .finally(() => resolvingPlayers.delete(bar));
+  }
+  return undefined;
+};
 
 const YouTubeMusic: Site = {
   debug: {
