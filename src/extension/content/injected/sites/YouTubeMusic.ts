@@ -2,7 +2,44 @@ import { convertTimeToSeconds, getMediaSessionCover } from "../../../../utils/mi
 import { EventError, RatingSystem, Repeat, Site, StateMode } from "../../../types";
 import { _throw, createDefaultControls, createSiteInfo, ratingUtils, setRepeat } from "../utils";
 
-const getPlayer = () => document.querySelector<any>("ytmusic-player-bar")?.playerApi;
+// Keep the legacy API when available; newer player bars no longer expose it.
+const getPlayer = () => {
+  const bar = document.querySelector<HTMLElement & { playerApi?: any }>("ytmusic-player-bar");
+  if (bar?.playerApi) return bar.playerApi;
+
+  const video = document.querySelector("video");
+  if (!bar || !video) return undefined;
+
+  const skip = (label: "Previous" | "Next") => {
+    const button = bar.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
+    if (!button || button.disabled) throw new EventError();
+    button.click();
+  };
+
+  // Resolve the current element on each call so SPA track/player replacements work.
+  return {
+    isReady: () => video.readyState >= HTMLMediaElement.HAVE_METADATA,
+    getPlayerState: () => (video.ended ? 0 : video.paused ? 2 : 1),
+    getCurrentTime: () => video.currentTime,
+    getVolume: () => (video.muted ? 0 : video.volume * 100),
+    playVideo: () => video.play(),
+    pauseVideo: () => video.pause(),
+    stopVideo: () => {
+      video.pause();
+      video.currentTime = 0;
+    },
+    seekTo: (seconds: number) => {
+      if (!Number.isFinite(seconds) || !Number.isFinite(video.duration) || video.duration <= 0) throw new EventError();
+      video.currentTime = Math.max(0, Math.min(seconds, video.duration));
+    },
+    setVolume: (volume: number) => {
+      if (!Number.isFinite(volume)) throw new EventError();
+      video.volume = Math.max(0, Math.min(volume / 100, 1));
+    },
+    previousVideo: () => skip("Previous"),
+    nextVideo: () => skip("Next"),
+  };
+};
 
 const YouTubeMusic: Site = {
   debug: {
